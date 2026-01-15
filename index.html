@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="config/Icon.ico">
     <title>ToDo Dashboard</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg-app: #f8fafc;
@@ -1582,6 +1587,24 @@
             margin-left: 4px;
         }
 
+        
+        /* Firebase UI */
+        #firebaseLoginBtn svg {
+            flex-shrink: 0;
+        }
+        
+        #firebaseUserInfo {
+            transition: all 0.2s ease;
+        }
+        
+        #firebaseUserInfo:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+        
+        #userInitial {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
         /* ===== IMPROVEMENTS FROM TEAM ANALYSIS ===== */
         
         /* Loading Indicator */
@@ -1655,9 +1678,6 @@
 
 
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -1671,24 +1691,24 @@
 
     <div class="controls-area">
         <!-- Search Input -->
-        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="🔍 Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
+        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="ðŸ” Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
         
         <!-- Undo/Redo Buttons -->
         <div class="undo-redo-controls">
             <button class="undo-redo-btn" id="undoBtn" onclick="undoRedo.undo()" title="Ongedaan maken (Ctrl+Z)" aria-label="Ongedaan maken" disabled>
-                ↶
+                â†¶
             </button>
             <button class="undo-redo-btn" id="redoBtn" onclick="undoRedo.redo()" title="Opnieuw (Ctrl+Y)" aria-label="Opnieuw" disabled>
-                ↷
+                â†·
             </button>
         </div>
         
         <select id="viewSelector" class="btn btn-secondary" onchange="app.changeView(this.value)" style="padding: 6px 12px;">
-            <option value="all">🏠 Alles</option>
-            <option value="today">📅 Vandaag</option>
-            <option value="overdue">⚠️ Achterstallig</option>
-            <option value="weekplan">📅🕙 Week Planner</option>
-            <option value="search" style="display:none;">🔍 Zoekresultaten</option>
+            <option value="all">ðŸ  Alles</option>
+            <option value="today">ðŸ“… Vandaag</option>
+            <option value="overdue">âš ï¸ Achterstallig</option>
+            <option value="weekplan">ðŸ“…ðŸ•™ Week Planner</option>
+            <option value="search" style="display:none;">ðŸ” Zoekresultaten</option>
         </select>
 
         <div class="btn-dropdown-wrapper">
@@ -1704,10 +1724,10 @@
                 <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); sessions.openManager();">
                     &#9881; Beheer Sessies
                 <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); backup.exportData();">
-                    💾 Exporteer Data
+                    ðŸ’¾ Exporteer Data
                 </div>
                 <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); backup.importData();">
-                    📥 Importeer Data
+                    ðŸ“¥ Importeer Data
                 </div>
 
                 </div>
@@ -1731,12 +1751,35 @@
             <span>Toon Voltooid</span>
         </label>
         
-        <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
-            ⌨️ Shortcuts
+        
+        <!-- Firebase Login/User Info -->
+        <button id="firebaseLoginBtn" class="btn btn-primary" onclick="firebaseAuth.loginWithGoogle()" style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Inloggen met Google
         </button>
         
-        <button id="authBtn" class="btn btn-primary" onclick="cloudApp.handleAuth()">
-            Inloggen met Google
+        <div id="firebaseUserInfo" style="display: none; align-items: center; gap: 12px; padding: 6px 12px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+                <span id="userInitial"></span>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span class="user-email" style="font-size: 12px; font-weight: 600; color: var(--text-main);"></span>
+                <button onclick="firebaseAuth.logout()" style="font-size: 10px; color: var(--text-muted); background: none; border: none; cursor: pointer; text-align: left; padding: 0;">
+                    Uitloggen
+                </button>
+            </div>
+        </div>
+        <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
+            âŒ¨ï¸ Shortcuts
+        </button>
+        
+        <button id="connectBtn" class="btn btn-primary" onclick="app.handleConnectionClick()">
+            &#128194; Database Kiezen
         </button>
     </div>
 </header>
@@ -1790,7 +1833,7 @@
             <button class="week-nav-btn" onclick="weekPlanner.previousWeek()">&#9664; Vorige</button>
             <h2 class="week-title" id="weekTitle">Week 1, 2025</h2>
             <button class="week-nav-btn" onclick="weekPlanner.nextWeek()">Volgende &#9654;</button>
-            <button class="week-nav-btn" onclick="weekPlanner.goToThisWeek()">📅 Deze Week</button>
+            <button class="week-nav-btn" onclick="weekPlanner.goToThisWeek()">ðŸ“… Deze Week</button>
         </div>
     </div>
 
@@ -1807,7 +1850,7 @@
             <!-- Categories -->
             <div>
                 <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">
-                    Categorieën
+                    CategorieÃ«n
                 </div>
                 <div id="miniCategories" style="display: flex; flex-direction: column; gap: 6px;">
                     <!-- Populated by JS -->
@@ -1871,7 +1914,7 @@
         <div id="taskFields" style="display:none;">
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">📅 Deadline</label>
+                    <label class="form-label">ðŸ“… Deadline</label>
                     <input type="date" id="modalDueDate" class="form-input">
                 </div>
                 <div class="form-group">
@@ -1971,7 +2014,7 @@
             <div class="pomodoro-task-list" id="pomodoroTaskList">
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Geen items voor deze sessie.<br>
-                    Voeg items toe via de ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â±ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â knop bij taken.
+                    Voeg items toe via de ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â knop bij taken.
                 </div>
             </div>
         </div>
@@ -1998,33 +2041,182 @@
 </div>
 
 <script>
-// ==========================================
-// 1. FIREBASE CONFIGURATIE & SETUP
-// ==========================================
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// ===== FIREBASE CONFIGURATION =====
 const firebaseConfig = {
-  apiKey: "AIzaSyCpikGbQ_rF3h6FT7Oszgs_zWp-y5HL-Xk",
-  authDomain: "rvstodo-5a499.firebaseapp.com",
-  projectId: "rvstodo-5a499",
-  storageBucket: "rvstodo-5a499.firebasestorage.app",
-  messagingSenderId: "681453933913",
-  appId: "1:681453933913:web:f7b9c2a921af48e06de848",
-  measurementId: "G-RX8TN3VETR"
+    apiKey: "AIzaSyCpikGbQ_rF3h6FT7Oszgs_zWp-y5HL-Xk",
+    authDomain: "rvstodo-5a499.firebaseapp.com",
+    projectId: "rvstodo-5a499",
+    storageBucket: "rvstodo-5a499.firebasestorage.app",
+    messagingSenderId: "681453933913",
+    appId: "1:681453933913:web:f7b9c2a921af48e06de848",
+    measurementId: "G-RX8TN3VETR"
 };
 
-// Initialiseer Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+// Initialize Firebase - with safety check
+let auth, db;
+if (typeof firebase !== 'undefined') {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        console.log('✅ Firebase initialized successfully');
+    } catch (error) {
+        console.error('❌ Firebase initialization failed:', error);
+    }
+} else {
+    console.warn('⚠️ Firebase SDK not loaded - running in local-only mode');
+}
 
-// ==========================================
-// 2. ORIGINELE APP CONSTANTEN
-// ==========================================
+// Firebase Authentication state
+const firebaseAuth = {
+    currentUser: null,
+    isEnabled: false,
+    
+    init() {
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined' || !auth) {
+            console.warn('⚠️ Firebase not available - skipping auth initialization');
+            this.isEnabled = false;
+            return;
+        }
+        
+        this.isEnabled = true;
+        auth.onAuthStateChanged(async (user) => {
+            this.currentUser = user;
+            if (user) {
+                console.log('User logged in:', user.email);
+                await this.onUserLogin(user);
+            } else {
+                console.log('User logged out');
+                this.onUserLogout();
+            }
+        });
+    },
+    
+    async loginWithGoogle() {
+        if (!this.isEnabled) {
+            toastNotifications.show('warning', 'Firebase Niet Beschikbaar', 'Login is niet beschikbaar in deze modus');
+            return;
+        }
+        
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await auth.signInWithPopup(provider);
+            toastNotifications.show('success', 'Ingelogd', 'Je bent succesvol ingelogd met Google');
+        } catch (error) {
+            errorHandler.log(error, 'Google login');
+            toastNotifications.show('error', 'Login Mislukt', error.message);
+        }
+    },
+    
+    async logout() {
+        if (!this.isEnabled) return;
+        
+        try {
+            await auth.signOut();
+            toastNotifications.show('success', 'Uitgelogd', 'Je bent succesvol uitgelogd');
+        } catch (error) {
+            errorHandler.log(error, 'Logout');
+        }
+    },
+    
+    async onUserLogin(user) {
+        if (!this.isEnabled || !db) return;
+        
+        try {
+            const docRef = db.collection('users').doc(user.uid);
+            const doc = await docRef.get();
+            
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.database) {
+                    state.db = data.database;
+                    app.render();
+                    toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
+                }
+            } else {
+                await docRef.set({
+                    email: user.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    database: state.db
+                });
+                toastNotifications.show('info', 'Welkom!', 'Je account is aangemaakt');
+            }
+            
+            this.updateUI();
+        } catch (error) {
+            errorHandler.log(error, 'Load user data');
+        }
+    },
+    
+    onUserLogout() {
+        state.db = { categories: [], pomodoroSessions: [] };
+        state.sel = { cat: null, proj: null, task: null };
+        app.render();
+        this.updateUI();
+    },
+    
+    async syncToCloud() {
+        if (!this.isEnabled || !db) {
+            console.log('⚠️ Cloud sync skipped - Firebase not available');
+            return;
+        }
+        
+        if (!this.currentUser) {
+            toastNotifications.show('warning', 'Niet Ingelogd', 'Log in om te synchroniseren');
+            return;
+        }
+        
+        try {
+            const docRef = db.collection('users').doc(this.currentUser.uid);
+            await docRef.update({
+                database: state.db,
+                lastSync: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            toastNotifications.show('success', 'Gesynchroniseerd', 'Data opgeslagen in de cloud');
+        } catch (error) {
+            errorHandler.log(error, 'Cloud sync');
+            toastNotifications.show('error', 'Sync Mislukt', 'Kon niet synchroniseren met de cloud');
+        }
+    },
+    
+    updateUI() {
+        const loginBtn = document.getElementById('firebaseLoginBtn');
+        const userInfo = document.getElementById('firebaseUserInfo');
+        
+        if (!loginBtn || !userInfo) return;
+        
+        // Hide login button if Firebase is not enabled
+        if (!this.isEnabled) {
+            loginBtn.style.display = 'none';
+            userInfo.style.display = 'none';
+            return;
+        }
+        
+        if (this.currentUser) {
+            loginBtn.style.display = 'none';
+            userInfo.style.display = 'flex';
+            const email = this.currentUser.email;
+            userInfo.querySelector('.user-email').textContent = email;
+            const initial = email.charAt(0).toUpperCase();
+            document.getElementById('userInitial').textContent = initial;
+        } else {
+            loginBtn.style.display = 'flex';
+            userInfo.style.display = 'none';
+        }
+    }
+};
 
 const CONSTANTS = {
-    DB_NAME: 'CIDashboardDB_V10', // Niet meer nodig, maar laten staan voor compatibiliteit
+    DB_NAME: 'CIDashboardDB_V10',
+    STORE_NAME: 'FileHandles',
+    BACKUP_DB_NAME: 'CIDashboardBackup_V10',
+    BACKUP_STORE_NAME: 'Backups',
+    MAX_UNDO_HISTORY: 50,
+    BACKUP_INTERVAL: 5 * 60 * 1000,
+    DEBOUNCE_SAVE: 1000,
+    AUTO_SAVE_ENABLED: true,
     COLORS: { 
         active: '#22c55e', 
         hold: '#f59e0b', 
@@ -2044,155 +2236,542 @@ const CONSTANTS = {
     ]
 };
 
-// ==========================================
-// 3. CLOUD OPSLAG LOGICA (De nieuwe motor)
-// ==========================================
-
-const cloudStorage = {
-    async loadData(user) {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) loadingIndicator.classList.add('show');
-        
-        try {
-            const docRef = db.collection('users').doc(user.uid);
-            const doc = await docRef.get();
-            
-            if (doc.exists) {
-                state.db = doc.data();
-                // Check op legacy data structuren
-                if (!state.db.categories) state.db.categories = [];
-                if (!state.db.pomodoroSessions) state.db.pomodoroSessions = [];
-                
-                // Voer migraties uit
-                await app.migratePomodoroToSessions();
-                await app.checkAndResetTodayTasks();
-                await app.processRecurringTasks();
-                
-                app.setStatus(`Welkom terug, ${user.displayName.split(' ')[0]}`, 'success');
-            } else {
-                // Nieuwe gebruiker: initialiseer lege DB
-                state.db = { categories: [], pomodoroSessions: [] };
-                await this.saveData(user);
-                app.setStatus('Nieuw profiel aangemaakt', 'success');
-            }
-            app.render();
-        } catch (error) {
-            console.error("Fout bij laden:", error);
-            app.setStatus('Fout bij laden data', 'error');
-        } finally {
-            if (loadingIndicator) loadingIndicator.classList.remove('show');
-        }
-    },
-
-    async saveData() {
-        if (!state.currentUser) return;
-        
-        // Debounce (niet te vaak opslaan achter elkaar)
-        if (state.saveTimeout) clearTimeout(state.saveTimeout);
-        
-        state.saveTimeout = setTimeout(async () => {
-            const statusEl = document.getElementById('statusIndicator');
-            const originalText = statusEl.innerHTML;
-            
-            try {
-                app.setStatus('Opslaan in cloud...', 'info');
-                const dataToSave = JSON.parse(JSON.stringify(state.db)); // Deep copy
-                await db.collection('users').doc(state.currentUser.uid).set(dataToSave, { merge: true });
-                app.setStatus('Opgeslagen', 'success');
-            } catch (error) {
-                console.error("Opslaan mislukt:", error);
-                app.setStatus('Opslaan mislukt!', 'error');
-            }
-        }, 1000); // Wacht 1 seconde met opslaan
-    }
-};
-
-// ==========================================
-// 4. DE APP LOGICA (Jouw originele functies, aangepast)
-// ==========================================
-
 const state = {
     db: { categories: [], pomodoroSessions: [] },
-    currentUser: null,
+    fileHandle: null,
     sel: { cat: null, proj: null, task: null },
     drag: null,
+    connectionState: 'new',
     currentView: 'all',
-    searchResults: [],
-    searchQuery: '',
-    undoHistory: [],
-    redoHistory: [],
     timerInterval: null,
-    activePomodoroSession: null,
-    saveTimeout: null
+    lastOpenDate: null,
+    activePomodoroSession: null
 };
 
-const app = {
-    init() {
-        // Browser checks en UI setup
-        this.loadDarkMode();
-        timer.startInterval();
-        this.initKeyboardShortcuts();
-        this.initGlobalHandlers();
-        this.initSearchListener();
-
-        // AUTH LISTENER: Dit vervangt de oude file-loader
-        auth.onAuthStateChanged(user => {
-            const authBtn = document.getElementById('authBtn') || document.getElementById('connectBtn');
-            
-            if (user) {
-                // Gebruiker is ingelogd
-                state.currentUser = user;
-                if (authBtn) {
-                    authBtn.innerHTML = 'Uitloggen';
-                    authBtn.onclick = () => auth.signOut();
-                    authBtn.classList.remove('btn-primary');
-                    authBtn.classList.add('btn-secondary');
-                }
-                
-                // Verberg onboarding als die er is
-                const onboarding = document.getElementById('onboardingOverlay');
-                if (onboarding) onboarding.style.display = 'none';
-
-                cloudStorage.loadData(user);
-            } else {
-                // Gebruiker is uitgelogd
-                state.currentUser = null;
-                state.db = { categories: [], pomodoroSessions: [] }; // Leegmaken
-                
-                if (authBtn) {
-                    authBtn.innerHTML = 'Inloggen met Google';
-                    authBtn.onclick = () => this.handleAuth();
-                    authBtn.classList.add('btn-primary');
-                }
-                
-                this.setStatus('Niet ingelogd', 'warning');
-                this.render();
-            }
+const storage = {
+    getDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(CONSTANTS.DB_NAME, 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore(CONSTANTS.STORE_NAME);
+            req.onsuccess = e => resolve(e.target.result);
+            req.onerror = e => reject(e);
         });
     },
 
-    async handleAuth() {
+    async saveHandle(handle) {
+        const db = await this.getDB();
+        const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
+        tx.objectStore(CONSTANTS.STORE_NAME).put(handle, 'defaultHandle');
+        return new Promise(r => tx.oncomplete = r);
+    },
+
+    async getHandle() {
+        const db = await this.getDB();
+        return new Promise(resolve => {
+            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readonly');
+            const req = tx.objectStore(CONSTANTS.STORE_NAME).get('defaultHandle');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+        });
+    }
+};
+
+
+// ===== ERROR HANDLER (DevOps + Backend feedback) =====
+const errorHandler = {
+    log(error, context = '') {
+        console.error(`[Error] ${context}:`, error);
+        
+        // Show user-friendly message
+        const userMessage = this.getUserMessage(error);
+        toastNotifications.show('error', 'Fout opgetreden', userMessage);
+        
+        // Log to potential tracking service
+        if (window.errorTracker) {
+            window.errorTracker.log({
+                message: error.message,
+                stack: error.stack,
+                context,
+                userAgent: navigator.userAgent,
+                timestamp: Date.now()
+            });
+        }
+    },
+    
+    getUserMessage(error) {
+        if (error.name === 'NotAllowedError') {
+            return 'Toegang geweigerd. Check je browser instellingen.';
+        }
+        if (error.name === 'SecurityError') {
+            return 'Beveiligingsfout. Probeer de pagina te vernieuwen.';
+        }
+        if (error.message.includes('JSON')) {
+            return 'Gegevens konden niet worden gelezen. Mogelijk corrupt bestand.';
+        }
+        if (error.message.includes('quota')) {
+            return 'Onvoldoende opslagruimte beschikbaar.';
+        }
+        return 'Er ging iets mis. Probeer het opnieuw.';
+    }
+};
+
+// ===== TOAST NOTIFICATIONS (UX feedback) =====
+const toastNotifications = {
+    show(type, title, message, duration = 5000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'âœ“',
+            error: 'âœ•',
+            warning: 'Ã¢Å¡Â ',
+            info: 'Ã¢â€žÂ¹'
+        };
+        
+        toast.innerHTML = `
+            <div class="toast-icon">${icons[type] || 'Ã¢â€žÂ¹'}</div>
+            <div class="toast-content">
+                <div class="toast-title">${this.escapeHtml(title)}</div>
+                ${message ? `<div class="toast-message">${this.escapeHtml(message)}</div>` : ''}
+            </div>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    },
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+};
+
+// ===== BACKUP SYSTEM (Backend feedback - Critical) =====
+const backup = {
+    async createBackup() {
         try {
-            await auth.signInWithPopup(googleProvider);
-        } catch (e) {
-            alert("Inloggen mislukt: " + e.message);
+            const db = await this.getBackupDB();
+            const tx = db.transaction(CONSTANTS.BACKUP_STORE_NAME, 'readwrite');
+            const store = tx.objectStore(CONSTANTS.BACKUP_STORE_NAME);
+            
+            const backupData = {
+                timestamp: Date.now(),
+                data: JSON.parse(JSON.stringify(state.db)),
+                version: '1.0'
+            };
+            
+            await store.put(backupData, 'latest');
+            
+            // Keep only last 10 backups
+            const allKeys = await store.getAllKeys();
+            if (allKeys.length > 10) {
+                const oldestKey = allKeys[0];
+                await store.delete(oldestKey);
+            }
+            
+            console.log('Auto-backup created at', new Date(backupData.timestamp));
+        } catch (error) {
+            console.error('Backup failed:', error);
+        }
+    },
+    
+    async getBackupDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(CONSTANTS.BACKUP_DB_NAME, 1);
+            req.onupgradeneeded = e => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(CONSTANTS.BACKUP_STORE_NAME)) {
+                    db.createObjectStore(CONSTANTS.BACKUP_STORE_NAME);
+                }
+            };
+            req.onsuccess = e => resolve(e.target.result);
+            req.onerror = e => reject(e);
+        });
+    },
+    
+    async restoreFromBackup() {
+        try {
+            const db = await this.getBackupDB();
+            const tx = db.transaction(CONSTANTS.BACKUP_STORE_NAME, 'readonly');
+            const backup = await tx.objectStore(CONSTANTS.BACKUP_STORE_NAME).get('latest');
+            
+            if (backup) {
+                state.db = backup.data;
+                await app.save();
+                app.render();
+                toastNotifications.show('success', 'Herstel Gelukt', 'Data hersteld van laatste backup');
+            } else {
+                toastNotifications.show('warning', 'Geen Backup', 'Geen backup beschikbaar');
+            }
+        } catch (error) {
+            errorHandler.log(error, 'restoreFromBackup');
+        }
+    },
+    
+    async exportData() {
+        try {
+            const dataStr = JSON.stringify(state.db, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `todo-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            toastNotifications.show('success', 'Export Gelukt', 'Data geÃƒÂ«xporteerd');
+        } catch (error) {
+            errorHandler.log(error, 'exportData');
+        }
+    },
+    
+    async importData() {
+        try {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async (e) => {
+                try {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    // Basic validation
+                    if (!data.categories || !Array.isArray(data.categories)) {
+                        throw new Error('Invalid backup file format');
+                    }
+                    
+                    // Confirm before overwriting
+                    if (!confirm('Dit overschrijft je huidige data. Doorgaan?')) {
+                        return;
+                    }
+                    
+                    state.db = data;
+                    await app.save();
+                    app.render();
+                    toastNotifications.show('success', 'Import Gelukt', 'Data geÃƒÂ¯mporteerd');
+                } catch (error) {
+                    errorHandler.log(error, 'importData - file processing');
+                }
+            };
+            
+            input.click();
+        } catch (error) {
+            errorHandler.log(error, 'importData');
+        }
+    },
+    
+    startAutoBackup() {
+        setInterval(() => {
+            if (state.connectionState === 'connected') {
+                this.createBackup();
+            }
+        }, CONSTANTS.BACKUP_INTERVAL);
+    }
+};
+
+// ===== UNDO/REDO SYSTEM (Product Manager feedback - High Priority) =====
+const undoRedo = {
+    saveState() {
+        try {
+            const snapshot = JSON.stringify(state.db);
+            state.undoHistory.push(snapshot);
+            
+            // Limit history size
+            if (state.undoHistory.length > CONSTANTS.MAX_UNDO_HISTORY) {
+                state.undoHistory.shift();
+            }
+            
+            // Clear redo history when new action is performed
+            state.redoHistory = [];
+            
+            this.updateButtons();
+        } catch (error) {
+            console.error('Failed to save undo state:', error);
+        }
+    },
+    
+    undo() {
+        if (state.undoHistory.length === 0) return;
+        
+        try {
+            // Save current state to redo
+            const currentState = JSON.stringify(state.db);
+            state.redoHistory.push(currentState);
+            
+            // Restore previous state
+            const previousState = state.undoHistory.pop();
+            state.db = JSON.parse(previousState);
+            
+            app.save();
+            app.render();
+            this.updateButtons();
+            
+            toastNotifications.show('info', 'Ongedaan gemaakt', '', 2000);
+        } catch (error) {
+            errorHandler.log(error, 'undo');
+        }
+    },
+    
+    redo() {
+        if (state.redoHistory.length === 0) return;
+        
+        try {
+            // Save current state to undo
+            const currentState = JSON.stringify(state.db);
+            state.undoHistory.push(currentState);
+            
+            // Restore redo state
+            const redoState = state.redoHistory.pop();
+            state.db = JSON.parse(redoState);
+            
+            app.save();
+            app.render();
+            this.updateButtons();
+            
+            toastNotifications.show('info', 'Opnieuw gedaan', '', 2000);
+        } catch (error) {
+            errorHandler.log(error, 'redo');
+        }
+    },
+    
+    updateButtons() {
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        
+        if (undoBtn) undoBtn.disabled = state.undoHistory.length === 0;
+        if (redoBtn) redoBtn.disabled = state.redoHistory.length === 0;
+    }
+};
+
+// ===== SEARCH FUNCTIONALITY (Product Manager feedback - High Priority) =====
+const search = {
+    perform(query) {
+        state.searchQuery = query.trim().toLowerCase();
+        
+        if (!state.searchQuery) {
+            state.searchResults = [];
+            if (state.currentView === 'search') {
+                state.currentView = 'all';
+                document.getElementById('viewSelector').value = 'all';
+            }
+            app.render();
+            return;
+        }
+        
+        const results = [];
+        
+        state.db.categories.forEach(cat => {
+            // Search in categories
+            if (cat.name.toLowerCase().includes(state.searchQuery)) {
+                results.push({
+                    type: 'category',
+                    item: cat,
+                    context: ''
+                });
+            }
+            
+            cat.projects?.forEach(proj => {
+                // Search in projects
+                if (proj.name.toLowerCase().includes(state.searchQuery)) {
+                    results.push({
+                        type: 'project',
+                        item: proj,
+                        context: cat.name
+                    });
+                }
+                
+                proj.tasks?.forEach(task => {
+                    // Search in tasks
+                    const searchIn = `${task.name} ${task.notes || ''}`.toLowerCase();
+                    if (searchIn.includes(state.searchQuery)) {
+                        results.push({
+                            type: 'task',
+                            item: task,
+                            context: `${cat.name} Ã¢â€ â€™ ${proj.name}`,
+                            _catId: cat.id,
+                            _projId: proj.id
+                        });
+                    }
+                    
+                    task.subtasks?.forEach(sub => {
+                        // Search in subtasks
+                        const subSearchIn = `${sub.name} ${sub.notes || ''}`.toLowerCase();
+                        if (subSearchIn.includes(state.searchQuery)) {
+                            results.push({
+                                type: 'subtask',
+                                item: sub,
+                                context: `${proj.name} Ã¢â€ â€™ ${task.name}`,
+                                _catId: cat.id,
+                                _projId: proj.id,
+                                _taskId: task.id
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        
+        state.searchResults = results;
+        state.currentView = 'search';
+        document.getElementById('viewSelector').value = 'search';
+        app.render();
+        
+        toastNotifications.show('info', 'Zoekresultaten', `${results.length} resultaten gevonden`, 3000);
+    },
+    
+    highlightText(text, query) {
+        if (!query) return this.escapeHtml(text);
+        
+        const escaped = this.escapeHtml(text);
+        const regex = new RegExp(`(${query})`, 'gi');
+        return escaped.replace(regex, '<span class="search-highlight">$1</span>');
+    },
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+};
+
+// ===== INPUT SANITIZATION (QA + Frontend feedback) =====
+const sanitizer = {
+    sanitize(input) {
+        if (typeof input !== 'string') return input;
+        
+        // Remove script tags
+        let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        
+        // Remove event handlers
+        cleaned = cleaned.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+        cleaned = cleaned.replace(/on\w+\s*=\s*[^\s>]*/gi, '');
+        
+        // Remove javascript: protocol
+        cleaned = cleaned.replace(/javascript:/gi, '');
+        
+        // Trim
+        cleaned = cleaned.trim();
+        
+        // Max length check
+        if (cleaned.length > 10000) {
+            cleaned = cleaned.substring(0, 10000);
+        }
+        
+        return cleaned;
+    },
+    
+    validateInput(input, maxLength = 500) {
+        if (!input || typeof input !== 'string') return false;
+        if (input.length > maxLength) return false;
+        if (input.trim().length === 0) return false;
+        return true;
+    }
+};
+
+// ===== BROWSER COMPATIBILITY CHECK (DevOps feedback) =====
+const compatibility = {
+    check() {
+        const hasFileSystemAccess = 'showOpenFilePicker' in window;
+        const hasIndexedDB = 'indexedDB' in window;
+        
+        if (!hasFileSystemAccess) {
+            const warning = document.getElementById('compatibilityWarning');
+            if (warning) {
+                warning.classList.add('show');
+            }
+            console.warn('File System Access API not supported');
+        }
+        
+        if (!hasIndexedDB) {
+            toastNotifications.show('error', 'Browser Niet Ondersteund', 'IndexedDB is vereist');
+        }
+        
+        return {
+            fileSystemAccess: hasFileSystemAccess,
+            indexedDB: hasIndexedDB,
+            isFullySupported: hasFileSystemAccess && hasIndexedDB
+        };
+    }
+};
+
+const app = {
+    async init() {
+        try {
+            // Browser compatibility check
+            const compat = compatibility.check();
+            if (!compat.isFullySupported) {
+                console.warn('Browser has limited support');
+            }
+            
+            const storedHandle = await storage.getHandle();
+            
+            if (storedHandle) {
+                state.fileHandle = storedHandle;
+                state.connectionState = 'known';
+                this.updateButtonUI();
+                this.setStatus("Bestand gevonden in geheugen", "");
+            } else {
+                state.connectionState = 'new';
+                this.updateButtonUI();
+                
+                // Show onboarding for new users
+                const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+                if (!hasSeenOnboarding) {
+                    setTimeout(() => this.showOnboarding(), 500);
+                }
+            }
+
+            this.loadDarkMode();
+            timer.startInterval();
+            this.initKeyboardShortcuts();
+            this.initGlobalHandlers();
+            this.initSearchListener();
+            
+            
+            // Initialize Firebase Authentication
+            try {
+                firebaseAuth.init();
+            } catch (error) {
+                console.error('Firebase initialization failed:', error);
+            }
+            
+            // Start auto-backup system
+            backup.startAutoBackup();
+            
+            console.log('âœ“ App initialized successfully');
+        } catch (error) {
+            errorHandler.log(error, 'app.init');
         }
     },
 
-    // Aangepaste save functie die naar cloudStorage wijst
-    async save() {
-        await cloudStorage.saveData();
-    },
-
-    // --- HIERONDER VOLGEN JOUW ORIGINELE FUNCTIES (Ongewijzigd) ---
-    
     toggleFullscreen() {
         if (!document.fullscreenElement) {
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-            else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
+            // Ga naar fullscreen
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
         } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
     },
 
@@ -2200,7 +2779,7 @@ const app = {
         const darkMode = localStorage.getItem('darkMode') === 'true';
         if (darkMode) {
             document.body.classList.add('dark-mode');
-            document.getElementById('darkModeToggle').innerHTML = '&#9790;';
+            document.getElementById('darkModeToggle').innerHTML = '&#9790;'; // Moon
         }
     },
 
@@ -2208,41 +2787,115 @@ const app = {
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDark);
-        document.getElementById('darkModeToggle').innerHTML = isDark ? '&#9790;' : '&#9728;';
+        document.getElementById('darkModeToggle').innerHTML = isDark ? '&#9790;' : '&#9728;'; // Moon : Sun
     },
 
     initGlobalHandlers() {
+        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.status-badge')) {
-                document.querySelectorAll('.status-dropdown').forEach(d => d.classList.remove('show'));
+                document.querySelectorAll('.status-dropdown').forEach(d => {
+                    d.classList.remove('show');
+                });
             }
         });
     },
 
     initKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undoRedo.undo(); return; }
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); undoRedo.redo(); return; }
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
-                const pomodoroOverlay = document.getElementById('pomodoroOverlay');
-                if (pomodoroOverlay && pomodoroOverlay.classList.contains('show')) pomodoro.close();
+            // Ctrl+K - Search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.focus();
                 return;
+            }
+            
+            // Ctrl+Z - Undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undoRedo.undo();
+                return;
+            }
+            
+            // Ctrl+Y or Ctrl+Shift+Z - Redo
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                e.preventDefault();
+                undoRedo.redo();
+                return;
+            }
+            
+            // Escape - Close modals/overlays
+            if (e.key === 'Escape') {
+                // Close modals
+                const modals = document.querySelectorAll('.modal-overlay.show');
+                modals.forEach(modal => {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 200);
+                });
+                
+                // Close pomodoro
+                const pomodoroOverlay = document.getElementById('pomodoroOverlay');
+                if (pomodoroOverlay && pomodoroOverlay.classList.contains('show')) {
+                    pomodoro.close();
+                }
+                
+                // Close onboarding
+                const onboardingOverlay = document.getElementById('onboardingOverlay');
+                if (onboardingOverlay && onboardingOverlay.classList.contains('show')) {
+                    this.closeOnboarding();
+                }
+                return;
+            }
+            
+            // Shift+? - Keyboard shortcuts help
+            if (e.shiftKey && e.key === '?') {
+                e.preventDefault();
+                this.showKeyboardShortcuts();
+                return;
+            }
+            
+            // Space - Quick add (original)
+            if (e.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                e.preventDefault();
+                const activeCol = state.sel.task ? 'sub' : state.sel.proj ? 'task' : null;
+                if (activeCol) {
+                    const input = document.querySelector(`#list-${activeCol} .inline-input`);
+                    if (input) input.focus();
+                }
+            }
+            
+            // X - Toggle task done (original)
+            if (e.key === 'x' && state.sel.task && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                const task = helpers.find('task', state.sel.task);
+                if (task) {
+                    undoRedo.saveState();
+                    task.done = !task.done;
+                    if (task.done) {
+                        task.completedAt = Date.now();
+                    } else {
+                        delete task.completedAt;
+                    }
+                    this.save();
+                    this.render();
+                }
             }
         });
     },
 
+
     initSearchListener() {
         const searchInput = document.getElementById('searchInput');
         if (!searchInput) return;
+        
         let searchTimeout;
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 const query = e.target.value;
-                if (query.trim()) search.perform(query);
-                else {
+                if (query.trim()) {
+                    search.perform(query);
+                } else {
                     state.searchResults = [];
                     state.searchQuery = '';
                     if (state.currentView === 'search') {
@@ -2251,12 +2904,72 @@ const app = {
                         this.render();
                     }
                 }
-            }, 300);
+            }, 300); // Debounce search
+        });
+        
+        // Clear search on Escape
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchInput.blur();
+                state.searchResults = [];
+                state.searchQuery = '';
+                if (state.currentView === 'search') {
+                    state.currentView = 'all';
+                    document.getElementById('viewSelector').value = 'all';
+                    this.render();
+                }
+            }
         });
     },
 
+    showOnboarding() {
+        const overlay = document.getElementById('onboardingOverlay');
+        if (!overlay) return;
+        
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('show'));
+    },
+
+    closeOnboarding() {
+        const overlay = document.getElementById('onboardingOverlay');
+        if (!overlay) return;
+        
+        overlay.classList.remove('show');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
+        
+        localStorage.setItem('hasSeenOnboarding', 'true');
+        
+        // Prompt to choose database
+        setTimeout(() => {
+            if (state.connectionState === 'new') {
+                toastNotifications.show('info', 'Kies een database', 'Klik op "Database Kiezen" om te beginnen', 8000);
+            }
+        }, 500);
+    },
+
+    showKeyboardShortcuts() {
+        const modal = document.getElementById('keyboardShortcutsModal');
+        if (!modal) return;
+        
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => modal.classList.add('show'));
+    },
+
+    hideKeyboardShortcuts() {
+        const modal = document.getElementById('keyboardShortcutsModal');
+        if (!modal) return;
+        
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 200);
+    },
     changeView(view) {
         state.currentView = view;
+        
         const dashboardContainer = document.querySelector('.dashboard-container');
         const weekPlannerContainer = document.getElementById('weekPlannerContainer');
         
@@ -2267,56 +2980,277 @@ const app = {
         } else {
             dashboardContainer.style.display = 'flex';
             weekPlannerContainer.classList.remove('active');
+            
             if (view === 'all') {
-                document.querySelectorAll('.column').forEach(col => { col.style.display = 'flex'; col.style.maxWidth = '25%'; });
+                document.querySelectorAll('.column').forEach(col => {
+                    col.style.display = 'flex';
+                    col.style.maxWidth = '25%';
+                });
             }
             this.render();
         }
     },
 
-    // Migraties en checks (behouden voor cloud data integriteit)
+    async handleConnectionClick() {
+        if (state.connectionState === 'new') {
+            await this.openFilePicker();
+        } else if (state.connectionState === 'known') {
+            await this.verifyAndLoad();
+        } else if (state.connectionState === 'connected') {
+            await this.openFilePicker();
+        }
+    },
+
+    async handleDisconnect(event = null) {
+        if (event) event.preventDefault();
+        
+        if (state.connectionState !== 'connected') return;
+        
+        const confirmed = confirm(
+            "Weet je zeker dat je de verbinding wilt verbreken?\n\n" +
+            "Dit zal:\n" +
+            "- De huidige verbinding verbreken\n" +
+            "- Het opgeslagen bestand uit het geheugen verwijderen\n" +
+            "- Je wordt gevraagd om een nieuw bestand te kiezen"
+        );
+        
+        if (!confirmed) return;
+        
+        // Wis opgeslagen file handle
+        try {
+            const db = await storage.getDB();
+            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
+            tx.objectStore(CONSTANTS.STORE_NAME).delete('defaultHandle');
+            await new Promise(r => tx.oncomplete = r);
+        } catch (e) {
+            console.error('Fout bij wissen geheugen:', e);
+        }
+        
+        // Reset state
+        state.fileHandle = null;
+        state.connectionState = 'new';
+        state.db = { categories: [] };
+        state.sel = { cat: null, proj: null, task: null };
+        
+        this.updateButtonUI();
+        this.setStatus("Verbonden", "success");
+        this.render();
+        
+        // Vraag om nieuw bestand
+        setTimeout(() => {
+            if (confirm("Wil je nu een nieuw bestand kiezen?")) {
+                this.openFilePicker();
+            }
+        }, 500);
+    },
+
+    async handleDisconnect(event = null) {
+        if (event) event.preventDefault();
+        
+        if (state.connectionState !== 'connected') return;
+        
+        const confirmed = confirm(
+            "Weet je zeker dat je de verbinding wilt verbreken?\n\n" +
+            "Dit zal:\n" +
+            "- De huidige verbinding verbreken\n" +
+            "- Het opgeslagen bestand uit het geheugen verwijderen\n" +
+            "- Je wordt gevraagd om een nieuw bestand te kiezen"
+        );
+        
+        if (!confirmed) return;
+        
+        // Wis opgeslagen file handle
+        try {
+            const db = await storage.getDB();
+            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
+            tx.objectStore(CONSTANTS.STORE_NAME).delete('defaultHandle');
+            await new Promise(r => tx.oncomplete = r);
+        } catch (e) {
+            console.error('Fout bij wissen geheugen:', e);
+        }
+        
+        // Reset state
+        state.fileHandle = null;
+        state.connectionState = 'new';
+        state.db = { categories: [] };
+        state.sel = { cat: null, proj: null, task: null };
+        
+        this.updateButtonUI();
+        this.setStatus("Verbonden", "success");
+        this.render();
+        
+        // Vraag om nieuw bestand
+        setTimeout(() => {
+            if (confirm("Wil je nu een nieuw bestand kiezen?")) {
+                this.openFilePicker();
+            }
+        }, 500);
+    },
+
+    async openFilePicker() {
+        try {
+            [state.fileHandle] = await window.showOpenFilePicker({
+                types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }]
+            });
+            await storage.saveHandle(state.fileHandle);
+            await this.loadDataFromFile();
+        } catch (e) { 
+            console.log("Picker cancelled or error:", e); 
+        }
+    },
+
+    async verifyAndLoad() {
+        if (!state.fileHandle) return;
+        
+        const options = { mode: 'readwrite' };
+        
+        if ((await state.fileHandle.queryPermission(options)) === 'granted') {
+            await this.loadDataFromFile();
+            return;
+        }
+        
+        if ((await state.fileHandle.requestPermission(options)) === 'granted') {
+            await this.loadDataFromFile();
+            return;
+        }
+        
+        this.setStatus("Toestemming geweigerd", "error");
+    },
+
+    async loadDataFromFile() {
+        try {
+            const file = await state.fileHandle.getFile();
+            const text = await file.text();
+            state.db = JSON.parse(text);
+            
+            // Migreer oude pomodoroSessions als die niet bestaat
+            if (!state.db.pomodoroSessions) {
+                state.db.pomodoroSessions = [];
+            }
+            
+            // Migreer oude inPomodoro boolean naar sessions systeem
+            await this.migratePomodoroToSessions();
+            
+            state.connectionState = 'connected';
+            this.updateButtonUI();
+            this.setStatus("Verbonden", "success");
+            
+            await this.checkAndResetTodayTasks();
+            await this.processRecurringTasks();
+            
+            this.render();
+        } catch (e) {
+            errorHandler.log(e, "loadDataFromFile");
+            this.setStatus("Fout bij laden bestand", "error");
+            
+            // Reset state en vraag om nieuw bestand
+            state.fileHandle = null;
+            state.connectionState = 'new';
+            this.updateButtonUI();
+            
+            // Vraag gebruiker om nieuw bestand te kiezen
+            if (confirm("Het bestand kon niet worden geladen. Wilt u een nieuw bestand kiezen?")) {
+                await this.openFilePicker();
+            }
+        }
+    },
+
     async migratePomodoroToSessions() {
         let needsMigration = false;
         let defaultSession = null;
+        
+        // Check if we have any old inPomodoro items
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.inPomodoro === true) {
+                        needsMigration = true;
+                    }
+                    task.subtasks?.forEach(sub => {
+                        if (sub.inPomodoro === true) {
+                            needsMigration = true;
+                        }
+                    });
+                });
+            });
+        });
+        
+        if (!needsMigration) return;
+        
+        // Create default session if needed
         if (state.db.pomodoroSessions.length === 0) {
-            defaultSession = { id: helpers.uid(), name: 'Algemeen', createdAt: Date.now(), order: 0 };
+            defaultSession = {
+                id: helpers.uid(),
+                name: 'Algemeen',
+                createdAt: Date.now(),
+                order: 0
+            };
             state.db.pomodoroSessions.push(defaultSession);
         } else {
             defaultSession = state.db.pomodoroSessions[0];
         }
         
+        // Migrate items
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    if (task.inPomodoro === true) { task.pomodoroSessions = [defaultSession.id]; delete task.inPomodoro; needsMigration = true; }
-                    else if (!task.pomodoroSessions) { task.pomodoroSessions = []; }
+                    if (task.inPomodoro === true) {
+                        task.pomodoroSessions = [defaultSession.id];
+                        delete task.inPomodoro;
+                    } else if (!task.pomodoroSessions) {
+                        task.pomodoroSessions = [];
+                    }
+                    
+                    task.subtasks?.forEach(sub => {
+                        if (sub.inPomodoro === true) {
+                            sub.pomodoroSessions = [defaultSession.id];
+                            delete sub.inPomodoro;
+                        } else if (!sub.pomodoroSessions) {
+                            sub.pomodoroSessions = [];
+                        }
+                    });
                 });
             });
         });
-        if(needsMigration) await this.save();
+        
+        await this.save();
     },
 
     async checkAndResetTodayTasks() {
         const today = new Date().setHours(0,0,0,0);
         const lastOpen = localStorage.getItem('lastOpenDate');
+        
+        // Als het een nieuwe dag is, reset alle doDate velden van gisteren
         if (lastOpen && parseInt(lastOpen) < today) {
             let changed = false;
+            
             state.db.categories.forEach(cat => {
                 cat.projects?.forEach(proj => {
                     proj.tasks?.forEach(task => {
-                        if (task.doDate && task.doDate < today) { task.doDate = null; changed = true; }
+                        // Reset alleen als de doDate van gisteren of eerder is
+                        if (task.doDate && task.doDate < today) {
+                            task.doDate = null;
+                            changed = true;
+                        }
                     });
                 });
             });
-            if (changed) await this.save();
+            
+            if (changed) {
+                await this.save();
+                this.setStatus("Taken van gisteren gereset", "success");
+            }
         }
+        
+        // Sla huidige datum op
         localStorage.setItem('lastOpenDate', today.toString());
+        state.lastOpenDate = today;
     },
 
     async processRecurringTasks() {
-        // (Simplified for brevity, logic remains same)
         const today = new Date().setHours(0,0,0,0);
         let changed = false;
+        
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
@@ -2325,11 +3259,15 @@ const app = {
                         if (nextDue <= today) {
                             task.done = false;
                             task.status = 'planned';
-                            // Calculate next date logic...
-                             const next = new Date(nextDue);
-                            if (task.recurring.frequency === 'daily') next.setDate(next.getDate() + (task.recurring.interval || 1));
-                            else if (task.recurring.frequency === 'weekly') next.setDate(next.getDate() + (7 * (task.recurring.interval || 1)));
-                            else if (task.recurring.frequency === 'monthly') next.setMonth(next.getMonth() + (task.recurring.interval || 1));
+                            
+                            const next = new Date(nextDue);
+                            if (task.recurring.frequency === 'daily') {
+                                next.setDate(next.getDate() + (task.recurring.interval || 1));
+                            } else if (task.recurring.frequency === 'weekly') {
+                                next.setDate(next.getDate() + (7 * (task.recurring.interval || 1)));
+                            } else if (task.recurring.frequency === 'monthly') {
+                                next.setMonth(next.getMonth() + (task.recurring.interval || 1));
+                            }
                             task.recurring.nextDue = next.getTime();
                             changed = true;
                         }
@@ -2337,20 +3275,93 @@ const app = {
                 });
             });
         });
+
         if (changed) await this.save();
+    },
+
+    async save() {
+        if (!state.fileHandle) return;
+        
+        // Debounce saves
+        if (state.saveTimeout) {
+            clearTimeout(state.saveTimeout);
+        }
+        
+        state.saveTimeout = setTimeout(async () => {
+            await this.performSave();
+        }, CONSTANTS.DEBOUNCE_SAVE);
+    },
+    
+    async performSave() {
+        if (!state.fileHandle) return;
+        
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        try {
+            // Show loading indicator
+            if (loadingIndicator) loadingIndicator.classList.add('show');
+            
+            this.setStatus("Opslaan...", "");
+            
+            const writable = await state.fileHandle.createWritable();
+            await writable.write(JSON.stringify(state.db, null, 2));
+            await writable.close();
+            
+            state.lastSaveTime = Date.now();
+            this.setStatus("Opgeslagen", "success");
+            
+            // Create backup after successful save
+            if (CONSTANTS.AUTO_SAVE_ENABLED) {
+                backup.createBackup().catch(err => console.error('Backup failed:', err));
+            }
+            
+            // Sync to Firebase if user is logged in
+            if (firebaseAuth.currentUser) {
+                firebaseAuth.syncToCloud().catch(err => console.error('Cloud sync failed:', err));
+            }
+            
+        } catch (error) {
+            this.setStatus("Fout bij opslaan", "error");
+            errorHandler.log(error, 'save');
+        } finally {
+            // Hide loading indicator
+            if (loadingIndicator) {
+                setTimeout(() => loadingIndicator.classList.remove('show'), 300);
+            }
+        }
+    },
+
+    updateButtonUI() {
+        const btn = document.getElementById('connectBtn');
+        if (state.connectionState === 'new') {
+            btn.innerHTML = `&#128194; Database Kiezen`;
+            btn.className = "btn btn-primary";
+        } else if (state.connectionState === 'known') {
+            btn.innerHTML = `&#9889; Herverbinden`;
+            btn.className = "btn btn-primary";
+        } else if (state.connectionState === 'connected') {
+            btn.innerHTML = `&#128260; Wissel Bestand`;
+            btn.className = "btn btn-secondary";
+        }
     },
 
     setStatus(msg, type) {
         const el = document.getElementById('statusIndicator');
-        if(!el) return;
         el.innerHTML = type === 'success' ? `<span>&#10003;</span> ${msg}` : 
-                       type === 'error' ? `<span>⚠️</span> ${msg}` : 
+                       type === 'error' ? `<span>âš ï¸</span> ${msg}` : 
                        `<span>&#8505;</span> ${msg}`;
         el.className = `status-pill ${type}`;
+        
+        // Tijdelijke statussen keren terug naar "Verbonden" na 5 seconden
+        if (msg !== 'Verbonden') {
+            setTimeout(() => {
+                this.setStatus('Verbonden', 'success');
+            }, 5000);
+        }
     },
 
     render() {
-        const showDone = document.getElementById('showDoneCheck')?.checked;
+        const showDone = document.getElementById('showDoneCheck').checked;
 
         if (state.currentView !== 'all') {
             this.renderSmartView();
@@ -2377,8 +3388,14 @@ const app = {
 
     renderSmartView() {
         const tasks = views.getTasksForView(state.currentView);
-        const showDone = document.getElementById('showDoneCheck')?.checked;
-        const viewName = { 'today': 'Vandaag', 'overdue': 'Achterstallig', 'search': 'Zoekresultaten' }[state.currentView] || state.currentView;
+        const showDone = document.getElementById('showDoneCheck').checked;
+        
+        // View name for header
+        const viewName = {
+            'today': 'Vandaag',
+            'overdue': 'Achterstallig',
+            'search': 'Zoekresultaten'
+        }[state.currentView] || state.currentView;
         
         ['cat', 'proj'].forEach(col => {
             const el = document.getElementById(`list-${col}`).parentElement;
@@ -2386,75 +3403,216 @@ const app = {
         });
 
         const taskCol = document.getElementById('list-task').parentElement;
+        const subCol = document.getElementById('list-sub').parentElement;
+        
         taskCol.style.display = 'flex';
         taskCol.style.maxWidth = '400px';
         
-        const colHeader = taskCol.querySelector('.col-header');
-        if (colHeader) {
-            colHeader.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <button onclick="state.currentView='all'; document.getElementById('viewSelector').value='all'; app.render();" class="btn btn-secondary">←</button>
-                    <span>${viewName}</span>
-                </div>
-                <span class="col-count" id="count-task">0</span>
-            `;
+        // Add back button for ADHD-friendly navigation
+        if (state.currentView !== 'all') {
+            const colHeader = taskCol.querySelector('.col-header');
+            if (colHeader) {
+                colHeader.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button onclick="state.currentView='all'; document.getElementById('viewSelector').value='all'; app.render();" 
+                                class="btn btn-secondary" 
+                                style="padding: 4px 12px; font-size: 12px;"
+                                title="Terug naar overzicht">
+                            â† Terug
+                        </button>
+                        <span>${viewName}</span>
+                    </div>
+                    <span class="col-count" id="count-task">0</span>
+                `;
+            }
         }
         
-        renderer.renderCol('task', tasks, state.sel.task, (id) => { state.sel.task = id; }, showDone);
+        renderer.renderCol('task', tasks, state.sel.task, (id) => {
+            state.sel.task = id;
+        }, showDone);
+
+        // Render search results
+        if (state.currentView === 'search') {
+            const container = document.getElementById('list-task');
+            const countEl = document.getElementById('count-task');
+            container.innerHTML = '';
+            
+            countEl.textContent = state.searchResults.length;
+            
+            if (state.searchResults.length === 0) {
+                container.innerHTML = '<div class="empty-state">Geen resultaten gevonden</div>';
+                return;
+            }
+            
+            state.searchResults.forEach(result => {
+                const { type, item, context, _catId, _projId, _taskId } = result;
+                
+                const el = document.createElement('div');
+                el.className = `item ${item.done ? 'completed' : ''}`;
+                el.dataset.id = item.id;
+                
+                // Click to navigate to item
+                el.onclick = () => {
+                    if (type === 'task' || type === 'subtask') {
+                        state.sel.cat = _catId;
+                        state.sel.proj = _projId;
+                        if (type === 'task') {
+                            state.sel.task = item.id;
+                        } else {
+                            state.sel.task = _taskId;
+                        }
+                        state.currentView = 'all';
+                        document.getElementById('viewSelector').value = 'all';
+                        const searchInput = document.getElementById('searchInput');
+                        if (searchInput) searchInput.value = '';
+                        app.render();
+                    }
+                };
+                
+                const typeIcons = {
+                    category: 'Ã°Å¸â€œâ€š',
+                    project: 'Ã°Å¸â€œâ€¹',
+                    task: 'Ã°Å¸â€œÂ',
+                    subtask: 'âœ“'
+                };
+                
+                const highlightedName = search.highlightText(item.name, state.searchQuery);
+                const contextInfo = context ? `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${context}</div>` : '';
+                
+                el.innerHTML = `
+                    ${contextInfo}
+                    <div class="item-row">
+                        <div class="item-icon">${typeIcons[type]}</div>
+                        <div class="item-content">
+                            <div class="item-title">${highlightedName}</div>
+                            <div class="item-meta">
+                                <span style="font-size: 10px; background: var(--primary-light); padding: 2px 6px; border-radius: 4px;">${type}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(el);
+            });
+            
+            const footer = document.createElement('div');
+            footer.className = 'list-footer';
+            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">ðŸ” Klik op een item om ernaar te navigeren</div>';
+            container.appendChild(footer);
+            
+            return;
+        }
+
+        // Toon subtaken voor vandaag weergave
+        if (state.currentView === 'today') {
+            const subtasks = views.getSubtasksForToday();
+            subCol.style.display = 'flex';
+            subCol.style.maxWidth = '400px';
+            
+            const container = document.getElementById('list-sub');
+            const countEl = document.getElementById('count-sub');
+            container.innerHTML = '';
+            
+            let visibleSubs = subtasks;
+            if (!showDone) {
+                visibleSubs = subtasks.filter(s => !s.done);
+            }
+            countEl.textContent = visibleSubs.length;
+
+            visibleSubs.forEach(sub => {
+                const el = document.createElement('div');
+                el.className = `item ${sub.done ? 'completed' : ''}`;
+                el.dataset.id = sub.id;
+                el.dataset.taskid = sub._taskId;
+                
+                el.onclick = () => {
+                    // Selecteer de parent task
+                    state.sel.task = sub._taskId;
+                    // Ga terug naar all view
+                    state.currentView = 'all';
+                    document.getElementById('viewSelector').value = 'all';
+                    app.render();
+                };
+
+                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${sub._task}</div>`;
+                
+                el.innerHTML = `
+                    ${contextInfo}
+                    <div class="item-row">
+                        <input type="checkbox" class="task-checkbox" ${sub.done ? 'checked' : ''}>
+                        <div class="item-content">
+                            <div class="item-title">${sub.name}</div>
+                        </div>
+                    </div>
+                `;
+                
+                const checkbox = el.querySelector('.task-checkbox');
+                checkbox.onclick = async (e) => {
+                    e.stopPropagation();
+                    // Vind en update de subtask
+                    state.db.categories.forEach(cat => {
+                        cat.projects?.forEach(proj => {
+                            proj.tasks?.forEach(task => {
+                                if (task.id === sub._taskId) {
+                                    const subtask = task.subtasks?.find(s => s.id === sub.id);
+                                    if (subtask) {
+                                        subtask.done = checkbox.checked;
+                                    }
+                                }
+                            });
+                        });
+                    });
+                    await app.save();
+                    this.renderSmartView();
+                };
+                
+                container.appendChild(el);
+            });
+        } else {
+            subCol.style.display = 'none';
+        }
     },
-    
+
     async quickAdd(e, type) {
         if (e.key !== 'Enter') return;
-        const name = e.target.value.trim();
-        if (!name) return;
-        undoRedo.saveState();
-        const newItem = helpers.createItem(name, type);
-        const list = helpers.getList(type);
-        if (list) {
+        
+        try {
+            // Get and sanitize input
+            const rawValue = e.target.value;
+            const name = sanitizer.sanitize(rawValue).trim();
+            
+            // Validate
+            if (!sanitizer.validateInput(name, 500)) {
+                toastNotifications.show('warning', 'Ongeldige Invoer', 'Te lang of ongeldige tekens', 2000);
+                e.target.value = '';
+                return;
+            }
+            
+            if (!name) return;
+            
+            // Save undo state
+            undoRedo.saveState();
+            
+            const newItem = helpers.createItem(name, type);
+            const list = helpers.getList(type);
+            if (!list) return;
+
             list.push(newItem);
+            
+            // Clear input immediately for better UX
             e.target.value = '';
+            
             await this.save();
             this.render();
+            
+            setTimeout(() => {
+                const inputs = document.querySelectorAll(`#list-${type} .inline-input`);
+                if(inputs.length) inputs[0].focus();
+            }, 50);
+            
+        } catch (error) {
+            errorHandler.log(error, 'quickAdd');
         }
-    }
-};
-
-// ==========================================
-// 5. HELPER OBJECTEN (Renderer, DnD, etc.)
-// ==========================================
-
-const helpers = {
-    uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2); },
-    createItem(name, type) {
-        const base = { id: this.uid(), name: name, createdAt: Date.now() };
-        if (type === 'cat') return { ...base, icon: '\u{1F4C2}', projects: [] };
-        if (type === 'proj') return { ...base, icon: '\u{1F4CB}', status: 'planned', tasks: [] };
-        if (type === 'task') return { ...base, done: false, subtasks: [], priority: 'none', pomodoroSessions: [], notes: '', schedule: null };
-        if (type === 'sub') return { ...base, done: false, checklist: [], schedule: null };
-    },
-    getList(type) {
-        if (type === 'cat') return state.db.categories;
-        if (type === 'proj') { const c = this.find('cat', state.sel.cat); return c ? c.projects : null; }
-        if (type === 'task') { const p = this.find('proj', state.sel.proj); return p ? p.tasks : null; }
-        if (type === 'sub') { const t = this.find('task', state.sel.task); return t ? t.subtasks : null; }
-    },
-    find(type, id) {
-        if (!id) return null;
-        if (type === 'cat') return state.db.categories.find(c => c.id === id);
-        if (type === 'proj') { const c = this.find('cat', state.sel.cat); return c ? c.projects.find(p => p.id === id) : null; }
-        if (type === 'task') { const p = this.find('proj', state.sel.proj); return p ? p.tasks.find(t => t.id === id) : null; }
-        return null;
-    },
-    formatDate(timestamp) {
-        if (!timestamp) return { text: '', class: '' };
-        const date = new Date(timestamp);
-        const today = new Date().setHours(0,0,0,0);
-        const taskDate = new Date(timestamp).setHours(0,0,0,0);
-        if (taskDate < today) return { text: date.toLocaleDateString('nl-NL'), class: 'overdue' };
-        if (taskDate === today) return { text: 'Vandaag', class: 'today' };
-        const tomorrow = today + (24 * 60 * 60 * 1000);
-        if (taskDate === tomorrow) return { text: 'Morgen', class: '' };
-        return { text: date.toLocaleDateString('nl-NL'), class: '' };
     }
 };
 
@@ -2479,6 +3637,26 @@ const renderer = {
             });
         }
         
+        // Sorteer items: niet-voltooide eerst, dan voltooide gesorteerd op completedAt
+        if (type !== 'cat') {
+            visibleItems = visibleItems.sort((a, b) => {
+                const aDone = (type === 'proj') ? (a.status === 'done') : a.done;
+                const bDone = (type === 'proj') ? (b.status === 'done') : b.done;
+                
+                // Beide niet voltooid of beide voltooid
+                if (aDone === bDone) {
+                    if (aDone) {
+                        // Beide voltooid: sorteer op completedAt (nieuwste eerst)
+                        return (b.completedAt || 0) - (a.completedAt || 0);
+                    }
+                    // Beide niet voltooid: behoud originele volgorde
+                    return 0;
+                }
+                // Niet-voltooide items eerst
+                return aDone ? 1 : -1;
+            });
+        }
+        
         countEl.textContent = visibleItems.length;
 
         visibleItems.forEach((item) => {
@@ -2486,67 +3664,264 @@ const renderer = {
             const isCompleted = item.done || item.status === 'done';
             const isToday = item.doDate === new Date().setHours(0,0,0,0);
             el.className = `item ${item.id === activeId ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isToday ? 'today-task' : ''}`;
+            
             el.draggable = true;
             el.dataset.id = item.id;
             el.ondragstart = (e) => dnd.onDragStart(e, type, item);
             el.ondragend = (e) => dnd.onDragEnd(e, el);
+
             el.onclick = () => { if (onSelect) { onSelect(item.id); app.render(); } };
+
             el.innerHTML = this.buildItemContent(type, item);
             this.attachEvents(el, type, item);
             container.appendChild(el);
         });
 
-        // Add Footer
         const footer = document.createElement('div');
         footer.className = 'list-footer';
+
         if (type === 'cat' || type === 'proj') {
             const btn = document.createElement('div');
             btn.className = 'add-btn-block';
-            btn.innerHTML = `<span>+</span> Nieuw`;
+            btn.innerHTML = `<span>+</span> Nieuwe ${type === 'cat' ? 'Categorie' : 'Project'}`;
             btn.onclick = () => modal.open(type);
             footer.appendChild(btn);
         } else {
             const input = document.createElement('input');
             input.className = 'inline-input';
-            input.placeholder = `+ Toevoegen...`;
+            input.placeholder = `+ Nieuwe ${type === 'task' ? 'Opdracht' : 'Actie'}...`;
             input.onkeypress = (e) => app.quickAdd(e, type);
             footer.appendChild(input);
         }
+        
         container.appendChild(footer);
     },
 
     buildItemContent(type, item) {
-        let leftHtml = type === 'cat' || type === 'proj' 
-            ? `<div class="item-icon">${item.icon || '\u{1F4C2}'}</div>`
-            : `<input type="checkbox" class="task-checkbox" ${item.done ? 'checked' : ''} data-action="toggle">`;
-
+        let leftHtml = '';
+        let statusHtml = '';
         let metaHtml = '';
-        if (type === 'task' && item.priority && item.priority !== 'none') {
-            metaHtml += `<span class="priority-badge">${CONSTANTS.PRIORITIES[item.priority].icon}</span> `;
+
+        if (type === 'cat' || type === 'proj') {
+            leftHtml = `<div class="item-icon">${item.icon || '\u{1F4C2}'}</div>`;
+        } else {
+            leftHtml = `<input type="checkbox" class="task-checkbox" ${item.done ? 'checked' : ''} data-action="toggle">`;
         }
-        if (type === 'task' && item.dueDate) {
-            const d = helpers.formatDate(item.dueDate);
-            metaHtml += `<span class="date-badge ${d.class}">${d.text}</span> `;
+
+        // Categorie statistieken
+        if (type === 'cat') {
+            let totalProjects = item.projects?.length || 0;
+            let totalTasks = 0;
+            let totalSubtasks = 0;
+            let doneTasks = 0;
+            
+            item.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    totalTasks++;
+                    if (task.done) doneTasks++;
+                    totalSubtasks += task.subtasks?.length || 0;
+                });
+            });
+            
+            const percentage = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+            metaHtml = `
+                <div class="category-stats">
+                    <div class="category-stats-bar">
+                        <div class="category-stats-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="category-stats-text">
+                        <span>${totalProjects} proj | ${totalTasks} taken | ${totalSubtasks} sub</span>
+                        <span>${doneTasks}/${totalTasks} voltooid</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (type === 'task' || type === 'sub') {
+            const metaParts = [];
+            
+            if (item.priority && item.priority !== 'none') {
+                const p = CONSTANTS.PRIORITIES[item.priority];
+                metaParts.push(`<span class="priority-badge" title="${p.label}" data-action="cycle-priority">${p.icon}</span>`);
+            }
+
+            if (item.dueDate) {
+                const dateInfo = helpers.formatDate(item.dueDate);
+                metaParts.push(`<span class="date-badge ${dateInfo.class}">${dateInfo.text}</span>`);
+            }
+
+            if (item.timeEstimate || item.timeSpent) {
+                const spent = item.timeSpent || 0;
+                const estimate = item.timeEstimate || 0;
+                if (estimate > 0) {
+                    metaParts.push(`<span class="time-badge">${spent}/${estimate}m</span>`);
+                } else if (spent > 0) {
+                    metaParts.push(`<span class="time-badge">${spent}m</span>`);
+                }
+            }
+
+            if (item.timerRunning) {
+                metaParts.push(`<span class="timer-display" data-timer-id="${item.id}">0:00</span>`);
+            }
+
+            if (item.recurring?.enabled) {
+                const freq = item.recurring.frequency;
+                const icon = freq === 'daily' ? '\u{1F4C6}' : freq === 'weekly' ? '\u{1F4C5}' : '\u{1F5D3}';
+                metaParts.push(`<span class="recurring-indicator" title="Terugkerend: ${freq}">${icon}</span>`);
+            }
+
+            if (item.notes) {
+                metaParts.push(`<span title="${item.notes.substring(0,50)}...">\u{1F4DD}</span>`);
+            }
+
+            // Subtask count voor tasks
+            if (type === 'task' && item.subtasks && item.subtasks.length > 0) {
+                const doneCount = item.subtasks.filter(s => s.done).length;
+                metaParts.push(`<span class="subtask-count" title="Subtaken">${doneCount}/${item.subtasks.length}</span>`);
+            }
+
+            // Pomodoro sessions badges voor tasks
+            if (type === 'task' && item.pomodoroSessions && item.pomodoroSessions.length > 0) {
+                const existingSessions = item.pomodoroSessions
+                    .map(sid => state.db.pomodoroSessions.find(s => s.id === sid))
+                    .filter(Boolean);
+                const sessionNames = existingSessions.map(s => s.name).join(', ');
+                if (existingSessions.length > 0) {
+                    metaParts.push(`<span class="pomodoro-badge" data-action="show-task-sessions" title="Sessies: ${sessionNames}">&#9201; ${existingSessions.length}x</span>`);
+                }
+            }
+
+            // Checklist badge voor subtaken
+            if (type === 'sub' && item.checklist && item.checklist.length > 0) {
+                const doneChecklist = item.checklist.filter(c => c.done).length;
+                metaParts.push(`<span class="checklist-badge" data-action="toggle-checklist" title="Checklist">âœ“ ${doneChecklist}/${item.checklist.length}</span>`);
+            }
+
+            // Pomodoro sessions badges voor subtaken
+            if (type === 'sub' && item.pomodoroSessions && item.pomodoroSessions.length > 0) {
+                const existingSessions = item.pomodoroSessions
+                    .map(sid => state.db.pomodoroSessions.find(s => s.id === sid))
+                    .filter(Boolean);
+                const sessionNames = existingSessions.map(s => s.name).join(', ');
+                if (existingSessions.length > 0) {
+                    metaParts.push(`<span class="pomodoro-badge" data-action="show-sub-sessions" title="Sessies: ${sessionNames}">&#9201; ${existingSessions.length}x</span>`);
+                }
+            }
+
+            if (metaParts.length > 0) {
+                metaHtml = `<div class="item-meta">${metaParts.join('')}</div>`;
+            }
+        }
+
+        if (type === 'proj') {
+            const statusLabels = {
+                'planned': { text: 'Gepland', icon: '&#128203;' },
+                'active': { text: 'Actief', icon: '&#9889;' },
+                'hold': { text: 'Wacht', icon: '&#9208;' },
+                'done': { text: 'Klaar', icon: '&#10003;' }
+            };
+            const currentStatus = item.status || 'planned';
+            const statusInfo = statusLabels[currentStatus];
+            statusHtml = `
+                <div class="status-badge status-${currentStatus}" data-action="toggle-status-dropdown" title="Klik om status te wijzigen">
+                    ${statusInfo.icon} ${statusInfo.text}
+                    <div class="status-dropdown" data-dropdown-for="${item.id}">
+                        <div class="status-dropdown-item" data-status="planned">&#128203; Gepland</div>
+                        <div class="status-dropdown-item" data-status="active">&#9889; Actief</div>
+                        <div class="status-dropdown-item" data-status="hold">&#9208; Wacht</div>
+                        <div class="status-dropdown-item" data-status="done">&#10003; Klaar</div>
+                    </div>
+                </div>
+            `;
+            
+            const totalTasks = item.tasks ? item.tasks.length : 0;
+            const doneTasks = item.tasks ? item.tasks.filter(t => t.done || t.status === 'done').length : 0;
+            let totalSubtasks = 0;
+            item.tasks?.forEach(task => {
+                totalSubtasks += task.subtasks?.length || 0;
+            });
+            
+            const pct = totalTasks === 0 ? 0 : (doneTasks / totalTasks) * 100;
+            metaHtml = `
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <div class="item-meta">${doneTasks}/${totalTasks} taken | ${totalSubtasks} subtaken</div>
+            `;
+        }
+
+        let actionButtons = '';
+        if (type === 'task') {
+            const timerBtn = item.timerRunning 
+                ? `<button class="action-btn" data-action="timer-stop" title="Stop timer">&#9209;</button>`
+                : `<button class="action-btn" data-action="timer-start" title="Start timer">&#9654;</button>`;
+            
+            const today = new Date().setHours(0,0,0,0);
+            const todayBtn = item.doDate === today
+                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">ðŸ“…&#10060;</button>`
+                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">ðŸ“…</button>`;
+            
+            const pomodoroBtn = `<button class="action-btn" data-action="manage-task-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
+            
+            actionButtons = timerBtn + todayBtn + pomodoroBtn;
         }
         if (type === 'proj') {
-            const total = item.tasks ? item.tasks.length : 0;
-            const done = item.tasks ? item.tasks.filter(t => t.done).length : 0;
-            metaHtml = `<div class="item-meta">${done}/${total} taken</div>`;
+            actionButtons = `<button class="action-btn archive" data-action="archive" title="Archiveer">&#128230;</button>`;
+        }
+        if (type === 'sub') {
+            const pomodoroBtn = `<button class="action-btn" data-action="manage-sub-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
+            const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">âœ“</button>`;
+            actionButtons = pomodoroBtn + checklistBtn;
+        }
+
+        // Checklist items voor subtaken
+        let checklistHtml = '';
+        if (type === 'sub' && item.showChecklist) {
+            let checklistItems = '';
+            
+            if (item.checklist && item.checklist.length > 0) {
+                checklistItems = item.checklist.map((checkItem, idx) => `
+                    <div class="checklist-item">
+                        <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
+                        <span>${checkItem.text}</span>
+                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+                    </div>
+                `).join('');
+            }
+            
+            // Add input field if adding new item
+            if (item.addingChecklistItem) {
+                checklistItems += `
+                    <div class="checklist-item" style="background: var(--primary-light); padding: 6px; border-radius: 4px;">
+                        <input type="text" class="checklist-input" data-subtask-id="${item.id}" placeholder="Nieuw checklist item..." 
+                               style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
+                               autofocus>
+                        <button class="action-btn" data-action="save-checklist-input" data-subtask-id="${item.id}" title="Opslaan" 
+                                style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">âœ“</button>
+                        <button class="action-btn danger" data-action="cancel-checklist-input" data-subtask-id="${item.id}" title="Annuleren" 
+                                style="width: 18px; height: 18px; font-size: 10px;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+                    </div>
+                `;
+            }
+            
+            checklistHtml = `<div class="checklist-items">${checklistItems}</div>`;
         }
 
         return `
             <div class="item-row">
-                <div class="drag-handle">≡</div>
+                <div class="drag-handle" title="Sleep om te sorteren">&#8801;</div>
                 ${leftHtml}
                 <div class="item-content">
                     <div class="item-title">${item.name}</div>
                     ${metaHtml}
                 </div>
+                ${statusHtml}
                 <div class="item-actions">
-                    <button class="action-btn" data-action="edit">✎</button>
-                    <button class="action-btn danger" data-action="delete">🗑️</button>
+                    ${actionButtons}
+                    <button class="action-btn" data-action="edit" title="Bewerken">&#9999;</button>
+                    <button class="action-btn danger" data-action="delete" title="Verwijderen">&#128465;</button>
                 </div>
-            </div>`;
+            </div>
+            ${checklistHtml}
+        `;
     },
 
     attachEvents(el, type, item) {
@@ -2555,13 +3930,488 @@ const renderer = {
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
                 item.done = e.target.checked;
-                item.completedAt = item.done ? Date.now() : null;
+                if (item.done) {
+                    item.completedAt = Date.now();
+                } else {
+                    delete item.completedAt;
+                }
+                if(type === 'task') item.status = item.done ? 'done' : 'doing';
                 await app.save();
                 app.render();
             };
         }
-        el.querySelectorAll('[data-action="delete"]').forEach(b => b.onclick = (e) => { e.stopPropagation(); crud.deleteItem(type, item.id); });
-        el.querySelectorAll('[data-action="edit"]').forEach(b => b.onclick = (e) => { e.stopPropagation(); modal.open(type, item); });
+
+        el.querySelectorAll('.item-actions button').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                const action = btn.dataset.action;
+                if (action === 'delete') crud.deleteItem(type, item.id);
+                if (action === 'edit') modal.open(type, item); 
+                if (action === 'archive') crud.archiveProject(item.id);
+                if (action === 'timer-start') timer.start(item.id);
+                if (action === 'timer-stop') timer.stop(item.id);
+                if (action === 'set-today') crud.setToday(item.id);
+                if (action === 'remove-today') crud.removeFromToday(item.id);
+                if (action === 'add-checklist') crud.addChecklistItem(item.id);
+                if (action === 'manage-task-sessions') crud.manageItemSessions(item, 'task');
+                if (action === 'manage-sub-sessions') crud.manageItemSessions(item, 'sub');
+            };
+        });
+
+        // Status dropdown voor projecten
+        const statusBadge = el.querySelector('[data-action="toggle-status-dropdown"]');
+        if (statusBadge) {
+            statusBadge.onclick = async (e) => {
+                e.stopPropagation();
+                const dropdown = statusBadge.querySelector('.status-dropdown');
+                
+                // Sluit alle andere dropdowns
+                document.querySelectorAll('.status-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                
+                dropdown.classList.toggle('show');
+            };
+
+            // Status dropdown items
+            el.querySelectorAll('.status-dropdown-item').forEach(dropdownItem => {
+                dropdownItem.onclick = async (e) => {
+                    e.stopPropagation();
+                    const newStatus = dropdownItem.dataset.status;
+                    item.status = newStatus;
+                    if (newStatus === 'done') {
+                        item.completedAt = Date.now();
+                    } else {
+                        delete item.completedAt;
+                    }
+                    await app.save();
+                    app.render();
+                };
+            });
+        }
+
+        // Pomodoro badge click
+        const pomodoroBadge = el.querySelector('[data-action="toggle-pomodoro"]');
+        if (pomodoroBadge) {
+            pomodoroBadge.onclick = async (e) => {
+                e.stopPropagation();
+                crud.removeFromPomodoro(item.id);
+            };
+        }
+
+        // Pomodoro badge click for tasks
+        const pomodoroTaskBadge = el.querySelector('[data-action="toggle-pomodoro-task"]');
+        if (pomodoroTaskBadge) {
+            pomodoroTaskBadge.onclick = async (e) => {
+                e.stopPropagation();
+                crud.removeTaskFromPomodoro(item.id);
+            };
+        }
+
+        const priorityBadge = el.querySelector('[data-action="cycle-priority"]');
+        if (priorityBadge) {
+            priorityBadge.onclick = async (e) => {
+                e.stopPropagation();
+                crud.cyclePriority(item);
+            };
+        }
+
+        // Checklist badge click
+        const checklistBadge = el.querySelector('[data-action="toggle-checklist"]');
+        if (checklistBadge) {
+            checklistBadge.onclick = async (e) => {
+                e.stopPropagation();
+                item.showChecklist = !item.showChecklist;
+                app.render();
+            };
+        }
+
+        // Checklist item toggles
+        el.querySelectorAll('[data-action="toggle-checklist-item"]').forEach(checkboxEl => {
+            checkboxEl.onclick = async (e) => {
+                e.stopPropagation();
+                const idx = parseInt(checkboxEl.dataset.index);
+                if (item.checklist && item.checklist[idx]) {
+                    item.checklist[idx].done = checkboxEl.checked;
+                    await app.save();
+                    app.render();
+                }
+            };
+        });
+        
+        // Checklist item delete buttons
+        el.querySelectorAll('[data-action="delete-checklist-item"]').forEach(deleteBtn => {
+            deleteBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const idx = parseInt(deleteBtn.dataset.index);
+                if (item.checklist && item.checklist[idx]) {
+                    item.checklist.splice(idx, 1);
+                    await app.save();
+                    app.render();
+                }
+            };
+        });
+        
+        // Checklist input field
+        const checklistInput = el.querySelector('.checklist-input');
+        if (checklistInput) {
+            checklistInput.onclick = (e) => e.stopPropagation();
+            checklistInput.onkeypress = async (e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                    e.stopPropagation();
+                    await crud.saveNewChecklistItem(checklistInput.dataset.subtaskId, e.target.value);
+                } else if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    crud.cancelAddChecklistItem(checklistInput.dataset.subtaskId);
+                }
+            };
+            // Auto-focus the input
+            setTimeout(() => checklistInput.focus(), 50);
+        }
+        
+        // Checklist input save button
+        el.querySelectorAll('[data-action="save-checklist-input"]').forEach(saveBtn => {
+            saveBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const input = el.querySelector('.checklist-input');
+                if (input && input.value.trim()) {
+                    await crud.saveNewChecklistItem(saveBtn.dataset.subtaskId, input.value);
+                }
+            };
+        });
+        
+        // Checklist input cancel button
+        el.querySelectorAll('[data-action="cancel-checklist-input"]').forEach(cancelBtn => {
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                crud.cancelAddChecklistItem(cancelBtn.dataset.subtaskId);
+            };
+        });
+        
+        // Pomodoro badge click for tasks (show sessions)
+        const pomodoroTaskShowBadge = el.querySelector('[data-action="show-task-sessions"]');
+        if (pomodoroTaskShowBadge) {
+            pomodoroTaskShowBadge.onclick = async (e) => {
+                e.stopPropagation();
+                crud.manageItemSessions(item, 'task');
+            };
+        }
+
+        // Pomodoro badge click for subtasks (show sessions)
+        const pomodoroSubShowBadge = el.querySelector('[data-action="show-sub-sessions"]');
+        if (pomodoroSubShowBadge) {
+            pomodoroSubShowBadge.onclick = async (e) => {
+                e.stopPropagation();
+                crud.manageItemSessions(item, 'sub');
+            };
+        }
+    }
+};
+
+const crud = {
+    async deleteItem(type, id) {
+        if (!confirm("Weet je het zeker? Dit item wordt verwijderd.")) return;
+        
+        
+        // Save undo state
+        undoRedo.saveState();
+        
+        const list = helpers.getList(type);
+        const idx = list.findIndex(i => i.id === id);
+        
+        if (idx > -1) {
+            list.splice(idx, 1);
+            if (state.sel[type] === id) state.sel[type] = null;
+            await app.save();
+            app.render();
+        }
+    },
+
+    async archiveProject(id) {
+        if (!confirm("Project naar archief verplaatsen?")) return;
+        undoRedo.saveState();
+        
+        let archCat = state.db.categories.find(c => c.name.includes("Archief"));
+        if (!archCat) {
+            archCat = helpers.createItem("\u{1F4C2} 99. Archief", 'cat');
+            archCat.icon = "\u{1F4C1}";
+            state.db.categories.push(archCat);
+        }
+
+        const sourceCat = helpers.find('cat', state.sel.cat);
+        const pIdx = sourceCat.projects.findIndex(p => p.id === id);
+        if (pIdx > -1) {
+            const [proj] = sourceCat.projects.splice(pIdx, 1);
+            proj.status = 'done';
+            archCat.projects.push(proj);
+            state.sel.proj = null;
+            await app.save();
+            app.render();
+        }
+    },
+
+    async cycleStatus(item) {
+        const flow = ['planned', 'active', 'hold', 'done'];
+        undoRedo.saveState();
+        const currentIdx = flow.indexOf(item.status || 'planned');
+        item.status = flow[(currentIdx + 1) % flow.length];
+        await app.save();
+        app.render();
+    },
+
+    async cyclePriority(item) {
+        const flow = ['none', 'low', 'medium', 'high'];
+        undoRedo.saveState();
+        const currentIdx = flow.indexOf(item.priority || 'none');
+        item.priority = flow[(currentIdx + 1) % flow.length];
+        await app.save();
+        app.render();
+    },
+
+    async setToday(taskId) {
+        const task = helpers.findTaskById(taskId);
+        undoRedo.saveState();
+        if (!task) return;
+        
+        const today = new Date().setHours(0, 0, 0, 0);
+        task.doDate = today;
+        
+        await app.save();
+        app.render();
+        app.setStatus("Taak ingepland voor vandaag", "success");
+    },
+
+    async removeFromToday(taskId) {
+        const task = helpers.findTaskById(taskId);
+        if (!task) return;
+        undoRedo.saveState();
+        
+        task.doDate = null;
+        
+        await app.save();
+        app.render();
+        app.setStatus("Taak verwijderd uit vandaag", "success");
+    },
+
+    async manageItemSessions(item, itemType) {
+        // Zorg dat item een pomodoroSessions array heeft
+        if (!item.pomodoroSessions) {
+            item.pomodoroSessions = [];
+        }
+        
+        // Bouw lijst met alle sessies
+        const sessionsList = state.db.pomodoroSessions.map(session => {
+            const isChecked = item.pomodoroSessions.includes(session.id);
+            return `<label style="display: flex; align-items: center; gap: 8px; padding: 8px; cursor: pointer;">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} value="${session.id}">
+                <span>${session.name}</span>
+            </label>`;
+        }).join('');
+        
+        if (state.db.pomodoroSessions.length === 0) {
+            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies" knop.');
+            return;
+        }
+        
+        // Toon modal met checkboxes
+        const result = await this.showSessionsModal(item.name, sessionsList);
+        if (!result) return;
+        
+        // Update item met geselecteerde sessies
+        item.pomodoroSessions = result;
+        
+        await app.save();
+        app.render();
+        app.setStatus(`Sessies bijgewerkt voor ${itemType === 'task' ? 'opdracht' : 'subtaak'}`, "success");
+    },
+
+    showSessionsModal(itemName, sessionsList) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay show';
+            overlay.style.display = 'flex';
+            
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Pomodoro Sessies voor: ${itemName}</h2>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${sessionsList}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelSessionsBtn">Annuleren</button>
+                        <button class="btn btn-primary" id="saveSessionsBtn">Opslaan</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            const saveBtn = overlay.querySelector('#saveSessionsBtn');
+            const cancelBtn = overlay.querySelector('#cancelSessionsBtn');
+            
+            const cleanup = () => {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 200);
+            };
+            
+            saveBtn.onclick = () => {
+                const selectedIds = Array.from(overlay.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                cleanup();
+                resolve(selectedIds);
+            };
+            
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve(null);
+            };
+            
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    cleanup();
+                    resolve(null);
+                }
+            };
+        });
+    },
+
+    async addChecklistItem(subtaskId) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask) return;
+        
+        // Mark that we're adding a checklist item so the render shows input
+        if (!subtask.addingChecklistItem) {
+            subtask.addingChecklistItem = true;
+            subtask.showChecklist = true; // Make sure checklist is visible
+            app.render();
+        }
+    },
+    
+    async saveNewChecklistItem(subtaskId, text) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask) return;
+        
+        if (!subtask.checklist) subtask.checklist = [];
+        subtask.checklist.push({ text: text.trim(), done: false });
+        subtask.addingChecklistItem = false;
+        
+        await app.save();
+        app.render();
+    },
+    
+    cancelAddChecklistItem(subtaskId) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask) return;
+        
+        subtask.addingChecklistItem = false;
+        app.render();
+    }
+};
+
+const timer = {
+    start(taskId) {
+        const task = helpers.findTaskById(taskId);
+        if (!task) return;
+        task.timerRunning = true;
+        task.timerStart = Date.now();
+        app.save();
+        app.render();
+    },
+    
+    stop(taskId) {
+        const task = helpers.findTaskById(taskId);
+        if (!task || !task.timerRunning) return;
+        
+        const duration = Math.floor((Date.now() - task.timerStart) / 60000);
+        task.timeSpent = (task.timeSpent || 0) + duration;
+        task.timeEntries = task.timeEntries || [];
+        task.timeEntries.push({
+            start: task.timerStart,
+            end: Date.now(),
+            duration
+        });
+        task.timerRunning = false;
+        task.timerStart = null;
+        app.save();
+        app.render();
+    },
+    
+    startInterval() {
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(() => {
+            document.querySelectorAll('[data-timer-id]').forEach(el => {
+                const taskId = el.dataset.timerId;
+                const task = helpers.findTaskById(taskId);
+                if (task?.timerRunning) {
+                    const elapsed = Math.floor((Date.now() - task.timerStart) / 1000);
+                    const mins = Math.floor(elapsed / 60);
+                    const secs = elapsed % 60;
+                    el.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+            });
+        }, 1000);
+    }
+};
+
+const views = {
+    getTasksForView(view) {
+        let allTasks = [];
+        const today = new Date().setHours(0,0,0,0);
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    const taskWithContext = { ...task, _cat: cat.name, _proj: proj.name };
+                    
+                    if (view === 'today' && task.doDate === today) {
+                        allTasks.push(taskWithContext);
+                    } else if (view === 'overdue' && task.dueDate && task.dueDate < today && !task.done) {
+                        allTasks.push(taskWithContext);
+                    } else if (view === 'week') {
+                        const weekEnd = today + (7 * 24 * 60 * 60 * 1000);
+                        if (task.dueDate && task.dueDate <= weekEnd) {
+                            allTasks.push(taskWithContext);
+                        }
+                    }
+                });
+            });
+        });
+        return allTasks;
+    },
+
+    getSubtasksForToday() {
+        let allSubtasks = [];
+        const today = new Date().setHours(0,0,0,0);
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.doDate === today && task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            allSubtasks.push({
+                                ...sub,
+                                _cat: cat.name,
+                                _proj: proj.name,
+                                _task: task.name,
+                                _taskId: task.id
+                            });
+                        });
+                    }
+                });
+            });
+        });
+        return allSubtasks;
     }
 };
 
@@ -2569,80 +4419,1283 @@ const dnd = {
     onDragStart(e, type, item) {
         state.drag = { type, item, sourceId: item.id };
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify(item));
         setTimeout(() => e.target.classList.add('dragging'), 0);
     },
+
     onDragEnd(e, el) {
         el.classList.remove('dragging');
         document.querySelectorAll('.drop-indicator').forEach(i => i.remove());
         state.drag = null;
     },
-    onDragOver(e) { e.preventDefault(); }, // Simplificatie voor cloud versie
+
+    onDragOver(e) {
+        e.preventDefault();
+        const container = e.currentTarget;
+        
+        if (!state.drag) return;
+        const targetType = container.id.split('-')[1];
+        if (state.drag.type !== targetType) return;
+
+        const afterElement = this.getDragAfterElement(container, e.clientY);
+        container.querySelectorAll('.drop-indicator').forEach(i => i.remove());
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'drop-indicator';
+
+        if (afterElement) {
+            container.insertBefore(indicator, afterElement);
+        } else {
+            const footer = container.querySelector('.list-footer');
+            if(footer) container.insertBefore(indicator, footer);
+            else container.appendChild(indicator);
+        }
+    },
+
     async onDrop(e, type) {
         e.preventDefault();
+        const container = e.currentTarget;
+        
         if (!state.drag || state.drag.type !== type) return;
-        // Simpele implementatie: verplaats naar einde
-        const list = helpers.getList(type);
-        const idx = list.findIndex(i => i.id === state.drag.sourceId);
-        if (idx > -1) {
-            const [moved] = list.splice(idx, 1);
-            list.push(moved);
-            await app.save();
-            app.render();
-        }
-    }
-};
 
-const crud = {
-    async deleteItem(type, id) {
-        if (!confirm("Verwijderen?")) return;
         const list = helpers.getList(type);
-        const idx = list.findIndex(i => i.id === id);
-        if (idx > -1) {
-            list.splice(idx, 1);
-            if (state.sel[type] === id) state.sel[type] = null;
-            await app.save();
-            app.render();
+        const draggedId = state.drag.sourceId;
+        const afterElement = this.getDragAfterElement(container, e.clientY);
+        
+        const oldIndex = list.findIndex(i => i.id === draggedId);
+        if (oldIndex === -1) return;
+
+        const [movedItem] = list.splice(oldIndex, 1);
+
+        let newIndex;
+        if (afterElement) {
+            const nextId = afterElement.dataset.id;
+            newIndex = list.findIndex(i => i.id === nextId);
+        } else {
+            newIndex = list.length;
         }
+
+        list.splice(newIndex, 0, movedItem);
+
+        await app.save();
+        app.render();
+    },
+    
+    async onDropCrossCategory(e, targetCatId) {
+        e.preventDefault();
+        
+        if (!state.drag || state.drag.type !== 'proj') return;
+        
+        // Verwijder uit oude categorie
+        const oldCat = helpers.find('cat', state.sel.cat);
+        const projIdx = oldCat.projects.findIndex(p => p.id === state.drag.sourceId);
+        if (projIdx === -1) return;
+        
+        const [proj] = oldCat.projects.splice(projIdx, 1);
+        
+        // Voeg toe aan nieuwe categorie
+        const newCat = state.db.categories.find(c => c.id === targetCatId);
+        if (!newCat) return;
+        
+        newCat.projects.push(proj);
+        
+        await app.save();
+        app.render();
+    },
+
+    getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 };
 
 const modal = {
+    target: null,
+
     open(type, item = null) {
-        // Simpele prompt fallback om code kort te houden, of gebruik je originele modal logica hier
-        const name = prompt(item ? "Nieuwe naam:" : "Naam:", item ? item.name : "");
-        if (name) {
-            if (item) item.name = name;
-            else {
-                const newItem = helpers.createItem(name, type);
-                helpers.getList(type).push(newItem);
+        const mode = item ? 'edit' : 'create';
+        this.target = { type, item, mode };
+        
+        const overlay = document.getElementById('modalOverlay');
+        const nameInput = document.getElementById('modalName');
+        const iconGrid = document.getElementById('modalIcons');
+        const taskFields = document.getElementById('taskFields');
+
+        document.getElementById('modalTitle').textContent = mode === 'create' 
+            ? `Nieuwe ${type === 'cat' ? 'Categorie' : type === 'proj' ? 'Project' : 'Opdracht'}` 
+            : 'Bewerken';
+            
+        nameInput.value = item ? item.name : '';
+
+        if (type === 'task') {
+            taskFields.style.display = 'block';
+            
+            document.getElementById('modalDueDate').value = item?.dueDate ? 
+                new Date(item.dueDate).toISOString().split('T')[0] : '';
+            document.getElementById('modalDoDate').value = item?.doDate ? 
+                new Date(item.doDate).toISOString().split('T')[0] : '';
+            document.getElementById('modalTimeEstimate').value = item?.timeEstimate || '';
+            document.getElementById('modalPriority').value = item?.priority || 'none';
+            document.getElementById('modalRecurring').value = item?.recurring?.frequency || '';
+            document.getElementById('modalNotes').value = item?.notes || '';
+        } else {
+            taskFields.style.display = 'none';
+        }
+
+        const iconGroup = document.getElementById('modalIconGroup');
+        const categoryGroup = document.getElementById('modalCategoryGroup');
+        
+        if (type === 'cat' || type === 'proj') {
+            iconGroup.style.display = 'flex';
+            iconGrid.innerHTML = '';
+            const currentIcon = item ? item.icon : CONSTANTS.ICONS[0];
+            this.target.selectedIcon = currentIcon;
+
+            CONSTANTS.ICONS.forEach(icon => {
+                const btn = document.createElement('div');
+                btn.className = `icon-btn ${icon === currentIcon ? 'selected' : ''}`;
+                btn.textContent = icon;
+                btn.onclick = () => {
+                    this.target.selectedIcon = icon;
+                    Array.from(iconGrid.children).forEach(c => c.classList.remove('selected'));
+                    btn.classList.add('selected');
+                };
+                iconGrid.appendChild(btn);
+            });
+        } else {
+            iconGroup.style.display = 'none';
+        }
+        
+        // Toon categorie selector voor projecten bij bewerken
+        if (type === 'proj' && mode === 'edit') {
+            categoryGroup.style.display = 'flex';
+            const select = document.getElementById('modalCategorySelect');
+            select.innerHTML = '';
+            
+            state.db.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                if (cat.id === state.sel.cat) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        } else {
+            categoryGroup.style.display = 'none';
+        }
+
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('show'));
+        
+        nameInput.focus();
+        nameInput.onkeypress = (e) => { if(e.key === 'Enter') this.save(); };
+    },
+
+    close() {
+        const overlay = document.getElementById('modalOverlay');
+        overlay.classList.remove('show');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            this.target = null;
+        }, 200);
+    },
+
+    async save() {
+        if (!this.target) return;
+        
+        try {
+            // Get and sanitize input
+            const rawName = document.getElementById('modalName').value;
+            const newName = sanitizer.sanitize(rawName).trim();
+            
+            // Validate input
+            if (!sanitizer.validateInput(newName, 500)) {
+                toastNotifications.show('warning', 'Ongeldige Invoer', 'Naam is te lang of bevat ongeldige tekens');
+                return;
             }
-            app.save();
+            
+            // Save undo state before making changes
+            undoRedo.saveState();
+            
+            if (this.target.mode === 'edit') {
+                this.target.item.name = newName;
+                if (this.target.type !== 'task') {
+                    this.target.item.icon = this.target.selectedIcon;
+                }
+                
+                // Verplaats project naar andere categorie indien gewijzigd
+                if (this.target.type === 'proj') {
+                    const newCatId = document.getElementById('modalCategorySelect').value;
+                    if (newCatId !== state.sel.cat) {
+                        // Verwijder uit huidige categorie
+                        const oldCat = helpers.find('cat', state.sel.cat);
+                        const projIdx = oldCat.projects.findIndex(p => p.id === this.target.item.id);
+                        if (projIdx > -1) {
+                            const [proj] = oldCat.projects.splice(projIdx, 1);
+                            
+                            // Voeg toe aan nieuwe categorie
+                            const newCat = state.db.categories.find(c => c.id === newCatId);
+                            if (newCat) {
+                                newCat.projects.push(proj);
+                                state.sel.cat = newCatId;
+                            }
+                        }
+                    }
+                }
+            } else {
+                const newItem = helpers.createItem(newName, this.target.type);
+                if (this.target.type !== 'task') {
+                    newItem.icon = this.target.selectedIcon;
+                }
+                
+                const list = helpers.getList(this.target.type);
+                if(list) list.push(newItem);
+            }
+
+            if (this.target.type === 'task') {
+                const item = this.target.item || helpers.getList('task').slice(-1)[0];
+                
+                const dueDate = document.getElementById('modalDueDate').value;
+                item.dueDate = dueDate ? new Date(dueDate).getTime() : null;
+                
+                const doDate = document.getElementById('modalDoDate').value;
+                item.doDate = doDate ? new Date(doDate).setHours(0,0,0,0) : null;
+                
+                item.timeEstimate = parseInt(document.getElementById('modalTimeEstimate').value) || null;
+                item.priority = document.getElementById('modalPriority').value;
+                
+                // Sanitize notes
+                const rawNotes = document.getElementById('modalNotes').value;
+                item.notes = sanitizer.sanitize(rawNotes);
+                
+                const recurFreq = document.getElementById('modalRecurring').value;
+                if (recurFreq) {
+                    item.recurring = {
+                        enabled: true,
+                        frequency: recurFreq,
+                        interval: 1,
+                        nextDue: item.dueDate || Date.now()
+                    };
+                } else {
+                    item.recurring = null;
+                }
+            }
+
+            await app.save();
             app.render();
+            this.close();
+            
+            const action = this.target.mode === 'edit' ? 'bijgewerkt' : 'aangemaakt';
+            toastNotifications.show('success', 'Opgeslagen', `Item ${action}`, 2000);
+            
+        } catch (error) {
+            errorHandler.log(error, 'modal.save');
         }
     }
 };
 
-const search = {
-    perform(query) {
-        // Implementatie van originele zoekfunctie
-        state.searchQuery = query.toLowerCase();
-        // (Voeg hier je uitgebreide zoeklogica toe indien nodig)
-        app.render();
+const helpers = {
+    uid() { 
+        return Date.now().toString(36) + Math.random().toString(36).substr(2); 
+    },
+    
+    createItem(name, type) {
+        const base = { id: this.uid(), name: name, createdAt: Date.now() };
+        if (type === 'cat') return { ...base, icon: '\u{1F4C2}', projects: [] };
+        if (type === 'proj') return { ...base, icon: '\u{1F4CB}', status: 'planned', tasks: [] };
+        if (type === 'task') return { 
+            ...base, 
+            done: false, 
+            subtasks: [],
+            dueDate: null,
+            doDate: null,
+            timeEstimate: null,
+            timeSpent: 0,
+            timerRunning: false,
+            timerStart: null,
+            timeEntries: [],
+            priority: 'none',
+            recurring: null,
+            notes: '',
+            schedule: null  // { day: 'monday', time: '09:00' }
+        };
+        if (type === 'sub') return { ...base, done: false, checklist: [], schedule: null };
+    },
+    
+    getList(type) {
+        if (type === 'cat') return state.db.categories;
+        if (type === 'proj') { const c = this.find('cat', state.sel.cat); return c ? c.projects : null; }
+        if (type === 'task') { const p = this.find('proj', state.sel.proj); return p ? p.tasks : null; }
+        if (type === 'sub') { const t = this.find('task', state.sel.task); return t ? t.subtasks : null; }
+    },
+    
+    find(type, id) {
+        if (!id) return null;
+        if (type === 'cat') return state.db.categories.find(c => c.id === id);
+        if (type === 'proj') { const c = this.find('cat', state.sel.cat); return c ? c.projects.find(p => p.id === id) : null; }
+        if (type === 'task') { const p = this.find('proj', state.sel.proj); return p ? p.tasks.find(t => t.id === id) : null; }
+        return null;
+    },
+
+    findTaskById(taskId) {
+        for (const cat of state.db.categories) {
+            for (const proj of (cat.projects || [])) {
+                const task = (proj.tasks || []).find(t => t.id === taskId);
+                if (task) return task;
+            }
+        }
+        return null;
+    },
+
+    formatDate(timestamp) {
+        if (!timestamp) return { text: '', class: '' };
+        const date = new Date(timestamp);
+        const today = new Date().setHours(0,0,0,0);
+        const taskDate = new Date(timestamp).setHours(0,0,0,0);
+        
+        if (taskDate < today) return { text: date.toLocaleDateString('nl-NL'), class: 'overdue' };
+        if (taskDate === today) return { text: 'Vandaag', class: 'today' };
+        
+        const tomorrow = today + (24 * 60 * 60 * 1000);
+        if (taskDate === tomorrow) return { text: 'Morgen', class: '' };
+        
+        return { text: date.toLocaleDateString('nl-NL'), class: '' };
     }
 };
 
-const undoRedo = {
-    saveState() { /* Placeholder */ },
-    undo() {},
-    redo() {}
+const sessions = {
+    create(name) {
+        const newSession = {
+            id: helpers.uid(),
+            name: name.trim(),
+            createdAt: Date.now(),
+            order: state.db.pomodoroSessions.length
+        };
+        state.db.pomodoroSessions.push(newSession);
+        return newSession;
+    },
+
+    async delete(sessionId) {
+        if (!confirm(`Sessie verwijderen? Items blijven behouden.`)) return false;
+        
+        const idx = state.db.pomodoroSessions.findIndex(s => s.id === sessionId);
+        if (idx === -1) return false;
+        
+        // Remove session
+        state.db.pomodoroSessions.splice(idx, 1);
+        
+        // Remove session references from all items
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.pomodoroSessions) {
+                        task.pomodoroSessions = task.pomodoroSessions.filter(s => s !== sessionId);
+                    }
+                    task.subtasks?.forEach(sub => {
+                        if (sub.pomodoroSessions) {
+                            sub.pomodoroSessions = sub.pomodoroSessions.filter(s => s !== sessionId);
+                        }
+                    });
+                });
+            });
+        });
+        
+        // Reset active session if deleted
+        if (state.activePomodoroSession === sessionId) {
+            state.activePomodoroSession = state.db.pomodoroSessions[0]?.id || null;
+        }
+        
+        await app.save();
+        return true;
+    },
+
+    async rename(sessionId, newName) {
+        const session = state.db.pomodoroSessions.find(s => s.id === sessionId);
+        if (!session) return false;
+        
+        session.name = newName.trim();
+        await app.save();
+        return true;
+    },
+
+    openManager() {
+        const overlay = document.getElementById('sessionManagerOverlay');
+        if (!overlay) return;
+        
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('show'));
+        this.renderManager();
+    },
+
+    closeManager() {
+        const overlay = document.getElementById('sessionManagerOverlay');
+        if (!overlay) return;
+        
+        overlay.classList.remove('show');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 200);
+    },
+
+    renderManager() {
+        const container = document.getElementById('sessionManagerList');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        state.db.pomodoroSessions.forEach(session => {
+            const div = document.createElement('div');
+            div.className = 'session-item';
+            div.innerHTML = `
+                <span class="session-icon">ÃƒÂ¢Ã‚ÂÃ‚Â±</span>
+                <input type="text" class="session-name-input" value="${session.name}" data-session-id="${session.id}">
+                <button class="action-btn danger" data-action="delete" data-session-id="${session.id}" title="Verwijder">&#128465;</button>
+            `;
+            
+            const input = div.querySelector('.session-name-input');
+            input.onchange = async () => {
+                await this.rename(session.id, input.value);
+            };
+            
+            const deleteBtn = div.querySelector('[data-action="delete"]');
+            deleteBtn.onclick = async () => {
+                const success = await this.delete(session.id);
+                if (success) {
+                    this.renderManager();
+                    app.render();
+                }
+            };
+            
+            container.appendChild(div);
+        });
+    },
+
+    async addNew() {
+        const container = document.getElementById('sessionManagerList');
+        if (!container) return;
+        
+        // Check if there's already an input
+        if (container.querySelector('.new-session-input')) return;
+        
+        // Create new session input element
+        const div = document.createElement('div');
+        div.className = 'session-item';
+        div.innerHTML = `
+            <span class="session-icon">ÃƒÂ¢Ã‚ÂÃ‚Â±</span>
+            <input type="text" class="session-name-input new-session-input" placeholder="Naam voor nieuwe sessie..." autofocus>
+            <button class="action-btn" data-action="save-new" title="Opslaan">&#10003;</button>
+            <button class="action-btn danger" data-action="cancel-new" title="Annuleren">&#10006;</button>
+        `;
+        
+        const input = div.querySelector('.new-session-input');
+        const saveBtn = div.querySelector('[data-action="save-new"]');
+        const cancelBtn = div.querySelector('[data-action="cancel-new"]');
+        
+        const saveNew = async () => {
+            const name = input.value.trim();
+            if (!name) {
+                div.remove();
+                return;
+            }
+            
+            this.create(name);
+            await app.save();
+            this.renderManager();
+        };
+        
+        const cancel = () => {
+            div.remove();
+        };
+        
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') saveNew();
+            if (e.key === 'Escape') cancel();
+        };
+        
+        saveBtn.onclick = saveNew;
+        cancelBtn.onclick = cancel;
+        
+        // Add to bottom of list
+        container.appendChild(div);
+        input.focus();
+    }
 };
 
-const timer = { startInterval() {} };
-const weekPlanner = { render() {} };
-const views = { getTasksForView() { return []; } };
+const pomodoroDropdown = {
+    toggle(event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById('pomodoroDropdown');
+        dropdown.classList.toggle('show');
+        
+        // Close dropdown when clicking outside
+        if (dropdown.classList.contains('show')) {
+            setTimeout(() => {
+                document.addEventListener('click', this.closeOnClickOutside);
+            }, 0);
+        } else {
+            document.removeEventListener('click', this.closeOnClickOutside);
+        }
+    },
+    
+    close() {
+        const dropdown = document.getElementById('pomodoroDropdown');
+        dropdown.classList.remove('show');
+        document.removeEventListener('click', this.closeOnClickOutside);
+    },
+    
+    closeOnClickOutside(event) {
+        const dropdown = document.getElementById('pomodoroDropdown');
+        const wrapper = dropdown.closest('.btn-dropdown-wrapper');
+        
+        if (!wrapper.contains(event.target)) {
+            pomodoroDropdown.close();
+        }
+    }
+};
 
-// START DE APP
+const pomodoro = {
+    duration: 25 * 60,
+    timeLeft: 25 * 60,
+    interval: null,
+    isRunning: false,
+
+    open() {
+        const overlay = document.getElementById('pomodoroOverlay');
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('show'));
+        
+        // Als er geen actieve sessie is, selecteer de eerste
+        if (!state.activePomodoroSession && state.db.pomodoroSessions.length > 0) {
+            state.activePomodoroSession = state.db.pomodoroSessions[0].id;
+        }
+        
+        // Vul session selector (nu met de juiste actieve sessie)
+        this.renderSessionSelector();
+        
+        this.renderTasks();
+    },
+
+    renderSessionSelector() {
+        const selector = document.getElementById('pomodoroSessionSelector');
+        if (!selector) return;
+        
+        selector.innerHTML = '<option value="">Selecteer een sessie...</option>';
+        
+        state.db.pomodoroSessions.forEach(session => {
+            const option = document.createElement('option');
+            option.value = session.id;
+            option.textContent = session.name;
+            if (session.id === state.activePomodoroSession) {
+                option.selected = true;
+            }
+            selector.appendChild(option);
+        });
+        
+        if (state.db.pomodoroSessions.length === 0) {
+            selector.innerHTML = '<option value="">Geen sessies - Maak er een aan via ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies</option>';
+        }
+    },
+
+    changeSession(sessionId) {
+        state.activePomodoroSession = sessionId || null;
+        this.renderTasks();
+    },
+
+    close() {
+        const overlay = document.getElementById('pomodoroOverlay');
+        overlay.classList.remove('show');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            this.stop();
+        }, 300);
+    },
+
+    setDuration(minutes) {
+        if (this.isRunning) return;
+        
+        this.duration = minutes * 60;
+        this.timeLeft = minutes * 60;
+        this.updateDisplay();
+        
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    },
+
+    setCustomDuration() {
+        if (this.isRunning) return;
+        
+        const input = document.getElementById('customMinutes');
+        const minutes = parseInt(input.value);
+        
+        if (!minutes || minutes < 1 || minutes > 120) {
+            alert('Voer een geldig aantal minuten in (1-120)');
+            return;
+        }
+        
+        this.duration = minutes * 60;
+        this.timeLeft = minutes * 60;
+        this.updateDisplay();
+        
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        input.value = '';
+    },
+
+    start() {
+        if (this.isRunning) {
+            this.pause();
+            return;
+        }
+
+        this.isRunning = true;
+        document.getElementById('pomodoroStartBtn').innerHTML = '&#9208; Pause';
+        
+        this.interval = setInterval(() => {
+            this.timeLeft--;
+            this.updateDisplay();
+            
+            // Speel geluid af bij 0
+            if (this.timeLeft === 0) {
+                this.playCompletionSound();
+            }
+        }, 1000);
+    },
+
+    pause() {
+        this.isRunning = false;
+        clearInterval(this.interval);
+        document.getElementById('pomodoroStartBtn').innerHTML = '&#9654; Start';
+    },
+
+    reset() {
+        this.pause();
+        this.timeLeft = this.duration;
+        this.updateDisplay();
+    },
+
+    complete() {
+        this.pause();
+        this.timeLeft = this.duration;
+        this.updateDisplay();
+        
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Pomodoro Voltooid!', {
+                body: 'Tijd voor een pauze!',
+                icon: '/favicon.ico'
+            });
+        }
+        
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OeeSwgYZbnx56FPEg1Ms+fwtWEaBjmP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zvmwhBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg==');
+        audio.play().catch(() => {});
+    },
+
+    updateDisplay() {
+        const isNegative = this.timeLeft < 0;
+        const absTimeLeft = Math.abs(this.timeLeft);
+        const minutes = Math.floor(absTimeLeft / 60);
+        const seconds = absTimeLeft % 60;
+        
+        const timeEl = document.getElementById('pomodoroTime');
+        const circleEl = document.getElementById('timerCircleProgress');
+        
+        timeEl.textContent = 
+            `${isNegative ? '-' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Voeg/verwijder negative class
+        if (isNegative) {
+            timeEl.classList.add('negative');
+            circleEl.classList.add('negative');
+        } else {
+            timeEl.classList.remove('negative');
+            circleEl.classList.remove('negative');
+        }
+        
+        const progress = (this.duration - this.timeLeft) / this.duration;
+        const circumference = 2 * Math.PI * 140;
+        const offset = circumference * (1 - progress);
+        circleEl.style.strokeDashoffset = offset;
+    },
+
+    renderTasks() {
+        const container = document.getElementById('pomodoroTaskList');
+        
+        console.log('renderTasks called, activePomodoroSession:', state.activePomodoroSession);
+        
+        // Check of er een actieve sessie is geselecteerd
+        if (!state.activePomodoroSession) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 32px;">
+                    Selecteer een sessie hierboven.<br>
+                    Maak een sessie aan via ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies knop.
+                </div>
+            `;
+            return;
+        }
+        
+        // Verzamel alle items voor de actieve sessie
+        let pomodoroItems = [];
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Check of task in deze sessie zit
+                    if (task.pomodoroSessions && task.pomodoroSessions.includes(state.activePomodoroSession)) {
+                        console.log('Found task:', task.name, 'with sessions:', task.pomodoroSessions);
+                        pomodoroItems.push({
+                            type: 'task',
+                            item: task,
+                            context: `${proj.name}`
+                        });
+                    }
+                    
+                    // Check subtaken
+                    task.subtasks?.forEach(subtask => {
+                        if (subtask.pomodoroSessions && subtask.pomodoroSessions.includes(state.activePomodoroSession)) {
+                            pomodoroItems.push({
+                                type: 'subtask',
+                                item: subtask,
+                                context: `${proj.name} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ ${task.name}`,
+                                parentTask: task
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        
+        console.log('Total pomodoro items found:', pomodoroItems.length);
+        
+        if (pomodoroItems.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 32px;">
+                    Geen items voor deze sessie.<br>
+                    Voeg items toe via de ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â knop bij taken.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        pomodoroItems.forEach(pomItem => {
+            const div = document.createElement('div');
+            div.className = `pomodoro-task-item ${pomItem.item.done ? 'completed' : ''}`;
+            
+            div.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                    <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${pomItem.context}</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="checkbox" class="task-checkbox" ${pomItem.item.done ? 'checked' : ''}>
+                        <span class="pomodoro-task-name" style="flex: 1;">${pomItem.item.name}</span>
+                        <button class="action-btn danger" data-action="remove-from-session" title="Verwijder uit deze sessie" style="display: flex;">&#10006;</button>
+                    </div>
+                </div>
+            `;
+            
+            const checkbox = div.querySelector('.task-checkbox');
+            checkbox.onclick = async (e) => {
+                e.stopPropagation();
+                pomItem.item.done = checkbox.checked;
+                if (pomItem.item.done) {
+                    pomItem.item.completedAt = Date.now();
+                } else {
+                    delete pomItem.item.completedAt;
+                }
+                await app.save();
+                this.renderTasks();
+                app.render();
+            };
+            
+            const removeBtn = div.querySelector('[data-action="remove-from-session"]');
+            if (removeBtn) {
+                removeBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    // Verwijder alleen uit deze sessie
+                    if (pomItem.item.pomodoroSessions) {
+                        pomItem.item.pomodoroSessions = pomItem.item.pomodoroSessions.filter(
+                            sid => sid !== state.activePomodoroSession
+                        );
+                    }
+                    await app.save();
+                    this.renderTasks();
+                    app.render();
+                };
+            }
+            
+            container.appendChild(div);
+        });
+    }
+};
+
+const weekPlanner = {
+    currentWeekStart: null,
+    timeSlots: ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'],
+    dayNames: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
+    
+    init() {
+        this.goToThisWeek();
+    },
+    
+    goToThisWeek() {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Monday is start of week
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        this.currentWeekStart = monday.getTime();
+        this.render();
+    },
+    
+    previousWeek() {
+        const date = new Date(this.currentWeekStart);
+        date.setDate(date.getDate() - 7);
+        this.currentWeekStart = date.getTime();
+        this.render();
+    },
+    
+    nextWeek() {
+        const date = new Date(this.currentWeekStart);
+        date.setDate(date.getDate() + 7);
+        this.currentWeekStart = date.getTime();
+        this.render();
+    },
+    
+    getWeekDates() {
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(this.currentWeekStart);
+            date.setDate(date.getDate() + i);
+            dates.push(date);
+        }
+        return dates;
+    },
+    
+    render() {
+        if (!this.currentWeekStart) this.init();
+        
+        this.renderWeekHeader();
+        this.renderWeekGrid();
+        this.renderUnscheduledTasks();
+    },
+    
+    renderWeekHeader() {
+        const weekStart = new Date(this.currentWeekStart);
+        const weekEnd = new Date(this.currentWeekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        const weekNumber = this.getWeekNumber(weekStart);
+        const year = weekStart.getFullYear();
+        
+        document.getElementById('weekTitle').textContent = 
+            `Week ${weekNumber}, ${year} (${weekStart.getDate()}/${weekStart.getMonth()+1} - ${weekEnd.getDate()}/${weekEnd.getMonth()+1})`;
+    },
+    
+    getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    },
+    
+    renderWeekGrid() {
+        const grid = document.getElementById('weekGrid');
+        grid.innerHTML = '';
+        
+        const weekDates = this.getWeekDates();
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        // Time column
+        const timeCol = document.createElement('div');
+        timeCol.className = 'time-column';
+        timeCol.innerHTML = '<div class="day-header" style="visibility: hidden;">Time</div>';
+        
+        this.timeSlots.forEach(time => {
+            const label = document.createElement('div');
+            label.className = 'time-label';
+            label.textContent = time;
+            timeCol.appendChild(label);
+        });
+        grid.appendChild(timeCol);
+        
+        // Day columns
+        weekDates.forEach((date, dayIndex) => {
+            const dayCol = document.createElement('div');
+            dayCol.className = 'day-column';
+            
+            const header = document.createElement('div');
+            header.className = `day-header ${date.getTime() === today ? 'today' : ''}`;
+            header.innerHTML = `
+                ${this.dayNames[dayIndex]}
+                <div class="day-date">${date.getDate()}/${date.getMonth()+1}</div>
+            `;
+            dayCol.appendChild(header);
+            
+            // Time slots for this day
+            this.timeSlots.forEach(time => {
+                const slot = this.createTimeSlot(date, time);
+                dayCol.appendChild(slot);
+            });
+            
+            grid.appendChild(dayCol);
+        });
+    },
+    
+    createTimeSlot(date, time) {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.dataset.date = date.getTime();
+        slot.dataset.time = time;
+        
+        // Check for scheduled tasks
+        const scheduledTasks = this.getTasksForSlot(date, time);
+        
+        if (scheduledTasks.length > 0) {
+            slot.classList.add('has-task');
+            scheduledTasks.forEach(taskInfo => {
+                const taskEl = this.createScheduledTaskElement(taskInfo);
+                slot.appendChild(taskEl);
+            });
+        }
+        
+        // Drag and drop handlers
+        slot.ondragover = (e) => {
+            e.preventDefault();
+            slot.classList.add('dragging-over');
+        };
+        
+        slot.ondragleave = () => {
+            slot.classList.remove('dragging-over');
+        };
+        
+        slot.ondrop = (e) => {
+            e.preventDefault();
+            slot.classList.remove('dragging-over');
+            
+            const taskId = e.dataTransfer.getData('taskId');
+            const taskType = e.dataTransfer.getData('taskType');
+            
+            this.scheduleTask(taskId, taskType, date, time);
+        };
+        
+        return slot;
+    },
+    
+    createScheduledTaskElement(taskInfo) {
+        const { task, type, context } = taskInfo;
+        
+        const el = document.createElement('div');
+        el.className = 'scheduled-task';
+        el.draggable = true;
+        
+        el.innerHTML = `
+            <span class="task-time">${task.schedule.time}</span>
+            <span class="task-name" title="${task.name}">${task.name}</span>
+            <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+        `;
+        
+        el.ondragstart = (e) => {
+            e.dataTransfer.setData('taskId', task.id);
+            e.dataTransfer.setData('taskType', type);
+            el.classList.add('dragging');
+        };
+        
+        el.ondragend = () => {
+            el.classList.remove('dragging');
+        };
+        
+        return el;
+    },
+    
+    getTasksForSlot(date, time) {
+        const tasks = [];
+        const targetDate = date.getTime();
+        const dayName = this.dayNames[date.getDay() === 0 ? 6 : date.getDay() - 1].toLowerCase();
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.schedule && task.schedule.date === targetDate && task.schedule.time === time) {
+                        tasks.push({
+                            task,
+                            type: 'task',
+                            context: `${cat.name} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${proj.name}`
+                        });
+                    }
+                    
+                    task.subtasks?.forEach(sub => {
+                        if (sub.schedule && sub.schedule.date === targetDate && sub.schedule.time === time) {
+                            tasks.push({
+                                task: sub,
+                                type: 'subtask',
+                                context: `${proj.name} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${task.name}`
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        
+        return tasks;
+    },
+    
+    renderUnscheduledTasks() {
+        // Mini dashboard state
+        if (!state.miniDashboard) {
+            state.miniDashboard = {
+                selectedCat: null,
+                selectedProj: null,
+                selectedTask: null
+            };
+        }
+        
+        this.renderMiniCategories();
+        this.renderMiniProjects();
+        this.renderMiniTasks();
+        this.renderMiniSubtasks();
+    },
+    
+    renderMiniCategories() {
+        const container = document.getElementById('miniCategories');
+        container.innerHTML = '';
+        
+        state.db.categories.forEach(cat => {
+            const el = document.createElement('div');
+            el.className = 'unscheduled-task';
+            if (state.miniDashboard.selectedCat === cat.id) {
+                el.style.background = 'var(--primary-light)';
+                el.style.borderColor = 'var(--primary)';
+            }
+            el.style.cursor = 'pointer';
+            el.innerHTML = `<span>${cat.icon || 'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
+            el.onclick = () => {
+                state.miniDashboard.selectedCat = cat.id;
+                state.miniDashboard.selectedProj = null;
+                state.miniDashboard.selectedTask = null;
+                this.renderUnscheduledTasks();
+            };
+            container.appendChild(el);
+        });
+    },
+    
+    renderMiniProjects() {
+        const container = document.getElementById('miniProjects');
+        container.innerHTML = '';
+        
+        if (!state.miniDashboard.selectedCat) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Selecteer categorie</div>';
+            return;
+        }
+        
+        const cat = state.db.categories.find(c => c.id === state.miniDashboard.selectedCat);
+        if (!cat || !cat.projects || cat.projects.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Geen projecten</div>';
+            return;
+        }
+        
+        cat.projects.forEach(proj => {
+            const el = document.createElement('div');
+            el.className = 'unscheduled-task';
+            if (state.miniDashboard.selectedProj === proj.id) {
+                el.style.background = 'var(--primary-light)';
+                el.style.borderColor = 'var(--primary)';
+            }
+            el.style.cursor = 'pointer';
+            el.innerHTML = `<span>${proj.icon || 'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬Â¹'}</span> <span style="font-size: 12px;">${proj.name}</span>`;
+            el.onclick = () => {
+                state.miniDashboard.selectedProj = proj.id;
+                state.miniDashboard.selectedTask = null;
+                this.renderUnscheduledTasks();
+            };
+            container.appendChild(el);
+        });
+    },
+    
+    renderMiniTasks() {
+        const container = document.getElementById('miniTasks');
+        const countEl = document.getElementById('miniTaskCount');
+        container.innerHTML = '';
+        
+        if (!state.miniDashboard.selectedProj) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Selecteer project</div>';
+            countEl.textContent = '0';
+            return;
+        }
+        
+        const cat = state.db.categories.find(c => c.id === state.miniDashboard.selectedCat);
+        const proj = cat?.projects?.find(p => p.id === state.miniDashboard.selectedProj);
+        
+        if (!proj || !proj.tasks || proj.tasks.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Geen opdrachten</div>';
+            countEl.textContent = '0';
+            return;
+        }
+        
+        const unscheduledTasks = proj.tasks.filter(t => !t.done && !t.schedule);
+        countEl.textContent = unscheduledTasks.length;
+        
+        if (unscheduledTasks.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Alle taken ingepland</div>';
+            return;
+        }
+        
+        unscheduledTasks.forEach(task => {
+            const el = document.createElement('div');
+            el.className = 'unscheduled-task';
+            if (state.miniDashboard.selectedTask === task.id) {
+                el.style.background = 'var(--primary-light)';
+                el.style.borderColor = 'var(--primary)';
+            }
+            el.draggable = true;
+            
+            const priorityIcon = task.priority && task.priority !== 'none' 
+                ? CONSTANTS.PRIORITIES[task.priority].icon 
+                : '';
+            
+            el.innerHTML = `${priorityIcon} <span style="font-size: 12px;">${task.name}</span>`;
+            
+            el.ondragstart = (e) => {
+                e.dataTransfer.setData('taskId', task.id);
+                e.dataTransfer.setData('taskType', 'task');
+                el.classList.add('dragging');
+            };
+            
+            el.ondragend = () => {
+                el.classList.remove('dragging');
+            };
+            
+            el.onclick = () => {
+                state.miniDashboard.selectedTask = task.id;
+                this.renderUnscheduledTasks();
+            };
+            
+            container.appendChild(el);
+        });
+    },
+    
+    renderMiniSubtasks() {
+        const container = document.getElementById('miniSubtasks');
+        const countEl = document.getElementById('miniSubCount');
+        container.innerHTML = '';
+        
+        if (!state.miniDashboard.selectedTask) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Selecteer opdracht</div>';
+            countEl.textContent = '0';
+            return;
+        }
+        
+        const cat = state.db.categories.find(c => c.id === state.miniDashboard.selectedCat);
+        const proj = cat?.projects?.find(p => p.id === state.miniDashboard.selectedProj);
+        const task = proj?.tasks?.find(t => t.id === state.miniDashboard.selectedTask);
+        
+        if (!task || !task.subtasks || task.subtasks.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Geen subtaken</div>';
+            countEl.textContent = '0';
+            return;
+        }
+        
+        const unscheduledSubs = task.subtasks.filter(s => !s.done && !s.schedule);
+        countEl.textContent = unscheduledSubs.length;
+        
+        if (unscheduledSubs.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; font-style: italic;">Alle subtaken ingepland</div>';
+            return;
+        }
+        
+        unscheduledSubs.forEach(sub => {
+            const el = document.createElement('div');
+            el.className = 'unscheduled-task';
+            el.draggable = true;
+            
+            el.innerHTML = `<span style="font-size: 12px;">${sub.name}</span>`;
+            
+            el.ondragstart = (e) => {
+                e.dataTransfer.setData('taskId', sub.id);
+                e.dataTransfer.setData('taskType', 'subtask');
+                el.classList.add('dragging');
+            };
+            
+            el.ondragend = () => {
+                el.classList.remove('dragging');
+            };
+            
+            container.appendChild(el);
+        });
+    },
+    
+    async scheduleTask(taskId, type, date, time) {
+        let task = null;
+        
+        // Find the task
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                if (type === 'task') {
+                    const found = proj.tasks?.find(t => t.id === taskId);
+                    if (found) task = found;
+                } else if (type === 'subtask') {
+                    proj.tasks?.forEach(t => {
+                        const found = t.subtasks?.find(s => s.id === taskId);
+                        if (found) task = found;
+                    });
+                }
+            });
+        });
+        
+        if (!task) return;
+        
+        // Update schedule
+        task.schedule = {
+            date: date.getTime(),
+            time: time
+        };
+        
+        await app.save();
+        this.render();
+        app.setStatus('Taak ingepland', 'success');
+    },
+    
+    async unscheduleTask(taskId, type, event) {
+        if (event) event.stopPropagation();
+        
+        let task = null;
+        
+        // Find the task
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                if (type === 'task') {
+                    const found = proj.tasks?.find(t => t.id === taskId);
+                    if (found) task = found;
+                } else if (type === 'subtask') {
+                    proj.tasks?.forEach(t => {
+                        const found = t.subtasks?.find(s => s.id === taskId);
+                        if (found) task = found;
+                    });
+                }
+            });
+        });
+        
+        if (!task) return;
+        
+        task.schedule = null;
+        
+        await app.save();
+        this.render();
+        app.setStatus('Planning verwijderd', 'success');
+    }
+};
+
 app.init();
+
 </script>
 
 <!-- ===== NEW FEATURES FROM TEAM ANALYSIS ===== -->
@@ -2661,8 +5714,8 @@ app.init();
 <div class="modal-overlay" id="keyboardShortcutsModal">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">⌨️ Sneltoetsen</h2>
-            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">✕</button>
+            <h2 class="modal-title">âŒ¨ï¸ Sneltoetsen</h2>
+            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">âœ•</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
@@ -2708,7 +5761,7 @@ app.init();
 
 
 <div class="compatibility-warning" id="compatibilityWarning">
-    <h3 style="margin: 0 0 8px 0;">âš ï¸ Browser Niet Volledig Ondersteund</h3>
+    <h3 style="margin: 0 0 8px 0;">Ã¢Å¡Â Ã¯Â¸Â Browser Niet Volledig Ondersteund</h3>
     <p style="margin: 0 0 12px 0;">Je browser ondersteunt de File System Access API niet volledig. Gebruik Chrome, Edge of Opera voor de beste ervaring.</p>
     <p style="margin: 0; font-size: 12px; opacity: 0.8;">Je kunt nog steeds export/import gebruiken om je data op te slaan.</p>
 </div>
@@ -2716,29 +5769,29 @@ app.init();
 <!-- Onboarding Overlay -->
 <div class="onboarding-overlay" id="onboardingOverlay">
     <div class="onboarding-content">
-        <div class="onboarding-title">ðŸ‘‹ Welkom bij ToDo Dashboard!</div>
+        <div class="onboarding-title">Ã°Å¸â€˜â€¹ Welkom bij ToDo Dashboard!</div>
         <div class="onboarding-message">
-            Organiseer je werk in 4 eenvoudige lagen: CategorieÃ«n â†’ Projecten â†’ Opdrachten â†’ Subtaken
+            Organiseer je werk in 4 eenvoudige lagen: CategorieÃƒÂ«n Ã¢â€ â€™ Projecten Ã¢â€ â€™ Opdrachten Ã¢â€ â€™ Subtaken
         </div>
         <div class="onboarding-steps">
             <div class="onboarding-step">
                 <div class="step-number">1</div>
                 <div class="step-content">
-                    <h3>ðŸ“‚ Kies je database</h3>
+                    <h3>Ã°Å¸â€œâ€š Kies je database</h3>
                     <p>Klik op "Database Kiezen" om een JSON bestand te selecteren (of maak een nieuwe aan).</p>
                 </div>
             </div>
             <div class="onboarding-step">
                 <div class="step-number">2</div>
                 <div class="step-content">
-                    <h3>ðŸ—‚ï¸ Maak categorieÃ«n</h3>
-                    <p>Begin met het maken van categorieÃ«n (bijv. Werk, PrivÃ©, Projecten).</p>
+                    <h3>Ã°Å¸â€”â€šÃ¯Â¸Â Maak categorieÃƒÂ«n</h3>
+                    <p>Begin met het maken van categorieÃƒÂ«n (bijv. Werk, PrivÃƒÂ©, Projecten).</p>
                 </div>
             </div>
             <div class="onboarding-step">
                 <div class="step-number">3</div>
                 <div class="step-content">
-                    <h3>âš¡ Gebruik sneltoetsen</h3>
+                    <h3>Ã¢Å¡Â¡ Gebruik sneltoetsen</h3>
                     <p>
                         <span class="keyboard-shortcut">Ctrl+K</span> Zoeken
                         <span class="keyboard-shortcut">Ctrl+Z</span> Ongedaan maken
@@ -2749,14 +5802,10 @@ app.init();
             </div>
         </div>
         <button class="btn btn-primary" onclick="app.closeOnboarding()" style="font-size: 16px; padding: 12px 32px;">
-            ðŸš€ Laten we beginnen!
+            Ã°Å¸Å¡â‚¬ Laten we beginnen!
         </button>
     </div>
 </div>
 
 </body>
 </html>
-
-
-
-
