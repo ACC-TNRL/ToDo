@@ -2205,8 +2205,6 @@ const firebaseAuth = {
             return;
         }
         
-        async uploadLocalDatabase() {
-
         if (this.currentUser) {
             loginBtn.style.display = 'none';
             userInfo.style.display = 'flex';
@@ -2220,7 +2218,7 @@ const firebaseAuth = {
         }
     },
     
-
+    async uploadLocalDatabase() {
         
         if (!this.currentUser) {
             toastNotifications.show('error', 'Niet Ingelogd', 'Log eerst in met Google');
