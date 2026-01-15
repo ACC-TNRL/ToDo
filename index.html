@@ -2968,20 +2968,12 @@ const app = {
         taskCol.style.display = 'flex';
         taskCol.style.maxWidth = '400px';
         
-        // Add back button for ADHD-friendly navigation
+        // Update header for smart view
         if (state.currentView !== 'all') {
             const colHeader = taskCol.querySelector('.col-header');
             if (colHeader) {
                 colHeader.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button onclick="state.currentView='all'; document.getElementById('viewSelector').value='all'; app.render();" 
-                                class="btn btn-secondary" 
-                                style="padding: 4px 12px; font-size: 12px;"
-                                title="Terug naar overzicht">
-                            ← Terug
-                        </button>
-                        <span>${viewName}</span>
-                    </div>
+                    <span>${viewName}</span>
                     <span class="col-count" id="count-task">0</span>
                 `;
             }
@@ -4760,6 +4752,55 @@ const pomodoro = {
                     </div>
                 </div>
             `;
+            
+            div.onclick = (e) => {
+                // Prevent clicking on checkbox or remove button
+                if (e.target.closest('.task-checkbox') || e.target.closest('[data-action="remove-from-session"]')) {
+                    return;
+                }
+                
+                // Find the parent category, project, and task
+                let foundCatId = null;
+                let foundProjId = null;
+                let foundTaskId = null;
+                
+                state.db.categories.forEach(cat => {
+                    cat.projects?.forEach(proj => {
+                        proj.tasks?.forEach(task => {
+                            if (pomItem.type === 'task' && task.id === pomItem.item.id) {
+                                foundCatId = cat.id;
+                                foundProjId = proj.id;
+                                foundTaskId = task.id;
+                            } else if (pomItem.type === 'subtask') {
+                                task.subtasks?.forEach(sub => {
+                                    if (sub.id === pomItem.item.id) {
+                                        foundCatId = cat.id;
+                                        foundProjId = proj.id;
+                                        foundTaskId = task.id;
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+                
+                if (foundCatId && foundProjId && foundTaskId) {
+                    // Close pomodoro overlay
+                    pomodoro.close();
+                    
+                    // Select the item in the main dashboard
+                    state.sel.cat = foundCatId;
+                    state.sel.proj = foundProjId;
+                    state.sel.task = foundTaskId;
+                    
+                    // Switch to all view
+                    state.currentView = 'all';
+                    document.getElementById('viewSelector').value = 'all';
+                    
+                    // Render
+                    app.render();
+                }
+            };
             
             const checkbox = div.querySelector('.task-checkbox');
             checkbox.onclick = async (e) => {
