@@ -1729,6 +1729,9 @@
                 <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); backup.importData();">
                     ðŸ“¥ Importeer Data
                 </div>
+                <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); firebaseAuth.uploadLocalDatabase();">
+                    ☁️ Upload naar Cloud
+                </div>
 
                 </div>
             </div>
@@ -2147,6 +2150,16 @@ const firebaseAuth = {
             this.updateUI();
         } catch (error) {
             errorHandler.log(error, 'Load user data');
+            
+            // Check for specific Firestore not setup error
+            if (error.message && error.message.includes('does not exist for project')) {
+                toastNotifications.show('warning', 'Firestore Database Nog Niet Actief', 
+                    'Ga naar Firebase Console om je database aan te maken. Check de FIRESTORE_SETUP_NOW.md guide.');
+                console.error('🔴 FIRESTORE NOT SETUP - Volg deze link: https://console.cloud.google.com/datastore/setup?project=rvstodo-5a499');
+            } else if (error.message && error.message.includes('offline')) {
+                toastNotifications.show('warning', 'Offline Modus', 
+                    'Je werkt nu offline. Data wordt gesynchroniseerd zodra Firestore beschikbaar is.');
+            }
         }
     },
     
@@ -2164,7 +2177,8 @@ const firebaseAuth = {
         }
         
         if (!this.currentUser) {
-            toastNotifications.show('warning', 'Niet Ingelogd', 'Log in om te synchroniseren');
+            // Don't show notification - just silently skip
+            console.log('⚠️ Cloud sync skipped - User not logged in');
             return;
         }
         
@@ -2174,10 +2188,19 @@ const firebaseAuth = {
                 database: state.db,
                 lastSync: firebase.firestore.FieldValue.serverTimestamp()
             });
-            toastNotifications.show('success', 'Gesynchroniseerd', 'Data opgeslagen in de cloud');
+            console.log('✅ Data synced to cloud');
+            // Don't show toast for every sync - too noisy
         } catch (error) {
-            errorHandler.log(error, 'Cloud sync');
-            toastNotifications.show('error', 'Sync Mislukt', 'Kon niet synchroniseren met de cloud');
+            // Check if it's the "database doesn't exist" error
+            if (error.message && error.message.includes('does not exist for project')) {
+                console.warn('⚠️ Firestore database not setup yet - sync skipped');
+                // Don't show toast - user already knows from login
+            } else if (error.message && error.message.includes('offline')) {
+                console.warn('⚠️ Offline - sync will happen when connection restored');
+            } else {
+                // Only log real errors, don't spam user with toasts
+                console.error('❌ Cloud sync failed:', error);
+            }
         }
     },
     
@@ -2204,6 +2227,39 @@ const firebaseAuth = {
         } else {
             loginBtn.style.display = 'flex';
             userInfo.style.display = 'none';
+        }
+    },
+    
+    async uploadLocalDatabase() {
+        if (!this.isEnabled || !db) {
+            toastNotifications.show('error', 'Firebase Niet Beschikbaar', 'Kan niet uploaden zonder Firebase');
+            return;
+        }
+        
+        if (!this.currentUser) {
+            toastNotifications.show('error', 'Niet Ingelogd', 'Log eerst in met Google');
+            return;
+        }
+        
+        try {
+            const docRef = db.collection('users').doc(this.currentUser.uid);
+            
+            // Upload current state.db to Firestore
+            await docRef.set({
+                email: this.currentUser.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastSync: firebase.firestore.FieldValue.serverTimestamp(),
+                database: state.db
+            }, { merge: true });
+            
+            toastNotifications.show('success', 'Upload Gelukt!', 
+                `${state.db.categories.length} categorieën geüpload naar cloud`);
+            
+            console.log('✅ Local database uploaded to Firestore');
+        } catch (error) {
+            errorHandler.log(error, 'uploadLocalDatabase');
+            toastNotifications.show('error', 'Upload Mislukt', 
+                'Kon lokale database niet uploaden: ' + error.message);
         }
     }
 };
