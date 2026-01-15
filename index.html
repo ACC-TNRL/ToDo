@@ -2005,7 +2005,7 @@
             <div class="pomodoro-task-list" id="pomodoroTaskList">
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Geen items voor deze sessie.<br>
-                    Voeg items toe via de ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â knop bij taken.
+                    Voeg items toe via de ➕⌨️ knop bij taken.
                 </div>
             </div>
         </div>
@@ -2331,14 +2331,14 @@ const toastNotifications = {
         toast.className = `toast ${type}`;
         
         const icons = {
-            success: 'âœ“',
-            error: 'âœ•',
-            warning: 'Ã¢Å¡Â ',
-            info: 'Ã¢â€žÂ¹'
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
         };
         
         toast.innerHTML = `
-            <div class="toast-icon">${icons[type] || 'Ã¢â€žÂ¹'}</div>
+            <div class="toast-icon">${icons[type] || 'ℹ'}</div>
             <div class="toast-content">
                 <div class="toast-title">${this.escapeHtml(title)}</div>
                 ${message ? `<div class="toast-message">${this.escapeHtml(message)}</div>` : ''}
@@ -2480,7 +2480,7 @@ const search = {
                         results.push({
                             type: 'task',
                             item: task,
-                            context: `${cat.name} Ã¢â€ â€™ ${proj.name}`,
+                            context: `${cat.name} → ${proj.name}`,
                             _catId: cat.id,
                             _projId: proj.id
                         });
@@ -2493,7 +2493,7 @@ const search = {
                             results.push({
                                 type: 'subtask',
                                 item: sub,
-                                context: `${proj.name} Ã¢â€ â€™ ${task.name}`,
+                                context: `${proj.name} → ${task.name}`,
                                 _catId: cat.id,
                                 _projId: proj.id,
                                 _taskId: task.id
@@ -2908,7 +2908,7 @@ const app = {
     setStatus(msg, type) {
         const el = document.getElementById('statusIndicator');
         el.innerHTML = type === 'success' ? `<span>&#10003;</span> ${msg}` : 
-                       type === 'error' ? `<span>âš ï¸</span> ${msg}` : 
+                       type === 'error' ? `<span>⚠️</span> ${msg}` : 
                        `<span>&#8505;</span> ${msg}`;
         el.className = `status-pill ${type}`;
         
@@ -2978,7 +2978,7 @@ const app = {
                                 class="btn btn-secondary" 
                                 style="padding: 4px 12px; font-size: 12px;"
                                 title="Terug naar overzicht">
-                            â† Terug
+                            ← Terug
                         </button>
                         <span>${viewName}</span>
                     </div>
@@ -3030,10 +3030,10 @@ const app = {
                 };
                 
                 const typeIcons = {
-                    category: 'Ã°Å¸â€œâ€š',
-                    project: 'Ã°Å¸â€œâ€¹',
-                    task: 'Ã°Å¸â€œÂ',
-                    subtask: 'âœ“'
+                    category: '📂',
+                    project: '📋',
+                    task: '📄',
+                    subtask: '✓'
                 };
                 
                 const highlightedName = search.highlightText(item.name, state.searchQuery);
@@ -3057,7 +3057,7 @@ const app = {
             
             const footer = document.createElement('div');
             footer.className = 'list-footer';
-            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">ðŸ” Klik op een item om ernaar te navigeren</div>';
+            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔒 Klik op een item om ernaar te navigeren</div>';
             container.appendChild(footer);
             
             return;
@@ -3094,7 +3094,7 @@ const app = {
                     app.render();
                 };
 
-                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${sub._task}</div>`;
+                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} → ${sub._task}</div>`;
                 
                 el.innerHTML = `
                     ${contextInfo}
@@ -3354,7 +3354,7 @@ const renderer = {
             // Checklist badge voor subtaken
             if (type === 'sub' && item.checklist && item.checklist.length > 0) {
                 const doneChecklist = item.checklist.filter(c => c.done).length;
-                metaParts.push(`<span class="checklist-badge" data-action="toggle-checklist" title="Checklist">âœ“ ${doneChecklist}/${item.checklist.length}</span>`);
+                metaParts.push(`<span class="checklist-badge" data-action="toggle-checklist" title="Checklist">✓ ${doneChecklist}/${item.checklist.length}</span>`);
             }
 
             // Pomodoro sessions badges voor subtaken
@@ -3416,8 +3416,8 @@ const renderer = {
             
             const today = new Date().setHours(0,0,0,0);
             const todayBtn = item.doDate === today
-                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">ðŸ“…&#10060;</button>`
-                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">ðŸ“…</button>`;
+                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">📅&#10060;</button>`
+                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">📅</button>`;
             
             const pomodoroBtn = `<button class="action-btn" data-action="manage-task-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
             
@@ -3428,7 +3428,7 @@ const renderer = {
         }
         if (type === 'sub') {
             const pomodoroBtn = `<button class="action-btn" data-action="manage-sub-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
-            const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">âœ“</button>`;
+            const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">✓</button>`;
             actionButtons = pomodoroBtn + checklistBtn;
         }
 
@@ -3442,7 +3442,7 @@ const renderer = {
                     <div class="checklist-item">
                         <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
                         <span>${checkItem.text}</span>
-                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">✕</button>
                     </div>
                 `).join('');
             }
@@ -3455,9 +3455,9 @@ const renderer = {
                                style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
                                autofocus>
                         <button class="action-btn" data-action="save-checklist-input" data-subtask-id="${item.id}" title="Opslaan" 
-                                style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">âœ“</button>
+                                style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">✓</button>
                         <button class="action-btn danger" data-action="cancel-checklist-input" data-subtask-id="${item.id}" title="Annuleren" 
-                                style="width: 18px; height: 18px; font-size: 10px;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+                                style="width: 18px; height: 18px; font-size: 10px;">✕</button>
                     </div>
                 `;
             }
@@ -3769,7 +3769,7 @@ const crud = {
         }).join('');
         
         if (state.db.pomodoroSessions.length === 0) {
-            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies" knop.');
+            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "➕⌨️ Sessies" knop.');
             return;
         }
         
@@ -4418,7 +4418,7 @@ const sessions = {
             const div = document.createElement('div');
             div.className = 'session-item';
             div.innerHTML = `
-                <span class="session-icon">ÃƒÂ¢Ã‚ÂÃ‚Â±</span>
+                <span class="session-icon">➕</span>
                 <input type="text" class="session-name-input" value="${session.name}" data-session-id="${session.id}">
                 <button class="action-btn danger" data-action="delete" data-session-id="${session.id}" title="Verwijder">&#128465;</button>
             `;
@@ -4452,7 +4452,7 @@ const sessions = {
         const div = document.createElement('div');
         div.className = 'session-item';
         div.innerHTML = `
-            <span class="session-icon">ÃƒÂ¢Ã‚ÂÃ‚Â±</span>
+            <span class="session-icon">➕</span>
             <input type="text" class="session-name-input new-session-input" placeholder="Naam voor nieuwe sessie..." autofocus>
             <button class="action-btn" data-action="save-new" title="Opslaan">&#10003;</button>
             <button class="action-btn danger" data-action="cancel-new" title="Annuleren">&#10006;</button>
@@ -4563,7 +4563,7 @@ const pomodoro = {
         });
         
         if (state.db.pomodoroSessions.length === 0) {
-            selector.innerHTML = '<option value="">Geen sessies - Maak er een aan via ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies</option>';
+            selector.innerHTML = '<option value="">Geen sessies - Maak er een aan via ➕⌨️ Sessies</option>';
         }
     },
 
@@ -4696,7 +4696,7 @@ const pomodoro = {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Selecteer een sessie hierboven.<br>
-                    Maak een sessie aan via ÃƒÂ¢Ã‚ÂÃ‚Â±ÃƒÂ¯Ã‚Â¸Ã‚ÂÃƒâ€šÃ‚Â Sessies knop.
+                    Maak een sessie aan via ➕⌨️ Sessies knop.
                 </div>
             `;
             return;
@@ -4724,7 +4724,7 @@ const pomodoro = {
                             pomodoroItems.push({
                                 type: 'subtask',
                                 item: subtask,
-                                context: `${proj.name} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ ${task.name}`,
+                                context: `${proj.name} → ${task.name}`,
                                 parentTask: task
                             });
                         }
@@ -4739,7 +4739,7 @@ const pomodoro = {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Geen items voor deze sessie.<br>
-                    Voeg items toe via de ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â knop bij taken.
+                    Voeg items toe via de ➕⌨️ knop bij taken.
                 </div>
             `;
             return;
@@ -4961,7 +4961,7 @@ const weekPlanner = {
         el.innerHTML = `
             <span class="task-time">${task.schedule.time}</span>
             <span class="task-name" title="${task.name}">${task.name}</span>
-            <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button>
+            <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">✕</button>
         `;
         
         el.ondragstart = (e) => {
@@ -4989,7 +4989,7 @@ const weekPlanner = {
                         tasks.push({
                             task,
                             type: 'task',
-                            context: `${cat.name} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${proj.name}`
+                            context: `${cat.name} → ${proj.name}`
                         });
                     }
                     
@@ -4998,7 +4998,7 @@ const weekPlanner = {
                             tasks.push({
                                 task: sub,
                                 type: 'subtask',
-                                context: `${proj.name} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${task.name}`
+                                context: `${proj.name} → ${task.name}`
                             });
                         }
                     });
@@ -5037,7 +5037,7 @@ const weekPlanner = {
                 el.style.borderColor = 'var(--primary)';
             }
             el.style.cursor = 'pointer';
-            el.innerHTML = `<span>${cat.icon || 'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
+            el.innerHTML = `<span>${cat.icon || '📄'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
             el.onclick = () => {
                 state.miniDashboard.selectedCat = cat.id;
                 state.miniDashboard.selectedProj = null;
@@ -5071,7 +5071,7 @@ const weekPlanner = {
                 el.style.borderColor = 'var(--primary)';
             }
             el.style.cursor = 'pointer';
-            el.innerHTML = `<span>${proj.icon || 'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬Â¹'}</span> <span style="font-size: 12px;">${proj.name}</span>`;
+            el.innerHTML = `<span>${proj.icon || '📋'}</span> <span style="font-size: 12px;">${proj.name}</span>`;
             el.onclick = () => {
                 state.miniDashboard.selectedProj = proj.id;
                 state.miniDashboard.selectedTask = null;
@@ -5274,8 +5274,8 @@ app.init();
 <div class="modal-overlay" id="keyboardShortcutsModal">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">âŒ¨ï¸ Sneltoetsen</h2>
-            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">âœ•</button>
+            <h2 class="modal-title">⌨️ Sneltoetsen</h2>
+            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">✕</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
@@ -5321,7 +5321,7 @@ app.init();
 
 
 <div class="compatibility-warning" id="compatibilityWarning">
-    <h3 style="margin: 0 0 8px 0;">Ã¢Å¡Â Ã¯Â¸Â Browser Niet Volledig Ondersteund</h3>
+    <h3 style="margin: 0 0 8px 0;">⚠️ Browser Niet Volledig Ondersteund</h3>
     <p style="margin: 0 0 12px 0;">Je browser ondersteunt de File System Access API niet volledig. Gebruik Chrome, Edge of Opera voor de beste ervaring.</p>
     <p style="margin: 0; font-size: 12px; opacity: 0.8;">Je kunt nog steeds export/import gebruiken om je data op te slaan.</p>
 </div>
@@ -5329,29 +5329,29 @@ app.init();
 <!-- Onboarding Overlay -->
 <div class="onboarding-overlay" id="onboardingOverlay">
     <div class="onboarding-content">
-        <div class="onboarding-title">Ã°Å¸â€˜â€¹ Welkom bij ToDo Dashboard!</div>
+        <div class="onboarding-title">👋 Welkom bij ToDo Dashboard!</div>
         <div class="onboarding-message">
-            Organiseer je werk in 4 eenvoudige lagen: CategorieÃƒÂ«n Ã¢â€ â€™ Projecten Ã¢â€ â€™ Opdrachten Ã¢â€ â€™ Subtaken
+            Organiseer je werk in 4 eenvoudige lagen: Categorieën → Projecten → Opdrachten → Subtaken
         </div>
         <div class="onboarding-steps">
             <div class="onboarding-step">
                 <div class="step-number">1</div>
                 <div class="step-content">
-                    <h3>Ã°Å¸â€œâ€š Kies je database</h3>
+                    <h3>📂 Kies je database</h3>
                     <p>Klik op "Database Kiezen" om een JSON bestand te selecteren (of maak een nieuwe aan).</p>
                 </div>
             </div>
             <div class="onboarding-step">
                 <div class="step-number">2</div>
                 <div class="step-content">
-                    <h3>Ã°Å¸â€”â€šÃ¯Â¸Â Maak categorieÃƒÂ«n</h3>
-                    <p>Begin met het maken van categorieÃƒÂ«n (bijv. Werk, PrivÃƒÂ©, Projecten).</p>
+                    <h3>📂️ Maak categorieën</h3>
+                    <p>Begin met het maken van categorieën (bijv. Werk, Privé, Projecten).</p>
                 </div>
             </div>
             <div class="onboarding-step">
                 <div class="step-number">3</div>
                 <div class="step-content">
-                    <h3>Ã¢Å¡Â¡ Gebruik sneltoetsen</h3>
+                    <h3>⚡ Gebruik sneltoetsen</h3>
                     <p>
                         <span class="keyboard-shortcut">Ctrl+K</span> Zoeken
                         <span class="keyboard-shortcut">Ctrl+Z</span> Ongedaan maken
@@ -5362,10 +5362,11 @@ app.init();
             </div>
         </div>
         <button class="btn btn-primary" onclick="app.closeOnboarding()" style="font-size: 16px; padding: 12px 32px;">
-            Ã°Å¸Å¡â‚¬ Laten we beginnen!
+            🚀 Laten we beginnen!
         </button>
     </div>
 </div>
 
 </body>
 </html>
+
