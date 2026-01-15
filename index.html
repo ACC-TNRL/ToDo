@@ -1723,15 +1723,6 @@
             <div class="dropdown-menu" id="pomodoroDropdown">
                 <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); sessions.openManager();">
                     &#9881; Beheer Sessies
-                <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); backup.exportData();">
-                    ðŸ’¾ Exporteer Data
-                </div>
-                <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); backup.importData();">
-                    ðŸ“¥ Importeer Data
-                </div>
-                <div class="dropdown-menu-item" onclick="pomodoroDropdown.close(); firebaseAuth.uploadLocalDatabase();">
-                    ☁️ Upload naar Cloud
-                </div>
 
                 </div>
             </div>
@@ -1781,9 +1772,6 @@
             âŒ¨ï¸ Shortcuts
         </button>
         
-        <button id="connectBtn" class="btn btn-primary" onclick="app.handleConnectionClick()">
-            &#128194; Database Kiezen
-        </button>
     </div>
 </header>
 
@@ -2217,6 +2205,8 @@ const firebaseAuth = {
             return;
         }
         
+        async uploadLocalDatabase() {
+
         if (this.currentUser) {
             loginBtn.style.display = 'none';
             userInfo.style.display = 'flex';
@@ -2230,11 +2220,7 @@ const firebaseAuth = {
         }
     },
     
-    async uploadLocalDatabase() {
-        if (!this.isEnabled || !db) {
-            toastNotifications.show('error', 'Firebase Niet Beschikbaar', 'Kan niet uploaden zonder Firebase');
-            return;
-        }
+
         
         if (!this.currentUser) {
             toastNotifications.show('error', 'Niet Ingelogd', 'Log eerst in met Google');
@@ -2265,14 +2251,8 @@ const firebaseAuth = {
 };
 
 const CONSTANTS = {
-    DB_NAME: 'CIDashboardDB_V10',
-    STORE_NAME: 'FileHandles',
-    BACKUP_DB_NAME: 'CIDashboardBackup_V10',
-    BACKUP_STORE_NAME: 'Backups',
     MAX_UNDO_HISTORY: 50,
-    BACKUP_INTERVAL: 5 * 60 * 1000,
     DEBOUNCE_SAVE: 1000,
-    AUTO_SAVE_ENABLED: true,
     COLORS: { 
         active: '#22c55e', 
         hold: '#f59e0b', 
@@ -2294,42 +2274,12 @@ const CONSTANTS = {
 
 const state = {
     db: { categories: [], pomodoroSessions: [] },
-    fileHandle: null,
     sel: { cat: null, proj: null, task: null },
     drag: null,
-    connectionState: 'new',
     currentView: 'all',
     timerInterval: null,
     lastOpenDate: null,
     activePomodoroSession: null
-};
-
-const storage = {
-    getDB() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(CONSTANTS.DB_NAME, 1);
-            req.onupgradeneeded = e => e.target.result.createObjectStore(CONSTANTS.STORE_NAME);
-            req.onsuccess = e => resolve(e.target.result);
-            req.onerror = e => reject(e);
-        });
-    },
-
-    async saveHandle(handle) {
-        const db = await this.getDB();
-        const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
-        tx.objectStore(CONSTANTS.STORE_NAME).put(handle, 'defaultHandle');
-        return new Promise(r => tx.oncomplete = r);
-    },
-
-    async getHandle() {
-        const db = await this.getDB();
-        return new Promise(resolve => {
-            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readonly');
-            const req = tx.objectStore(CONSTANTS.STORE_NAME).get('defaultHandle');
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => resolve(null);
-        });
-    }
 };
 
 
@@ -2411,132 +2361,6 @@ const toastNotifications = {
 };
 
 // ===== BACKUP SYSTEM (Backend feedback - Critical) =====
-const backup = {
-    async createBackup() {
-        try {
-            const db = await this.getBackupDB();
-            const tx = db.transaction(CONSTANTS.BACKUP_STORE_NAME, 'readwrite');
-            const store = tx.objectStore(CONSTANTS.BACKUP_STORE_NAME);
-            
-            const backupData = {
-                timestamp: Date.now(),
-                data: JSON.parse(JSON.stringify(state.db)),
-                version: '1.0'
-            };
-            
-            await store.put(backupData, 'latest');
-            
-            // Keep only last 10 backups
-            const allKeys = await store.getAllKeys();
-            if (allKeys.length > 10) {
-                const oldestKey = allKeys[0];
-                await store.delete(oldestKey);
-            }
-            
-            console.log('Auto-backup created at', new Date(backupData.timestamp));
-        } catch (error) {
-            console.error('Backup failed:', error);
-        }
-    },
-    
-    async getBackupDB() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(CONSTANTS.BACKUP_DB_NAME, 1);
-            req.onupgradeneeded = e => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(CONSTANTS.BACKUP_STORE_NAME)) {
-                    db.createObjectStore(CONSTANTS.BACKUP_STORE_NAME);
-                }
-            };
-            req.onsuccess = e => resolve(e.target.result);
-            req.onerror = e => reject(e);
-        });
-    },
-    
-    async restoreFromBackup() {
-        try {
-            const db = await this.getBackupDB();
-            const tx = db.transaction(CONSTANTS.BACKUP_STORE_NAME, 'readonly');
-            const backup = await tx.objectStore(CONSTANTS.BACKUP_STORE_NAME).get('latest');
-            
-            if (backup) {
-                state.db = backup.data;
-                await app.save();
-                app.render();
-                toastNotifications.show('success', 'Herstel Gelukt', 'Data hersteld van laatste backup');
-            } else {
-                toastNotifications.show('warning', 'Geen Backup', 'Geen backup beschikbaar');
-            }
-        } catch (error) {
-            errorHandler.log(error, 'restoreFromBackup');
-        }
-    },
-    
-    async exportData() {
-        try {
-            const dataStr = JSON.stringify(state.db, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `todo-backup-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            
-            URL.revokeObjectURL(url);
-            toastNotifications.show('success', 'Export Gelukt', 'Data geÃƒÂ«xporteerd');
-        } catch (error) {
-            errorHandler.log(error, 'exportData');
-        }
-    },
-    
-    async importData() {
-        try {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = async (e) => {
-                try {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    
-                    const text = await file.text();
-                    const data = JSON.parse(text);
-                    
-                    // Basic validation
-                    if (!data.categories || !Array.isArray(data.categories)) {
-                        throw new Error('Invalid backup file format');
-                    }
-                    
-                    // Confirm before overwriting
-                    if (!confirm('Dit overschrijft je huidige data. Doorgaan?')) {
-                        return;
-                    }
-                    
-                    state.db = data;
-                    await app.save();
-                    app.render();
-                    toastNotifications.show('success', 'Import Gelukt', 'Data geÃƒÂ¯mporteerd');
-                } catch (error) {
-                    errorHandler.log(error, 'importData - file processing');
-                }
-            };
-            
-            input.click();
-        } catch (error) {
-            errorHandler.log(error, 'importData');
-        }
-    },
-    
-    startAutoBackup() {
-        setInterval(() => {
-            if (state.connectionState === 'connected') {
-                this.createBackup();
-            }
-        }, CONSTANTS.BACKUP_INTERVAL);
-    }
-};
 
 // ===== UNDO/REDO SYSTEM (Product Manager feedback - High Priority) =====
 const undoRedo = {
@@ -2738,64 +2562,18 @@ const sanitizer = {
 };
 
 // ===== BROWSER COMPATIBILITY CHECK (DevOps feedback) =====
-const compatibility = {
-    check() {
-        const hasFileSystemAccess = 'showOpenFilePicker' in window;
-        const hasIndexedDB = 'indexedDB' in window;
-        
-        if (!hasFileSystemAccess) {
-            const warning = document.getElementById('compatibilityWarning');
-            if (warning) {
-                warning.classList.add('show');
-            }
-            console.warn('File System Access API not supported');
-        }
-        
-        if (!hasIndexedDB) {
-            toastNotifications.show('error', 'Browser Niet Ondersteund', 'IndexedDB is vereist');
-        }
-        
-        return {
-            fileSystemAccess: hasFileSystemAccess,
-            indexedDB: hasIndexedDB,
-            isFullySupported: hasFileSystemAccess && hasIndexedDB
-        };
+
     }
 };
 
 const app = {
     async init() {
         try {
-            // Browser compatibility check
-            const compat = compatibility.check();
-            if (!compat.isFullySupported) {
-                console.warn('Browser has limited support');
-            }
-            
-            const storedHandle = await storage.getHandle();
-            
-            if (storedHandle) {
-                state.fileHandle = storedHandle;
-                state.connectionState = 'known';
-                this.updateButtonUI();
-                this.setStatus("Bestand gevonden in geheugen", "");
-            } else {
-                state.connectionState = 'new';
-                this.updateButtonUI();
-                
-                // Show onboarding for new users
-                const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-                if (!hasSeenOnboarding) {
-                    setTimeout(() => this.showOnboarding(), 500);
-                }
-            }
-
             this.loadDarkMode();
             timer.startInterval();
             this.initKeyboardShortcuts();
             this.initGlobalHandlers();
             this.initSearchListener();
-            
             
             // Initialize Firebase Authentication
             try {
@@ -2804,10 +2582,7 @@ const app = {
                 console.error('Firebase initialization failed:', error);
             }
             
-            // Start auto-backup system
-            backup.startAutoBackup();
-            
-            console.log('âœ“ App initialized successfully');
+            console.log('✅ App initialized successfully');
         } catch (error) {
             errorHandler.log(error, 'app.init');
         }
@@ -2998,13 +2773,6 @@ const app = {
         
         localStorage.setItem('hasSeenOnboarding', 'true');
         
-        // Prompt to choose database
-        setTimeout(() => {
-            if (state.connectionState === 'new') {
-                toastNotifications.show('info', 'Kies een database', 'Klik op "Database Kiezen" om te beginnen', 8000);
-            }
-        }, 500);
-    },
 
     showKeyboardShortcuts() {
         const modal = document.getElementById('keyboardShortcutsModal');
@@ -3045,231 +2813,6 @@ const app = {
             }
             this.render();
         }
-    },
-
-    async handleConnectionClick() {
-        if (state.connectionState === 'new') {
-            await this.openFilePicker();
-        } else if (state.connectionState === 'known') {
-            await this.verifyAndLoad();
-        } else if (state.connectionState === 'connected') {
-            await this.openFilePicker();
-        }
-    },
-
-    async handleDisconnect(event = null) {
-        if (event) event.preventDefault();
-        
-        if (state.connectionState !== 'connected') return;
-        
-        const confirmed = confirm(
-            "Weet je zeker dat je de verbinding wilt verbreken?\n\n" +
-            "Dit zal:\n" +
-            "- De huidige verbinding verbreken\n" +
-            "- Het opgeslagen bestand uit het geheugen verwijderen\n" +
-            "- Je wordt gevraagd om een nieuw bestand te kiezen"
-        );
-        
-        if (!confirmed) return;
-        
-        // Wis opgeslagen file handle
-        try {
-            const db = await storage.getDB();
-            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
-            tx.objectStore(CONSTANTS.STORE_NAME).delete('defaultHandle');
-            await new Promise(r => tx.oncomplete = r);
-        } catch (e) {
-            console.error('Fout bij wissen geheugen:', e);
-        }
-        
-        // Reset state
-        state.fileHandle = null;
-        state.connectionState = 'new';
-        state.db = { categories: [] };
-        state.sel = { cat: null, proj: null, task: null };
-        
-        this.updateButtonUI();
-        this.setStatus("Verbonden", "success");
-        this.render();
-        
-        // Vraag om nieuw bestand
-        setTimeout(() => {
-            if (confirm("Wil je nu een nieuw bestand kiezen?")) {
-                this.openFilePicker();
-            }
-        }, 500);
-    },
-
-    async handleDisconnect(event = null) {
-        if (event) event.preventDefault();
-        
-        if (state.connectionState !== 'connected') return;
-        
-        const confirmed = confirm(
-            "Weet je zeker dat je de verbinding wilt verbreken?\n\n" +
-            "Dit zal:\n" +
-            "- De huidige verbinding verbreken\n" +
-            "- Het opgeslagen bestand uit het geheugen verwijderen\n" +
-            "- Je wordt gevraagd om een nieuw bestand te kiezen"
-        );
-        
-        if (!confirmed) return;
-        
-        // Wis opgeslagen file handle
-        try {
-            const db = await storage.getDB();
-            const tx = db.transaction(CONSTANTS.STORE_NAME, 'readwrite');
-            tx.objectStore(CONSTANTS.STORE_NAME).delete('defaultHandle');
-            await new Promise(r => tx.oncomplete = r);
-        } catch (e) {
-            console.error('Fout bij wissen geheugen:', e);
-        }
-        
-        // Reset state
-        state.fileHandle = null;
-        state.connectionState = 'new';
-        state.db = { categories: [] };
-        state.sel = { cat: null, proj: null, task: null };
-        
-        this.updateButtonUI();
-        this.setStatus("Verbonden", "success");
-        this.render();
-        
-        // Vraag om nieuw bestand
-        setTimeout(() => {
-            if (confirm("Wil je nu een nieuw bestand kiezen?")) {
-                this.openFilePicker();
-            }
-        }, 500);
-    },
-
-    async openFilePicker() {
-        try {
-            [state.fileHandle] = await window.showOpenFilePicker({
-                types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }]
-            });
-            await storage.saveHandle(state.fileHandle);
-            await this.loadDataFromFile();
-        } catch (e) { 
-            console.log("Picker cancelled or error:", e); 
-        }
-    },
-
-    async verifyAndLoad() {
-        if (!state.fileHandle) return;
-        
-        const options = { mode: 'readwrite' };
-        
-        if ((await state.fileHandle.queryPermission(options)) === 'granted') {
-            await this.loadDataFromFile();
-            return;
-        }
-        
-        if ((await state.fileHandle.requestPermission(options)) === 'granted') {
-            await this.loadDataFromFile();
-            return;
-        }
-        
-        this.setStatus("Toestemming geweigerd", "error");
-    },
-
-    async loadDataFromFile() {
-        try {
-            const file = await state.fileHandle.getFile();
-            const text = await file.text();
-            state.db = JSON.parse(text);
-            
-            // Migreer oude pomodoroSessions als die niet bestaat
-            if (!state.db.pomodoroSessions) {
-                state.db.pomodoroSessions = [];
-            }
-            
-            // Migreer oude inPomodoro boolean naar sessions systeem
-            await this.migratePomodoroToSessions();
-            
-            state.connectionState = 'connected';
-            this.updateButtonUI();
-            this.setStatus("Verbonden", "success");
-            
-            await this.checkAndResetTodayTasks();
-            await this.processRecurringTasks();
-            
-            this.render();
-        } catch (e) {
-            errorHandler.log(e, "loadDataFromFile");
-            this.setStatus("Fout bij laden bestand", "error");
-            
-            // Reset state en vraag om nieuw bestand
-            state.fileHandle = null;
-            state.connectionState = 'new';
-            this.updateButtonUI();
-            
-            // Vraag gebruiker om nieuw bestand te kiezen
-            if (confirm("Het bestand kon niet worden geladen. Wilt u een nieuw bestand kiezen?")) {
-                await this.openFilePicker();
-            }
-        }
-    },
-
-    async migratePomodoroToSessions() {
-        let needsMigration = false;
-        let defaultSession = null;
-        
-        // Check if we have any old inPomodoro items
-        state.db.categories.forEach(cat => {
-            cat.projects?.forEach(proj => {
-                proj.tasks?.forEach(task => {
-                    if (task.inPomodoro === true) {
-                        needsMigration = true;
-                    }
-                    task.subtasks?.forEach(sub => {
-                        if (sub.inPomodoro === true) {
-                            needsMigration = true;
-                        }
-                    });
-                });
-            });
-        });
-        
-        if (!needsMigration) return;
-        
-        // Create default session if needed
-        if (state.db.pomodoroSessions.length === 0) {
-            defaultSession = {
-                id: helpers.uid(),
-                name: 'Algemeen',
-                createdAt: Date.now(),
-                order: 0
-            };
-            state.db.pomodoroSessions.push(defaultSession);
-        } else {
-            defaultSession = state.db.pomodoroSessions[0];
-        }
-        
-        // Migrate items
-        state.db.categories.forEach(cat => {
-            cat.projects?.forEach(proj => {
-                proj.tasks?.forEach(task => {
-                    if (task.inPomodoro === true) {
-                        task.pomodoroSessions = [defaultSession.id];
-                        delete task.inPomodoro;
-                    } else if (!task.pomodoroSessions) {
-                        task.pomodoroSessions = [];
-                    }
-                    
-                    task.subtasks?.forEach(sub => {
-                        if (sub.inPomodoro === true) {
-                            sub.pomodoroSessions = [defaultSession.id];
-                            delete sub.inPomodoro;
-                        } else if (!sub.pomodoroSessions) {
-                            sub.pomodoroSessions = [];
-                        }
-                    });
-                });
-            });
-        });
-        
-        await this.save();
     },
 
     async checkAndResetTodayTasks() {
@@ -3336,7 +2879,6 @@ const app = {
     },
 
     async save() {
-        if (!state.fileHandle) return;
         
         // Debounce saves
         if (state.saveTimeout) {
@@ -3349,55 +2891,20 @@ const app = {
     },
     
     async performSave() {
-        if (!state.fileHandle) return;
-        
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        
+        // Firebase-only save
         try {
-            // Show loading indicator
-            if (loadingIndicator) loadingIndicator.classList.add('show');
-            
             this.setStatus("Opslaan...", "");
             
-            const writable = await state.fileHandle.createWritable();
-            await writable.write(JSON.stringify(state.db, null, 2));
-            await writable.close();
-            
-            state.lastSaveTime = Date.now();
-            this.setStatus("Opgeslagen", "success");
-            
-            // Create backup after successful save
-            if (CONSTANTS.AUTO_SAVE_ENABLED) {
-                backup.createBackup().catch(err => console.error('Backup failed:', err));
+            if (firebaseAuth.currentUser && firebaseAuth.isEnabled) {
+                await firebaseAuth.syncToCloud();
+                this.setStatus("Opgeslagen", "success");
+            } else {
+                console.log('⚠️ Not logged in - changes stored in memory only');
+                this.setStatus("Niet ingelogd", "");
             }
-            
-            // Sync to Firebase if user is logged in
-            if (firebaseAuth.currentUser) {
-                firebaseAuth.syncToCloud().catch(err => console.error('Cloud sync failed:', err));
-            }
-            
         } catch (error) {
             this.setStatus("Fout bij opslaan", "error");
             errorHandler.log(error, 'save');
-        } finally {
-            // Hide loading indicator
-            if (loadingIndicator) {
-                setTimeout(() => loadingIndicator.classList.remove('show'), 300);
-            }
-        }
-    },
-
-    updateButtonUI() {
-        const btn = document.getElementById('connectBtn');
-        if (state.connectionState === 'new') {
-            btn.innerHTML = `&#128194; Database Kiezen`;
-            btn.className = "btn btn-primary";
-        } else if (state.connectionState === 'known') {
-            btn.innerHTML = `&#9889; Herverbinden`;
-            btn.className = "btn btn-primary";
-        } else if (state.connectionState === 'connected') {
-            btn.innerHTML = `&#128260; Wissel Bestand`;
-            btn.className = "btn btn-secondary";
         }
     },
 
