@@ -1675,7 +1675,178 @@
         body.dark-mode .compatibility-warning { background: #78350f; border-color: #f59e0b; }
         .compatibility-warning.show { display: block; }
 
-
+        /* ===== FEEDBACK SYSTEM STYLES ===== */
+        .feedback-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feedback-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+        
+        .feedback-button:active {
+            transform: scale(0.95);
+        }
+        
+        body.dark-mode .feedback-button {
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        body.dark-mode .feedback-button:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+        
+        .feedback-modal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .feedback-type-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .feedback-type-btn {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-panel);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .feedback-type-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .feedback-type-btn.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+        
+        .feedback-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+            background: var(--bg-panel);
+            color: var(--text-main);
+        }
+        
+        .feedback-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+            outline: none;
+        }
+        
+        body.dark-mode .feedback-textarea {
+            background: #0f172a;
+            border-color: #475569;
+        }
+        
+        .feedback-screenshot-preview {
+            margin-top: 8px;
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--border-color);
+            padding: 12px;
+            display: none;
+            position: relative;
+        }
+        
+        .feedback-screenshot-preview.has-image {
+            display: block;
+        }
+        
+        .feedback-screenshot-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: var(--radius-md);
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .feedback-screenshot-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .feedback-screenshot-remove:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .feedback-info {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feedback-rate-limit-warning {
+            font-size: 12px;
+            color: #f59e0b;
+            padding: 8px 12px;
+            background: #fef3c7;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        body.dark-mode .feedback-rate-limit-warning {
+            background: #78350f;
+            color: #fde68a;
+        }
 
     </style>
 </head>
@@ -2677,7 +2848,7 @@ const app = {
             }
             
             // Shift+? - Keyboard shortcuts help
-            if (e.shiftKey && e.key === '?') {
+            if (e.shiftKey && e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 e.preventDefault();
                 this.showKeyboardShortcuts();
                 return;
@@ -5295,6 +5466,261 @@ const weekPlanner = {
     }
 };
 
+// ===== FEEDBACK SYSTEM =====
+const feedbackSystem = {
+    selectedType: 'bug',
+    screenshotData: null,
+    
+    open() {
+        // Check rate limit
+        if (!this.checkRateLimit()) {
+            document.getElementById('feedbackRateLimitWarning').style.display = 'flex';
+            document.getElementById('feedbackSubmitBtn').disabled = true;
+        } else {
+            document.getElementById('feedbackRateLimitWarning').style.display = 'none';
+            document.getElementById('feedbackSubmitBtn').disabled = false;
+        }
+        
+        const overlay = document.getElementById('feedbackModalOverlay');
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('show'));
+        
+        // Focus textarea
+        setTimeout(() => {
+            document.getElementById('feedbackMessage').focus();
+        }, 100);
+        
+        // Setup character counter
+        const textarea = document.getElementById('feedbackMessage');
+        const counter = document.getElementById('feedbackCharCount');
+        textarea.oninput = () => {
+            counter.textContent = textarea.value.length;
+        };
+        
+        // Setup image upload
+        const imageUpload = document.getElementById('feedbackImageUpload');
+        imageUpload.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleImageFile(file);
+            }
+        };
+        
+        // Setup paste handler
+        document.addEventListener('paste', this.handlePaste.bind(this));
+    },
+    
+    handlePaste(e) {
+        // Only handle paste when feedback modal is open
+        const modalOpen = document.getElementById('feedbackModalOverlay').classList.contains('show');
+        if (!modalOpen) return;
+        
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const blob = items[i].getAsFile();
+                this.handleImageFile(blob);
+                break;
+            }
+        }
+    },
+    
+    handleImageFile(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            toastNotifications.show('warning', 'Ongeldig Bestand', 'Upload alleen afbeeldingen (JPG, PNG, etc.)', 3000);
+            return;
+        }
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toastNotifications.show('warning', 'Bestand Te Groot', 'Afbeelding moet kleiner zijn dan 5MB', 3000);
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.screenshotData = e.target.result;
+            this.showImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    },
+    
+    showImagePreview(dataUrl) {
+        const preview = document.getElementById('feedbackScreenshotPreview');
+        preview.className = 'feedback-screenshot-preview has-image';
+        preview.innerHTML = `
+            <button class="feedback-screenshot-remove" onclick="feedbackSystem.removeImage()" title="Verwijder afbeelding">✕</button>
+            <img src="${dataUrl}" alt="Preview">
+        `;
+    },
+    
+    removeImage() {
+        this.screenshotData = null;
+        const preview = document.getElementById('feedbackScreenshotPreview');
+        preview.className = 'feedback-screenshot-preview';
+        preview.innerHTML = '';
+        document.getElementById('feedbackImageUpload').value = '';
+    },
+    
+    close() {
+        const overlay = document.getElementById('feedbackModalOverlay');
+        overlay.classList.remove('show');
+        
+        // Remove paste handler
+        document.removeEventListener('paste', this.handlePaste.bind(this));
+        
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            this.reset();
+        }, 200);
+    },
+    
+    reset() {
+        this.selectedType = 'bug';
+        document.getElementById('feedbackMessage').value = '';
+        document.getElementById('feedbackCharCount').textContent = '0';
+        document.getElementById('feedbackImageUpload').value = '';
+        this.removeImage();
+        
+        // Reset type buttons
+        document.querySelectorAll('.feedback-type-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.querySelector('[data-type="bug"]').classList.add('selected');
+    },
+    
+    selectType(type) {
+        this.selectedType = type;
+        document.querySelectorAll('.feedback-type-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+    },
+    
+    checkRateLimit() {
+        const key = 'feedbackRateLimit';
+        const now = Date.now();
+        const weekInMs = 7 * 24 * 60 * 60 * 1000;
+        
+        let rateData = localStorage.getItem(key);
+        if (!rateData) {
+            rateData = { count: 0, resetTime: now + weekInMs };
+            localStorage.setItem(key, JSON.stringify(rateData));
+            return true;
+        }
+        
+        rateData = JSON.parse(rateData);
+        
+        // Reset if week has passed
+        if (now > rateData.resetTime) {
+            rateData = { count: 0, resetTime: now + weekInMs };
+            localStorage.setItem(key, JSON.stringify(rateData));
+            return true;
+        }
+        
+        // Check limit
+        if (rateData.count >= 50) {
+            const daysLeft = Math.ceil((rateData.resetTime - now) / (24 * 60 * 60 * 1000));
+            toastNotifications.show('warning', 'Limiet Bereikt', 
+                `Je hebt je feedback limiet bereikt (50/week). Probeer het over ${daysLeft} dag(en) opnieuw.`, 5000);
+            return false;
+        }
+        
+        return true;
+    },
+    
+    incrementRateLimit() {
+        const key = 'feedbackRateLimit';
+        let rateData = JSON.parse(localStorage.getItem(key));
+        rateData.count++;
+        localStorage.setItem(key, JSON.stringify(rateData));
+    },
+    
+    async submit() {
+        const message = document.getElementById('feedbackMessage').value.trim();
+        
+        // Validation
+        if (!message) {
+            toastNotifications.show('warning', 'Feedback Leeg', 'Typ eerst je feedback voordat je verstuurt.', 3000);
+            return;
+        }
+        
+        if (message.length < 10) {
+            toastNotifications.show('warning', 'Te Kort', 'Geef wat meer details (minimaal 10 karakters).', 3000);
+            return;
+        }
+        
+        // Check rate limit again
+        if (!this.checkRateLimit()) {
+            return;
+        }
+        
+        // Disable submit button
+        const submitBtn = document.getElementById('feedbackSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Versturen...';
+        
+        try {
+            // Use uploaded/pasted screenshot if available
+            let screenshot = this.screenshotData;
+            
+            // Prepare feedback data
+            const feedbackData = {
+                type: this.selectedType,
+                message: sanitizer.sanitize(message),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                userEmail: firebaseAuth.currentUser?.email || 'anonymous',
+                userId: firebaseAuth.currentUser?.uid || 'anonymous',
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    screenResolution: `${window.screen.width}x${window.screen.height}`,
+                    viewportSize: `${window.innerWidth}x${window.innerHeight}`
+                },
+                appState: {
+                    currentView: state.currentView,
+                    darkMode: document.body.classList.contains('dark-mode'),
+                    totalCategories: state.db.categories?.length || 0,
+                    totalProjects: state.db.categories?.reduce((acc, cat) => acc + (cat.projects?.length || 0), 0) || 0
+                },
+                screenshot: screenshot,
+                status: 'new',
+                read: false
+            };
+            
+            // Check if Firebase is available
+            if (!firebaseAuth.isEnabled || !db) {
+                throw new Error('Firebase is niet beschikbaar. Feedback kan niet worden verstuurd.');
+            }
+            
+            // Save to Firestore
+            await db.collection('feedback').add(feedbackData);
+            
+            // Increment rate limit
+            this.incrementRateLimit();
+            
+            // Success!
+            toastNotifications.show('success', 'Feedback Verstuurd! 🎉', 
+                'Bedankt voor je hulp!', 3000);
+            
+            this.close();
+            
+        } catch (error) {
+            errorHandler.log(error, 'feedback.submit');
+            toastNotifications.show('error', 'Feedback Mislukt', 
+                'Er ging iets mis. Probeer het later opnieuw of neem contact op via email.', 5000);
+            
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '📤 Versturen';
+        }
+    }
+};
+
 app.init();
 
 </script>
@@ -5408,6 +5834,83 @@ app.init();
     </div>
 </div>
 
+<!-- ===== FEEDBACK SYSTEM ===== -->
+<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛 Bug, ❓ Vraag)" aria-label="Geef feedback">
+    💬
+</button>
+
+<!-- Feedback Modal -->
+<div class="modal-overlay" id="feedbackModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">💬 Geef Feedback</h2>
+            <button class="pomodoro-close" onclick="feedbackSystem.close()" aria-label="Sluiten">✕</button>
+        </div>
+        
+        <div class="feedback-modal-content">
+            <div class="form-group">
+                <label class="form-label">Type Feedback</label>
+                <div class="feedback-type-selector">
+                    <button class="feedback-type-btn selected" data-type="bug" onclick="feedbackSystem.selectType('bug')">
+                        🐛 Bug
+                    </button>
+                    <button class="feedback-type-btn" data-type="feature" onclick="feedbackSystem.selectType('feature')">
+                        💡 Feature
+                    </button>
+                    <button class="feedback-type-btn" data-type="question" onclick="feedbackSystem.selectType('question')">
+                        ❓ Vraag
+                    </button>
+                    <button class="feedback-type-btn" data-type="other" onclick="feedbackSystem.selectType('other')">
+                        💬 Anders
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Jouw Feedback</label>
+                <textarea 
+                    id="feedbackMessage" 
+                    class="feedback-textarea" 
+                    placeholder="Beschrijf je bug, feature request, of vraag..."
+                    maxlength="5000"
+                ></textarea>
+                <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
+                    <span id="feedbackCharCount">0</span>/5000 karakters
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Screenshot of Afbeelding (Optioneel)</label>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="file" id="feedbackImageUpload" accept="image/*" style="display: none;">
+                    <button class="btn btn-secondary" onclick="document.getElementById('feedbackImageUpload').click()" style="width: 100%;">
+                        📁 Upload Afbeelding
+                    </button>
+                    <div style="font-size: 12px; color: var(--text-muted); text-align: center;">
+                        Of plak een screenshot met Ctrl+V
+                    </div>
+                </div>
+            </div>
+            
+            <div id="feedbackScreenshotPreview"></div>
+            
+            <div class="feedback-info">
+                ℹ️ Bedankt voor je hulp! 🙏
+            </div>
+            
+            <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
+                ⚠️ Je hebt je limiet bereikt. Probeer het later opnieuw.
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="feedbackSystem.close()">Annuleren</button>
+            <button class="btn btn-primary" onclick="feedbackSystem.submit()" id="feedbackSubmitBtn">
+                📤 Versturen
+            </button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
-
