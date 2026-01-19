@@ -1867,10 +1867,10 @@
         <!-- Undo/Redo Buttons -->
         <div class="undo-redo-controls">
             <button class="undo-redo-btn" id="undoBtn" onclick="undoRedo.undo()" title="Ongedaan maken (Ctrl+Z)" aria-label="Ongedaan maken" disabled>
-                ↶
+                â†¶
             </button>
             <button class="undo-redo-btn" id="redoBtn" onclick="undoRedo.redo()" title="Opnieuw (Ctrl+Y)" aria-label="Opnieuw" disabled>
-                ↷
+                â†·
             </button>
         </div>
         
@@ -1878,7 +1878,7 @@
             <option value="all">🏠 Alles</option>
             <option value="today">📅 Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
-            <option value="weekplan">📅🕒 Week Planner</option>
+            <option value="weekplan">📅🕐 Week Planner</option>
             <option value="search" style="display:none;">🔍 Zoekresultaten</option>
         </select>
 
@@ -1940,7 +1940,7 @@
             </div>
         </div>
         <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
-            ⌨️ Shortcuts
+            âŒ¨ï¸ Shortcuts
         </button>
         
     </div>
@@ -2222,9 +2222,9 @@ if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
         db = firebase.firestore();
-        console.log('✅ Firebase initialized successfully');
+        console.log('âœ… Firebase initialized successfully');
     } catch (error) {
-        console.error('❌ Firebase initialization failed:', error);
+        console.error('âŒ Firebase initialization failed:', error);
     }
 } else {
     console.warn('⚠️ Firebase SDK not loaded - running in local-only mode');
@@ -2347,7 +2347,7 @@ const firebaseAuth = {
                 database: state.db,
                 lastSync: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('✅ Data synced to cloud');
+            console.log('âœ… Data synced to cloud');
             // Don't show toast for every sync - too noisy
         } catch (error) {
             // Check if it's the "database doesn't exist" error
@@ -2358,7 +2358,7 @@ const firebaseAuth = {
                 console.warn('⚠️ Offline - sync will happen when connection restored');
             } else {
                 // Only log real errors, don't spam user with toasts
-                console.error('❌ Cloud sync failed:', error);
+                console.error('âŒ Cloud sync failed:', error);
             }
         }
     },
@@ -2412,7 +2412,7 @@ const firebaseAuth = {
             toastNotifications.show('success', 'Upload Gelukt!', 
                 `${state.db.categories.length} categorieën geüpload naar cloud`);
             
-            console.log('✅ Local database uploaded to Firestore');
+            console.log('âœ… Local database uploaded to Firestore');
         } catch (error) {
             errorHandler.log(error, 'uploadLocalDatabase');
             toastNotifications.show('error', 'Upload Mislukt', 
@@ -2440,6 +2440,31 @@ const CONSTANTS = {
         "\u{1F4C2}","\u{1F680}","\u26A1","\u{1F3ED}","\u{1F527}","\u2699","\u{1F4C8}","\u{1F4C9}",
         "\u2705","\u{1F6A7}","\u{1F393}","\u{1F4A1}","\u{1F4E6}","\u{1F69B}","\u{1F3E0}","\u26A0",
         "\u{1F3AF}","\u{1F4C5}","\u{1F4B0}","\u{1F916}","\u{1F525}","\u{1F6D2}","\u2B50","\u{1F514}"
+    ],
+    ICONS_EXTENDED: [
+        "\u{1F4D1}","\u{1F4D2}","\u{1F4D3}","\u{1F4D4}","\u{1F4D5}","\u{1F4D6}","\u{1F4D7}","\u{1F4D8}",
+        "\u{1F4D9}","\u{1F4DA}","\u{1F4CB}","\u{1F4C3}","\u{1F4C4}","\u{1F4CC}","\u{1F4CD}","\u{1F4CE}",
+        "\u{1F4CF}","\u{1F4E7}","\u{1F4E8}","\u{1F4E9}","\u{1F4EA}","\u{1F4EB}","\u{1F4EC}","\u{1F4ED}",
+        "\u{1F4EE}","\u{1F4EF}","\u{1F4F0}","\u{1F4F1}","\u{1F4F2}","\u{1F4F7}","\u{1F4F9}","\u{1F4FA}",
+        "\u{1F4FB}","\u{1F4FC}","\u{1F50D}","\u{1F50E}","\u{1F512}","\u{1F513}","\u{1F511}","\u{1F52C}",
+        "\u{1F52D}","\u{1F52E}","\u{1F556}","\u{1F557}","\u{1F558}","\u{1F559}","\u{1F55A}","\u{1F55B}",
+        "\u{1F5A4}","\u{1F5C2}","\u{1F5C3}","\u{1F5C4}","\u{1F5D1}","\u{1F5D2}","\u{1F5D3}","\u{1F5DC}",
+        "\u{1F5DD}","\u{1F5DE}","\u{1F5E1}","\u{1F5E3}","\u{1F5E8}","\u{1F5EF}","\u{1F5F3}","\u{1F6AB}",
+        "\u{1F6AC}","\u{1F6AD}","\u{1F6AE}","\u{1F6AF}","\u{1F6B0}","\u{1F6B1}","\u{1F6B2}","\u{1F6B9}",
+        "\u{1F6BA}","\u{1F6BB}","\u{1F6BC}","\u{1F6BD}","\u{1F6BE}","\u{1F6BF}","\u{1F6C0}","\u{1F6C1}",
+        "\u{1F6C2}","\u{1F6C3}","\u{1F6C4}","\u{1F6C5}","\u{1F6CB}","\u{1F6CC}","\u{1F6CD}","\u{1F6CE}",
+        "\u{1F6CF}","\u{1F6E0}","\u{1F6E1}","\u{1F6E2}","\u{1F6E3}","\u{1F6E4}","\u{1F6E5}","\u{1F6E9}",
+        "\u{1F6EB}","\u{1F6EC}","\u{1F6F0}","\u{1F6F3}","\u{1F6F4}","\u{1F6F5}","\u{1F6F6}","\u{1F6F7}",
+        "\u{1F6F8}","\u{1F6F9}","\u{1F6FA}","\u{1F7E0}","\u{1F7E1}","\u{1F7E2}","\u{1F7E3}","\u{1F7E4}",
+        "\u{1F7E5}","\u{1F7E6}","\u{1F7E7}","\u{1F7E8}","\u{1F7E9}","\u{1F7EA}","\u{1F7EB}","\u2600",
+        "\u2601","\u2602","\u2603","\u2604","\u260E","\u2611","\u2614","\u2615","\u2618","\u261D",
+        "\u2620","\u2622","\u2623","\u2626","\u262A","\u262E","\u262F","\u2638","\u2639","\u263A",
+        "\u2648","\u2649","\u264A","\u264B","\u264C","\u264D","\u264E","\u264F","\u2650","\u2651",
+        "\u2652","\u2653","\u265F","\u2660","\u2663","\u2665","\u2666","\u2668","\u267B","\u267E",
+        "\u267F","\u2692","\u2693","\u2694","\u2695","\u2696","\u2697","\u2699","\u269B","\u269C",
+        "\u26A0","\u26A1","\u26A7","\u26AA","\u26AB","\u26B0","\u26B1","\u26BD","\u26BE","\u26C4",
+        "\u26C5","\u26C8","\u26CE","\u26CF","\u26D1","\u26D3","\u26D4","\u26E9","\u26EA","\u26F0",
+        "\u26F1","\u26F2","\u26F3","\u26F4","\u26F5","\u26F7","\u26F8","\u26F9","\u26FA","\u26FD"
     ]
 };
 
@@ -2504,12 +2529,12 @@ const toastNotifications = {
         const icons = {
             success: '✓',
             error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
+            warning: 'âš ',
+            info: 'â„¹'
         };
         
         toast.innerHTML = `
-            <div class="toast-icon">${icons[type] || 'ℹ'}</div>
+            <div class="toast-icon">${icons[type] || 'â„¹'}</div>
             <div class="toast-content">
                 <div class="toast-title">${this.escapeHtml(title)}</div>
                 ${message ? `<div class="toast-message">${this.escapeHtml(message)}</div>` : ''}
@@ -2651,7 +2676,7 @@ const search = {
                         results.push({
                             type: 'task',
                             item: task,
-                            context: `${cat.name} → ${proj.name}`,
+                            context: `${cat.name} â†’ ${proj.name}`,
                             _catId: cat.id,
                             _projId: proj.id
                         });
@@ -2664,7 +2689,7 @@ const search = {
                             results.push({
                                 type: 'subtask',
                                 item: sub,
-                                context: `${proj.name} → ${task.name}`,
+                                context: `${proj.name} â†’ ${task.name}`,
                                 _catId: cat.id,
                                 _projId: proj.id,
                                 _taskId: task.id
@@ -2750,7 +2775,7 @@ const app = {
                 console.error('Firebase initialization failed:', error);
             }
             
-            console.log('✅ App initialized successfully');
+            console.log('âœ… App initialized successfully');
         } catch (error) {
             errorHandler.log(error, 'app.init');
         }
@@ -3079,7 +3104,7 @@ const app = {
     setStatus(msg, type) {
         const el = document.getElementById('statusIndicator');
         el.innerHTML = type === 'success' ? `<span>&#10003;</span> ${msg}` : 
-                       type === 'error' ? `<span>⚠️</span> ${msg}` : 
+                       type === 'error' ? `<span>⚠️</span> ${msg}` : 
                        `<span>&#8505;</span> ${msg}`;
         el.className = `status-pill ${type}`;
         
@@ -3220,7 +3245,7 @@ const app = {
             
             const footer = document.createElement('div');
             footer.className = 'list-footer';
-            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔒 Klik op een item om ernaar te navigeren</div>';
+            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔑 Klik op een item om ernaar te navigeren</div>';
             container.appendChild(footer);
             
             return;
@@ -3257,7 +3282,7 @@ const app = {
                     app.render();
                 };
 
-                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} → ${sub._task}</div>`;
+                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} â†’ ${sub._task}</div>`;
                 
                 el.innerHTML = `
                     ${contextInfo}
@@ -4244,6 +4269,7 @@ const dnd = {
 
 const modal = {
     target: null,
+    showMoreIcons: false,
 
     open(type, item = null) {
         const mode = item ? 'edit' : 'create';
@@ -4284,17 +4310,69 @@ const modal = {
             const currentIcon = item ? item.icon : CONSTANTS.ICONS[0];
             this.target.selectedIcon = currentIcon;
 
+            // Render basis iconen
             CONSTANTS.ICONS.forEach(icon => {
                 const btn = document.createElement('div');
                 btn.className = `icon-btn ${icon === currentIcon ? 'selected' : ''}`;
                 btn.textContent = icon;
                 btn.onclick = () => {
                     this.target.selectedIcon = icon;
-                    Array.from(iconGrid.children).forEach(c => c.classList.remove('selected'));
+                    Array.from(iconGrid.children).forEach(c => {
+                        if (!c.classList.contains('more-icons-btn')) {
+                            c.classList.remove('selected');
+                        }
+                    });
                     btn.classList.add('selected');
                 };
                 iconGrid.appendChild(btn);
             });
+            
+            // Voeg "Meer..." knop toe
+            const moreBtn = document.createElement('div');
+            moreBtn.className = 'icon-btn more-icons-btn';
+            moreBtn.innerHTML = '...';
+            moreBtn.style.fontWeight = 'bold';
+            moreBtn.style.fontSize = '20px';
+            moreBtn.title = 'Meer icoontjes...';
+            moreBtn.onclick = () => {
+                this.showMoreIcons = !this.showMoreIcons;
+                if (this.showMoreIcons) {
+                    // Verwijder de "Meer..." knop tijdelijk
+                    moreBtn.remove();
+                    
+                    // Voeg extended iconen toe
+                    CONSTANTS.ICONS_EXTENDED.forEach(icon => {
+                        const btn = document.createElement('div');
+                        btn.className = `icon-btn ${icon === currentIcon ? 'selected' : ''}`;
+                        btn.textContent = icon;
+                        btn.onclick = () => {
+                            this.target.selectedIcon = icon;
+                            Array.from(iconGrid.children).forEach(c => {
+                                if (!c.classList.contains('less-icons-btn')) {
+                                    c.classList.remove('selected');
+                                }
+                            });
+                            btn.classList.add('selected');
+                        };
+                        iconGrid.appendChild(btn);
+                    });
+                    
+                    // Voeg "Minder..." knop toe
+                    const lessBtn = document.createElement('div');
+                    lessBtn.className = 'icon-btn less-icons-btn';
+                    lessBtn.innerHTML = '&#x2191;'; // Pijl omhoog
+                    lessBtn.style.fontWeight = 'bold';
+                    lessBtn.style.fontSize = '24px';
+                    lessBtn.title = 'Verberg extra icoontjes';
+                    lessBtn.onclick = () => {
+                        // Reset en render opnieuw
+                        this.showMoreIcons = false;
+                        this.open(type, item);
+                    };
+                    iconGrid.appendChild(lessBtn);
+                }
+            };
+            iconGrid.appendChild(moreBtn);
         } else {
             iconGroup.style.display = 'none';
         }
@@ -4581,7 +4659,7 @@ const sessions = {
             const div = document.createElement('div');
             div.className = 'session-item';
             div.innerHTML = `
-                <span class="session-icon">➕</span>
+                <span class="session-icon">âž•</span>
                 <input type="text" class="session-name-input" value="${session.name}" data-session-id="${session.id}">
                 <button class="action-btn danger" data-action="delete" data-session-id="${session.id}" title="Verwijder">&#128465;</button>
             `;
@@ -4615,7 +4693,7 @@ const sessions = {
         const div = document.createElement('div');
         div.className = 'session-item';
         div.innerHTML = `
-            <span class="session-icon">➕</span>
+            <span class="session-icon">âž•</span>
             <input type="text" class="session-name-input new-session-input" placeholder="Naam voor nieuwe sessie..." autofocus>
             <button class="action-btn" data-action="save-new" title="Opslaan">&#10003;</button>
             <button class="action-btn danger" data-action="cancel-new" title="Annuleren">&#10006;</button>
@@ -4887,7 +4965,7 @@ const pomodoro = {
                             pomodoroItems.push({
                                 type: 'subtask',
                                 item: subtask,
-                                context: `${proj.name} → ${task.name}`,
+                                context: `${proj.name} â†’ ${task.name}`,
                                 parentTask: task
                             });
                         }
@@ -5201,7 +5279,7 @@ const weekPlanner = {
                         tasks.push({
                             task,
                             type: 'task',
-                            context: `${cat.name} → ${proj.name}`
+                            context: `${cat.name} â†’ ${proj.name}`
                         });
                     }
                     
@@ -5210,7 +5288,7 @@ const weekPlanner = {
                             tasks.push({
                                 task: sub,
                                 type: 'subtask',
-                                context: `${proj.name} → ${task.name}`
+                                context: `${proj.name} â†’ ${task.name}`
                             });
                         }
                     });
@@ -5661,7 +5739,7 @@ const feedbackSystem = {
         // Disable submit button
         const submitBtn = document.getElementById('feedbackSubmitBtn');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '⏳ Versturen...';
+        submitBtn.innerHTML = 'â³ Versturen...';
         
         try {
             // Use uploaded/pasted screenshot if available
@@ -5741,7 +5819,7 @@ app.init();
 <div class="modal-overlay" id="keyboardShortcutsModal">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">⌨️ Sneltoetsen</h2>
+            <h2 class="modal-title">⌨️ Sneltoetsen</h2>
             <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">✕</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -5788,7 +5866,7 @@ app.init();
 
 
 <div class="compatibility-warning" id="compatibilityWarning">
-    <h3 style="margin: 0 0 8px 0;">⚠️ Browser Niet Volledig Ondersteund</h3>
+    <h3 style="margin: 0 0 8px 0;">⚠️ Browser Niet Volledig Ondersteund</h3>
     <p style="margin: 0 0 12px 0;">Je browser ondersteunt de File System Access API niet volledig. Gebruik Chrome, Edge of Opera voor de beste ervaring.</p>
     <p style="margin: 0; font-size: 12px; opacity: 0.8;">Je kunt nog steeds export/import gebruiken om je data op te slaan.</p>
 </div>
@@ -5798,7 +5876,7 @@ app.init();
     <div class="onboarding-content">
         <div class="onboarding-title">👋 Welkom bij ToDo Dashboard!</div>
         <div class="onboarding-message">
-            Organiseer je werk in 4 eenvoudige lagen: Categorieën → Projecten → Opdrachten → Subtaken
+            Organiseer je werk in 4 eenvoudige lagen: Categorieën â†’ Projecten â†’ Opdrachten â†’ Subtaken
         </div>
         <div class="onboarding-steps">
             <div class="onboarding-step">
@@ -5811,14 +5889,14 @@ app.init();
             <div class="onboarding-step">
                 <div class="step-number">2</div>
                 <div class="step-content">
-                    <h3>📂️ Maak categorieën</h3>
+                    <h3>📂️ Maak categorieën</h3>
                     <p>Begin met het maken van categorieën (bijv. Werk, Privé, Projecten).</p>
                 </div>
             </div>
             <div class="onboarding-step">
                 <div class="step-number">3</div>
                 <div class="step-content">
-                    <h3>⚡ Gebruik sneltoetsen</h3>
+                    <h3>âš¡ Gebruik sneltoetsen</h3>
                     <p>
                         <span class="keyboard-shortcut">Ctrl+K</span> Zoeken
                         <span class="keyboard-shortcut">Ctrl+Z</span> Ongedaan maken
@@ -5835,7 +5913,7 @@ app.init();
 </div>
 
 <!-- ===== FEEDBACK SYSTEM ===== -->
-<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛 Bug, ❓ Vraag)" aria-label="Geef feedback">
+<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛 Bug, â“ Vraag)" aria-label="Geef feedback">
     💬
 </button>
 
@@ -5858,7 +5936,7 @@ app.init();
                         💡 Feature
                     </button>
                     <button class="feedback-type-btn" data-type="question" onclick="feedbackSystem.selectType('question')">
-                        ❓ Vraag
+                        â“ Vraag
                     </button>
                     <button class="feedback-type-btn" data-type="other" onclick="feedbackSystem.selectType('other')">
                         💬 Anders
@@ -5895,7 +5973,7 @@ app.init();
             <div id="feedbackScreenshotPreview"></div>
             
             <div class="feedback-info">
-                ℹ️ Bedankt voor je hulp! 🙏
+                â„¹ï¸ Bedankt voor je hulp! 🙏
             </div>
             
             <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
