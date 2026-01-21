@@ -1646,18 +1646,7 @@
         .undo-redo-btn { width: 32px; height: 32px; border: 1px solid var(--border-color); background: var(--bg-panel); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; }
         .undo-redo-btn:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); }
         .undo-redo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        
-        /* Onboarding */
-        .onboarding-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        .onboarding-overlay.show { display: flex; opacity: 1; }
-        .onboarding-content { background: var(--bg-panel); border-radius: var(--radius-lg); padding: 48px; max-width: 600px; text-align: center; box-shadow: var(--shadow-lg); }
-        .onboarding-title { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); }
-        .onboarding-message { font-size: 16px; color: var(--text-muted); line-height: 1.6; margin-bottom: 32px; }
-        .onboarding-steps { text-align: left; margin: 32px 0; }
-        .onboarding-step { display: flex; align-items: start; gap: 16px; margin-bottom: 24px; }
-        .step-number { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
-        .step-content h3 { margin: 0 0 8px 0; font-size: 16px; color: var(--text-main); }
-        .step-content p { margin: 0; font-size: 14px; color: var(--text-muted); }
+
         
         /* Search Highlight */
         .search-highlight { background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 600; }
@@ -1848,6 +1837,715 @@
             color: #fde68a;
         }
 
+        /* ===== WEEK VIEW ===== */
+        .week-view-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .week-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        
+        .week-nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+        
+        .week-nav-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+        
+        .week-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            min-height: 500px;
+            padding-bottom: 16px;
+        }
+        
+        .week-day-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .week-day-card.today {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .week-day-card.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .week-day-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: #f8fafc;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            text-align: center;
+        }
+        
+        body.dark-mode .week-day-header {
+            background: #0f172a;
+        }
+        
+        .week-day-card.today .week-day-header {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .week-day-name {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .week-day-card.today .week-day-name {
+            color: var(--primary);
+        }
+        
+        .week-day-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 4px;
+        }
+        
+        .week-day-tasks {
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+        
+        .week-task-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            cursor: move;
+            transition: all 0.2s;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        body.dark-mode .week-task-card {
+            background: #1e293b;
+            border-color: #475569;
+        }
+        
+        .week-task-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+        
+        .week-task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+        
+        .week-task-title {
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        
+        .week-task-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .week-empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+        
+        .unscheduled-section {
+            background: var(--bg-panel);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .unscheduled-header {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .unscheduled-tasks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .unscheduled-task {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 6px 10px;
+            cursor: move;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        body.dark-mode .unscheduled-task {
+            background: #1e293b;
+            border-color: #475569;
+        }
+        
+        .unscheduled-task:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Daily/Weekly Reminders */
+        .reminder-modal {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: var(--bg-panel);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            max-width: 360px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .reminder-modal.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .reminder-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reminder-close {
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 20px;
+            line-height: 1;
+        }
+        
+        .reminder-close:hover {
+            color: var(--text-main);
+        }
+        
+        .reminder-message {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .reminder-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .reminder-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .reminder-btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .reminder-btn-secondary {
+            background: var(--bg-app);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        
+        .reminder-btn-secondary:hover {
+            background: #f1f5f9;
+        }
+        
+        body.dark-mode .reminder-btn-secondary:hover {
+            background: #334155;
+        }
+        
+        .reminder-dismiss {
+            margin-top: 12px;
+            text-align: center;
+        }
+        
+        .reminder-dismiss-link {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .reminder-dismiss-link:hover {
+            color: var(--text-main);
+        }
+        
+        /* Celebration Screen */
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .celebration-overlay.show {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .celebration-content {
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .celebration-emoji {
+            font-size: 120px;
+            animation: bounce 0.6s ease infinite;
+            display: inline-block;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .celebration-text {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .celebration-subtext {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 12px;
+        }
+        
+        /* Parkeerplaats (Quick Capture) */
+        .parking-lot {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--bg-panel) 0%, var(--bg-panel) 90%, transparent 100%);
+            padding: 12px 24px 16px;
+            z-index: 100;
+            border-top: 2px solid var(--primary);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .parking-lot-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            background: var(--bg-app);
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        
+        .parking-lot-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .parking-lot-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        /* Wizard & Review Overlays */
+        .wizard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-app);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .wizard-overlay.show {
+            display: flex;
+        }
+        
+        .wizard-header {
+            padding: 32px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .wizard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        
+        .wizard-subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+        
+        .wizard-progress {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s;
+        }
+        
+        .progress-dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+        
+        .wizard-content {
+            flex: 1;
+            padding: 40px 24px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .wizard-question {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .wizard-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .wizard-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wizard-card:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+        
+        .wizard-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .wizard-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        
+        .wizard-card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .wizard-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .wizard-btn {
+            padding: 12px 32px;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wizard-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .wizard-btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .wizard-btn-primary:disabled {
+            background: var(--border-color);
+            cursor: not-allowed;
+        }
+        
+        .wizard-btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border: 2px solid var(--border-color);
+        }
+        
+        .wizard-btn-secondary:hover {
+            border-color: var(--primary);
+        }
+        
+        /* Review Cards */
+        .review-card {
+            background: var(--bg-panel);
+            border: 3px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .review-card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 32px;
+        }
+        
+        .review-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .review-btn {
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--border-color);
+            background: var(--bg-app);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .review-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .review-btn-trash:hover {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .review-btn-quick:hover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .review-btn-later:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .review-btn-icon {
+            font-size: 32px;
+        }
+        
+        .review-btn-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .review-btn-key {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .review-stats {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .review-stat-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+        
+        .review-stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .review-pause-suggestion {
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--primary);
+        }
+        
+        .review-pause-text {
+            font-size: 16px;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+        
+        .brain-dump-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            background: var(--bg-app);
+            color: var(--text-main);
+            margin-bottom: 16px;
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .brain-dump-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
     </style>
 </head>
 <body>
@@ -1862,15 +2560,15 @@
 
     <div class="controls-area">
         <!-- Search Input -->
-        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="🔍 Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
+        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="🔍 Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
         
         <!-- Undo/Redo Buttons -->
         <div class="undo-redo-controls">
             <button class="undo-redo-btn" id="undoBtn" onclick="undoRedo.undo()" title="Ongedaan maken (Ctrl+Z)" aria-label="Ongedaan maken" disabled>
-                â†¶
+                &#8634;
             </button>
             <button class="undo-redo-btn" id="redoBtn" onclick="undoRedo.redo()" title="Opnieuw (Ctrl+Y)" aria-label="Opnieuw" disabled>
-                â†·
+                &#8635;
             </button>
         </div>
         
@@ -1878,9 +2576,10 @@
             <option value="all">🏠 Alles</option>
             <option value="today">📅 Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
-            <option value="weekplan">📅🕐 Week Planner</option>
-            <option value="search" style="display:none;">🔍 Zoekresultaten</option>
+            <option value="week">📅 Week</option>
+            <option value="search" style="display:none;">🔍 Zoekresultaten</option>
         </select>
+        </button>
 
         <div class="btn-dropdown-wrapper">
             <button class="btn btn-secondary btn-with-dropdown">
@@ -1940,7 +2639,10 @@
             </div>
         </div>
         <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
-            ⌨️ Shortcuts
+            ⌨️  Shortcuts
+        </button>
+        <button id="settingsBtn" class="btn btn-secondary" onclick="app.showSettings()" title="Instellingen" aria-label="Instellingen">
+            &#9881;
         </button>
         
     </div>
@@ -1968,7 +2670,7 @@
 
     <div class="column">
         <div class="col-header">
-            <span>3. Opdrachten</span>
+            <span>3. OPDRACHTEN</span>
             <span class="col-count" id="count-task">0</span>
         </div>
         <div class="col-list" id="list-task" ondragover="dnd.onDragOver(event)" ondrop="dnd.onDrop(event, 'task')">
@@ -2076,12 +2778,15 @@
         <div id="taskFields" style="display:none;">
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">📅 Deadline</label>
+                    <label class="form-label">&#128197; Deadline</label>
                     <input type="date" id="modalDueDate" class="form-input">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">&#128198; Geplande Datum</label>
-                    <input type="date" id="modalDoDate" class="form-input">
+                    <label class="form-label">&#128197; Geplande Datum</label>
+                    <input type="date" id="modalScheduledDate" class="form-input">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                        Voor weekplanning, vandaag-view en achterstallige taken
+                    </div>
                 </div>
             </div>
 
@@ -2114,6 +2819,13 @@
             <div class="form-group">
                 <label class="form-label">&#128221; Notities</label>
                 <textarea id="modalNotes" class="form-input" rows="3" placeholder="Extra informatie..."></textarea>
+            </div>
+            
+            <div id="modalChecklistSection" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">&#9989; Checklist Items</label>
+                    <div id="modalChecklistItems"></div>
+                </div>
             </div>
         </div>
 
@@ -2176,8 +2888,14 @@
             <div class="pomodoro-task-list" id="pomodoroTaskList">
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Geen items voor deze sessie.<br>
-                    Voeg items toe via de ➕⌨️ knop bij taken.
+                    Voeg items toe via de ⚡⌨️ knop bij taken.
                 </div>
+            </div>
+            
+            <!-- Parkeerplaats binnen Pomodoro -->
+            <div style="margin-top: 16px; padding: 12px; background: rgba(37, 99, 235, 0.05); border-radius: var(--radius-lg); border: 2px solid var(--primary);">
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">💭 GEDACHTEN PARKEREN</div>
+                <input type="text" class="parking-lot-input" id="parkingLotInput" placeholder="Type gedachte... (Enter = Opslaan)" style="width: 100%; border: 2px solid var(--border-color); background: var(--bg-app);" />
             </div>
         </div>
     </div>
@@ -2222,9 +2940,9 @@ if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
         db = firebase.firestore();
-        console.log('âœ… Firebase initialized successfully');
+        console.log('✓ Firebase initialized successfully');
     } catch (error) {
-        console.error('âŒ Firebase initialization failed:', error);
+        console.error('! Firebase initialization failed:', error);
     }
 } else {
     console.warn('⚠️ Firebase SDK not loaded - running in local-only mode');
@@ -2314,7 +3032,7 @@ const firebaseAuth = {
             if (error.message && error.message.includes('does not exist for project')) {
                 toastNotifications.show('warning', 'Firestore Database Nog Niet Actief', 
                     'Ga naar Firebase Console om je database aan te maken. Check de FIRESTORE_SETUP_NOW.md guide.');
-                console.error('🔴 FIRESTORE NOT SETUP - Volg deze link: https://console.cloud.google.com/datastore/setup?project=rvstodo-5a499');
+                console.error('🔍´ FIRESTORE NOT SETUP - Volg deze link: https://console.cloud.google.com/datastore/setup?project=rvstodo-5a499');
             } else if (error.message && error.message.includes('offline')) {
                 toastNotifications.show('warning', 'Offline Modus', 
                     'Je werkt nu offline. Data wordt gesynchroniseerd zodra Firestore beschikbaar is.');
@@ -2347,7 +3065,7 @@ const firebaseAuth = {
                 database: state.db,
                 lastSync: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('âœ… Data synced to cloud');
+            console.log('✓ Data synced to cloud');
             // Don't show toast for every sync - too noisy
         } catch (error) {
             // Check if it's the "database doesn't exist" error
@@ -2358,7 +3076,7 @@ const firebaseAuth = {
                 console.warn('⚠️ Offline - sync will happen when connection restored');
             } else {
                 // Only log real errors, don't spam user with toasts
-                console.error('âŒ Cloud sync failed:', error);
+                console.error('! Cloud sync failed:', error);
             }
         }
     },
@@ -2412,7 +3130,7 @@ const firebaseAuth = {
             toastNotifications.show('success', 'Upload Gelukt!', 
                 `${state.db.categories.length} categorieën geüpload naar cloud`);
             
-            console.log('âœ… Local database uploaded to Firestore');
+            console.log('✓ Local database uploaded to Firestore');
         } catch (error) {
             errorHandler.log(error, 'uploadLocalDatabase');
             toastNotifications.show('error', 'Upload Mislukt', 
@@ -2475,7 +3193,9 @@ const state = {
     currentView: 'all',
     timerInterval: null,
     lastOpenDate: null,
-    activePomodoroSession: null
+    activePomodoroSession: null,
+    undoHistory: [],
+    redoHistory: []
 };
 
 
@@ -2528,13 +3248,13 @@ const toastNotifications = {
         
         const icons = {
             success: '✓',
-            error: '✕',
-            warning: 'âš ',
-            info: 'â„¹'
+            error: '×',
+            warning: '⚠',
+            info: 'ℹ'
         };
         
         toast.innerHTML = `
-            <div class="toast-icon">${icons[type] || 'â„¹'}</div>
+            <div class="toast-icon">${icons[type] || 'ℹ'}</div>
             <div class="toast-content">
                 <div class="toast-title">${this.escapeHtml(title)}</div>
                 ${message ? `<div class="toast-message">${this.escapeHtml(message)}</div>` : ''}
@@ -2676,7 +3396,7 @@ const search = {
                         results.push({
                             type: 'task',
                             item: task,
-                            context: `${cat.name} â†’ ${proj.name}`,
+                            context: `${cat.name} → ${proj.name}`,
                             _catId: cat.id,
                             _projId: proj.id
                         });
@@ -2689,7 +3409,7 @@ const search = {
                             results.push({
                                 type: 'subtask',
                                 item: sub,
-                                context: `${proj.name} â†’ ${task.name}`,
+                                context: `${proj.name} → ${task.name}`,
                                 _catId: cat.id,
                                 _projId: proj.id,
                                 _taskId: task.id
@@ -2767,6 +3487,9 @@ const app = {
             this.initKeyboardShortcuts();
             this.initGlobalHandlers();
             this.initSearchListener();
+            weekView.init();
+            parkingLot.init();
+            parkingLot.load();
             
             // Initialize Firebase Authentication
             try {
@@ -2775,7 +3498,12 @@ const app = {
                 console.error('Firebase initialization failed:', error);
             }
             
-            console.log('âœ… App initialized successfully');
+            // Check for daily/weekly reminders
+            setTimeout(() => {
+                reminders.check();
+            }, 1000);
+            
+            console.log('✓ App initialized successfully');
         } catch (error) {
             errorHandler.log(error, 'app.init');
         }
@@ -2864,10 +3592,10 @@ const app = {
                     pomodoro.close();
                 }
                 
-                // Close onboarding
-                const onboardingOverlay = document.getElementById('onboardingOverlay');
-                if (onboardingOverlay && onboardingOverlay.classList.contains('show')) {
-                    this.closeOnboarding();
+                // Close reminder
+                const reminderModal = document.getElementById('reminderModal');
+                if (reminderModal && reminderModal.classList.contains('show')) {
+                    reminders.dismiss();
                 }
                 return;
             }
@@ -2894,9 +3622,13 @@ const app = {
                 const task = helpers.find('task', state.sel.task);
                 if (task) {
                     undoRedo.saveState();
+                    const wasNotDone = !task.done;
                     task.done = !task.done;
                     if (task.done) {
                         task.completedAt = Date.now();
+                        if (wasNotDone) {
+                            celebration.show(task.name);
+                        }
                     } else {
                         delete task.completedAt;
                     }
@@ -2947,26 +3679,6 @@ const app = {
         });
     },
 
-    showOnboarding() {
-        const overlay = document.getElementById('onboardingOverlay');
-        if (!overlay) return;
-        
-        overlay.style.display = 'flex';
-        requestAnimationFrame(() => overlay.classList.add('show'));
-    },
-
-    closeOnboarding() {
-        const overlay = document.getElementById('onboardingOverlay');
-        if (!overlay) return;
-        
-        overlay.classList.remove('show');
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 300);
-        
-        localStorage.setItem('hasSeenOnboarding', 'true');
-    },
-
     showKeyboardShortcuts() {
         const modal = document.getElementById('keyboardShortcutsModal');
         if (!modal) return;
@@ -2984,23 +3696,82 @@ const app = {
             modal.style.display = 'none';
         }, 200);
     },
+
+    showSettings() {
+        const modal = document.getElementById('settingsModalOverlay');
+        if (!modal) return;
+        
+        // Load current reminders setting
+        const remindersEnabled = localStorage.getItem('remindersEnabled') !== 'false'; // default true
+        const checkbox = document.getElementById('remindersEnabledCheck');
+        if (checkbox) checkbox.checked = remindersEnabled;
+        
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => modal.classList.add('show'));
+    },
+
+    hideSettings() {
+        const modal = document.getElementById('settingsModalOverlay');
+        if (!modal) return;
+        
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 200);
+    },
+    
+    toggleReminders() {
+        const checked = document.getElementById('remindersEnabledCheck').checked;
+        if (checked) {
+            reminders.enable();
+        } else {
+            localStorage.setItem('remindersEnabled', 'false');
+            app.setStatus('Herinneringen uitgeschakeld', 'info');
+        }
+    },
+    
     changeView(view) {
         state.currentView = view;
         
-        const dashboardContainer = document.querySelector('.dashboard-container');
-        const weekPlannerContainer = document.getElementById('weekPlannerContainer');
+        // Update view selector
+        const viewSelector = document.getElementById('viewSelector');
+        if (viewSelector && viewSelector.value !== view) {
+            viewSelector.value = view;
+        }
         
-        if (view === 'weekplan') {
-            dashboardContainer.style.display = 'none';
-            weekPlannerContainer.classList.add('active');
-            weekPlanner.render();
+        const dashboardContainer = document.querySelector('.dashboard-container');
+        if (!dashboardContainer) return;
+        
+        const weekContainer = dashboardContainer.querySelector('.week-view-container');
+        
+        if (view === 'week') {
+            // Week view
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'none';
+            });
+            weekView.render();
         } else {
-            dashboardContainer.style.display = 'flex';
-            weekPlannerContainer.classList.remove('active');
+            // Normale views - verberg week container
+            if (weekContainer) {
+                weekContainer.style.display = 'none';
+            }
+            
+            // Toon normale columns
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'flex';
+            });
             
             if (view === 'all') {
+                // Reset column headers voor all view
+                const taskColHeader = document.querySelector('#list-task').parentElement.querySelector('.col-header');
+                if (taskColHeader && !taskColHeader.innerHTML.includes('3. OPDRACHTEN')) {
+                    taskColHeader.innerHTML = `
+                        <span>3. OPDRACHTEN</span>
+                        <span class="col-count" id="count-task">0</span>
+                    `;
+                }
+                
                 document.querySelectorAll('.column').forEach(col => {
-                    col.style.display = 'flex';
                     col.style.maxWidth = '25%';
                 });
             }
@@ -3019,9 +3790,9 @@ const app = {
             state.db.categories.forEach(cat => {
                 cat.projects?.forEach(proj => {
                     proj.tasks?.forEach(task => {
-                        // Reset alleen als de doDate van gisteren of eerder is
-                        if (task.doDate && task.doDate < today) {
-                            task.doDate = null;
+                        // Reset alleen als de scheduledDate van gisteren of eerder is
+                        if (task.scheduledDate && task.scheduledDate < today) {
+                            task.scheduledDate = null;
                             changed = true;
                         }
                     });
@@ -3123,6 +3894,18 @@ const app = {
             this.renderSmartView();
             return;
         }
+        
+        // Zorg dat alle columns zichtbaar zijn in all view
+        document.querySelectorAll('.column').forEach(col => {
+            col.style.display = 'flex';
+            col.style.maxWidth = '25%';
+        });
+        
+        // Verberg week view als die er is
+        const weekContainer = document.querySelector('.week-view-container');
+        if (weekContainer) {
+            weekContainer.style.display = 'none';
+        }
 
         renderer.renderCol('cat', state.db.categories, state.sel.cat, (id) => {
             state.sel.cat = id; state.sel.proj = null; state.sel.task = null;
@@ -3146,13 +3929,6 @@ const app = {
         const tasks = views.getTasksForView(state.currentView);
         const showDone = document.getElementById('showDoneCheck').checked;
         
-        // View name for header
-        const viewName = {
-            'today': 'Vandaag',
-            'overdue': 'Achterstallig',
-            'search': 'Zoekresultaten'
-        }[state.currentView] || state.currentView;
-        
         ['cat', 'proj'].forEach(col => {
             const el = document.getElementById(`list-${col}`).parentElement;
             el.style.display = 'none';
@@ -3164,15 +3940,13 @@ const app = {
         taskCol.style.display = 'flex';
         taskCol.style.maxWidth = '400px';
         
-        // Update header for smart view
-        if (state.currentView !== 'all') {
-            const colHeader = taskCol.querySelector('.col-header');
-            if (colHeader) {
-                colHeader.innerHTML = `
-                    <span>${viewName}</span>
-                    <span class="col-count" id="count-task">0</span>
-                `;
-            }
+        // Update header - altijd "OPDRACHTEN"
+        const colHeader = taskCol.querySelector('.col-header');
+        if (colHeader) {
+            colHeader.innerHTML = `
+                <span>OPDRACHTEN</span>
+                <span class="col-count" id="count-task">0</span>
+            `;
         }
         
         renderer.renderCol('task', tasks, state.sel.task, (id) => {
@@ -3220,7 +3994,7 @@ const app = {
                 const typeIcons = {
                     category: '📂',
                     project: '📋',
-                    task: '📄',
+                    task: '📄Â',
                     subtask: '✓'
                 };
                 
@@ -3245,7 +4019,7 @@ const app = {
             
             const footer = document.createElement('div');
             footer.className = 'list-footer';
-            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔑 Klik op een item om ernaar te navigeren</div>';
+            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔍‘Â Klik op een item om ernaar te navigeren</div>';
             container.appendChild(footer);
             
             return;
@@ -3282,7 +4056,7 @@ const app = {
                     app.render();
                 };
 
-                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} â†’ ${sub._task}</div>`;
+                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} → ${sub._task}</div>`;
                 
                 el.innerHTML = `
                     ${contextInfo}
@@ -3304,7 +4078,11 @@ const app = {
                                 if (task.id === sub._taskId) {
                                     const subtask = task.subtasks?.find(s => s.id === sub.id);
                                     if (subtask) {
+                                        const wasNotDone = !subtask.done;
                                         subtask.done = checkbox.checked;
+                                        if (subtask.done && wasNotDone) {
+                                            celebration.show(subtask.name);
+                                        }
                                     }
                                 }
                             });
@@ -3410,7 +4188,7 @@ const renderer = {
         visibleItems.forEach((item) => {
             const el = document.createElement('div');
             const isCompleted = item.done || item.status === 'done';
-            const isToday = item.doDate === new Date().setHours(0,0,0,0);
+            const isToday = item.scheduledDate === new Date().setHours(0,0,0,0);
             el.className = `item ${item.id === activeId ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isToday ? 'today-task' : ''}`;
             
             el.draggable = true;
@@ -3435,13 +4213,13 @@ const renderer = {
             btn.onclick = () => modal.open(type);
             footer.appendChild(btn);
         } else {
-            const input = document.createElement('input');
-            input.className = 'inline-input';
-            input.placeholder = `+ Nieuwe ${type === 'task' ? 'Opdracht' : 'Actie'}...`;
-            input.onkeypress = (e) => app.quickAdd(e, type);
-            footer.appendChild(input);
+            // Open modal instead of inline input for tasks and subtasks
+            const btn = document.createElement('div');
+            btn.className = 'add-btn-block';
+            btn.innerHTML = `<span>+</span> Nieuwe ${type === 'task' ? 'Opdracht' : 'Actie'}`;
+            btn.onclick = () => modal.open(type);
+            footer.appendChild(btn);
         }
-        
         container.appendChild(footer);
     },
 
@@ -3603,7 +4381,7 @@ const renderer = {
                 : `<button class="action-btn" data-action="timer-start" title="Start timer">&#9654;</button>`;
             
             const today = new Date().setHours(0,0,0,0);
-            const todayBtn = item.doDate === today
+            const todayBtn = item.scheduledDate === today
                 ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">📅&#10060;</button>`
                 : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">📅</button>`;
             
@@ -3630,7 +4408,7 @@ const renderer = {
                     <div class="checklist-item">
                         <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
                         <span>${checkItem.text}</span>
-                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">✕</button>
+                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">×</button>
                     </div>
                 `).join('');
             }
@@ -3645,7 +4423,7 @@ const renderer = {
                         <button class="action-btn" data-action="save-checklist-input" data-subtask-id="${item.id}" title="Opslaan" 
                                 style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">✓</button>
                         <button class="action-btn danger" data-action="cancel-checklist-input" data-subtask-id="${item.id}" title="Annuleren" 
-                                style="width: 18px; height: 18px; font-size: 10px;">✕</button>
+                                style="width: 18px; height: 18px; font-size: 10px;">×</button>
                     </div>
                 `;
             }
@@ -3677,9 +4455,13 @@ const renderer = {
         if (checkbox) {
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
+                const wasNotDone = !item.done;
                 item.done = e.target.checked;
                 if (item.done) {
                     item.completedAt = Date.now();
+                    if (wasNotDone) {
+                        celebration.show(item.name);
+                    }
                 } else {
                     delete item.completedAt;
                 }
@@ -3922,7 +4704,7 @@ const crud = {
         if (!task) return;
         
         const today = new Date().setHours(0, 0, 0, 0);
-        task.doDate = today;
+        task.scheduledDate = today;
         
         await app.save();
         app.render();
@@ -3934,7 +4716,7 @@ const crud = {
         if (!task) return;
         undoRedo.saveState();
         
-        task.doDate = null;
+        task.scheduledDate = null;
         
         await app.save();
         app.render();
@@ -3957,7 +4739,7 @@ const crud = {
         }).join('');
         
         if (state.db.pomodoroSessions.length === 0) {
-            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "➕⌨️ Sessies" knop.');
+            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "⚡⌨️ Sessies" knop.');
             return;
         }
         
@@ -4122,10 +4904,16 @@ const views = {
                 proj.tasks?.forEach(task => {
                     const taskWithContext = { ...task, _cat: cat.name, _proj: proj.name };
                     
-                    if (view === 'today' && task.doDate === today) {
+                    if (view === 'today' && task.scheduledDate === today) {
+                        // Vandaag: geplande datum is vandaag
                         allTasks.push(taskWithContext);
-                    } else if (view === 'overdue' && task.dueDate && task.dueDate < today && !task.done) {
-                        allTasks.push(taskWithContext);
+                    } else if (view === 'overdue' && !task.done) {
+                        // Achterstallig: deadline in verleden OF geplande datum in verleden
+                        const hasOverdueDeadline = task.dueDate && task.dueDate < today;
+                        const hasOverdueSchedule = task.scheduledDate && task.scheduledDate < today;
+                        if (hasOverdueDeadline || hasOverdueSchedule) {
+                            allTasks.push(taskWithContext);
+                        }
                     } else if (view === 'week') {
                         const weekEnd = today + (7 * 24 * 60 * 60 * 1000);
                         if (task.dueDate && task.dueDate <= weekEnd) {
@@ -4145,7 +4933,7 @@ const views = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    if (task.doDate === today && task.subtasks) {
+                    if (task.scheduledDate === today && task.subtasks) {
                         task.subtasks.forEach(sub => {
                             allSubtasks.push({
                                 ...sub,
@@ -4160,6 +4948,1162 @@ const views = {
             });
         });
         return allSubtasks;
+    }
+};
+
+const weekView = {
+    currentWeekStart: null,
+    
+    init() {
+        this.currentWeekStart = this.getWeekStart(new Date());
+    },
+    
+    getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // maandag
+        return new Date(d.setDate(diff)).setHours(0, 0, 0, 0);
+    },
+    
+    getDayName(date) {
+        const days = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+        return days[date.getDay()];
+    },
+    
+    formatWeekRange(weekStart) {
+        const start = new Date(weekStart);
+        const end = new Date(weekStart + 6 * 86400000);
+        return `${start.getDate()}/${start.getMonth() + 1} - ${end.getDate()}/${end.getMonth() + 1}`;
+    },
+    
+    getWeekNumber(weekStart) {
+        const d = new Date(weekStart);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    },
+    
+    prevWeek() {
+        this.currentWeekStart -= 7 * 86400000;
+        this.render();
+    },
+    
+    nextWeek() {
+        this.currentWeekStart += 7 * 86400000;
+        this.render();
+    },
+    
+    goToToday() {
+        this.currentWeekStart = this.getWeekStart(new Date());
+        this.render();
+    },
+    
+    getTasksForDay(dayTimestamp) {
+        const items = [];
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Taken
+                    if (task.scheduledDate === dayTimestamp && !task.done) {
+                        items.push({
+                            ...task,
+                            _type: 'task',
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id,
+                            _taskId: task.id
+                        });
+                    }
+                    
+                    // Subtaken
+                    task.subtasks?.forEach(sub => {
+                        if (sub.scheduledDate === dayTimestamp && !sub.done) {
+                            items.push({
+                                ...sub,
+                                _type: 'sub',
+                                _cat: cat.name,
+                                _proj: proj.name,
+                                _task: task.name,
+                                _catId: cat.id,
+                                _projId: proj.id,
+                                _taskId: task.id
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        return items;
+    },
+    
+    getUnscheduledTasks() {
+        const items = [];
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Taken zonder scheduledDate
+                    if (!task.scheduledDate && !task.done) {
+                        const hasFutureDueDate = !task.dueDate || task.dueDate >= today;
+                        if (hasFutureDueDate) {
+                            items.push({
+                                ...task,
+                                _type: 'task',
+                                _cat: cat.name,
+                                _proj: proj.name,
+                                _catId: cat.id,
+                                _projId: proj.id,
+                                _taskId: task.id
+                            });
+                        }
+                    }
+                    
+                    // Subtaken zonder scheduledDate
+                    task.subtasks?.forEach(sub => {
+                        if (!sub.scheduledDate && !sub.done) {
+                            const hasFutureDueDate = !sub.dueDate || sub.dueDate >= today;
+                            if (hasFutureDueDate) {
+                                items.push({
+                                    ...sub,
+                                    _type: 'sub',
+                                    _cat: cat.name,
+                                    _proj: proj.name,
+                                    _task: task.name,
+                                    _catId: cat.id,
+                                    _projId: proj.id,
+                                    _taskId: task.id
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+        });
+        return items;
+    },
+    
+    render() {
+        const container = document.querySelector('.dashboard-container');
+        if (!container) return;
+        
+        // Verberg normale columns
+        document.querySelectorAll('.column').forEach(col => {
+            col.style.display = 'none';
+        });
+        
+        // Check of week view container al bestaat
+        let weekContainer = container.querySelector('.week-view-container');
+        if (!weekContainer) {
+            weekContainer = document.createElement('div');
+            weekContainer.className = 'week-view-container';
+            container.appendChild(weekContainer);
+        }
+        
+        // Zorg dat week container zichtbaar is
+        weekContainer.style.display = 'flex';
+        
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            days.push(this.currentWeekStart + i * 86400000);
+        }
+        
+        const today = new Date().setHours(0, 0, 0, 0);
+        const unscheduledTasks = this.getUnscheduledTasks();
+        
+        weekContainer.innerHTML = `
+            <div class="week-header">
+                <div class="week-nav">
+                    <button class="week-nav-btn" onclick="weekView.prevWeek()" title="Vorige week">&#9664;</button>
+                    <div class="week-title">
+                        Week ${this.getWeekNumber(this.currentWeekStart)}: ${this.formatWeekRange(this.currentWeekStart)}
+                    </div>
+                    <button class="week-nav-btn" onclick="weekView.nextWeek()" title="Volgende week">&#9654;</button>
+                </div>
+                <button class="btn btn-primary" onclick="weekView.goToToday()">
+                    Vandaag
+                </button>
+            </div>
+            
+            <div class="week-days-grid">
+                ${days.map(day => this.renderDay(day, day === today)).join('')}
+            </div>
+            
+            <div class="unscheduled-section">
+                <div class="unscheduled-header">
+                    &#128270; Bladeren & Inplannen (${unscheduledTasks.length} taken)
+                </div>
+                <div class="unscheduled-tasks">
+                    ${unscheduledTasks.length > 0 
+                        ? unscheduledTasks.map(task => this.renderUnscheduledTask(task)).join('')
+                        : '<div style="color: var(--text-muted); padding: 20px; text-align: center;">Alle taken zijn ingepland! &#127881;</div>'
+                    }
+                </div>
+            </div>
+        `;
+        
+        this.attachDragListeners();
+    },
+    
+    renderDay(dayTimestamp, isToday) {
+        const date = new Date(dayTimestamp);
+        const tasks = this.getTasksForDay(dayTimestamp);
+        
+        return `
+            <div class="week-day-card ${isToday ? 'today' : ''}" 
+                 data-day="${dayTimestamp}"
+                 ondrop="weekView.handleDrop(event, ${dayTimestamp})"
+                 ondragover="weekView.handleDragOver(event)">
+                <div class="week-day-header">
+                    <div class="week-day-name">${this.getDayName(date)}</div>
+                    <div class="week-day-number">${date.getDate()}</div>
+                </div>
+                <div class="week-day-tasks">
+                    ${tasks.length > 0 
+                        ? tasks.map(task => this.renderTaskCard(task)).join('') 
+                        : '<div class="week-empty-message">Nog niets gepland<br/>&#128197;</div>'
+                    }
+                </div>
+            </div>
+        `;
+    },
+    
+    renderTaskCard(item) {
+        const priorityIcon = item.priority === 'high' ? '&#128308;' : item.priority === 'medium' ? '&#128992;' : '';
+        const typeIcon = item._type === 'sub' ? '&#x2022; ' : ''; // bullet voor subtaken
+        const meta = item._type === 'sub' 
+            ? `${item._cat} / ${item._proj} / ${item._task}`
+            : `${item._cat} / ${item._proj}`;
+        
+        return `
+            <div class="week-task-card" 
+                 draggable="true"
+                 data-task-id="${item.id}"
+                 data-cat-id="${item._catId}"
+                 data-proj-id="${item._projId}"
+                 data-task-parent-id="${item._taskId || ''}"
+                 data-item-type="${item._type || 'task'}"
+                 onclick="weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}')">
+                <div class="week-task-title">${typeIcon}${priorityIcon} ${item.name}</div>
+                <div class="week-task-meta">
+                    <span>${meta}</span>
+                </div>
+            </div>
+        `;
+    },
+    
+    renderUnscheduledTask(item) {
+        const priorityIcon = item.priority === 'high' ? '&#128308;' : item.priority === 'medium' ? '&#128992;' : '';
+        const typeIcon = item._type === 'sub' ? '&#x2022; ' : '';
+        const meta = item._type === 'sub' 
+            ? `${item._cat} / ${item._proj} / ${item._task}`
+            : `${item._cat} / ${item._proj}`;
+            
+        return `
+            <div class="unscheduled-task" 
+                 draggable="true"
+                 data-task-id="${item.id}"
+                 data-cat-id="${item._catId}"
+                 data-proj-id="${item._projId}"
+                 data-task-parent-id="${item._taskId || ''}"
+                 data-item-type="${item._type || 'task'}"
+                 title="${meta}">
+                <div style="font-weight: 500;">${typeIcon}${priorityIcon} ${item.name}</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${meta}</div>
+            </div>
+        `;
+    },
+    
+    attachDragListeners() {
+        const draggables = document.querySelectorAll('[draggable="true"]');
+        draggables.forEach(el => {
+            el.addEventListener('dragstart', (e) => {
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    taskId: el.dataset.taskId,
+                    catId: el.dataset.catId,
+                    projId: el.dataset.projId,
+                    taskParentId: el.dataset.taskParentId || null,
+                    itemType: el.dataset.itemType || 'task'
+                }));
+            });
+            
+            el.addEventListener('dragend', () => {
+                el.classList.remove('dragging');
+                document.querySelectorAll('.drag-over').forEach(e => e.classList.remove('drag-over'));
+            });
+        });
+    },
+    
+    handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
+    },
+    
+    async handleDrop(e, dayTimestamp) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        
+        try {
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const { taskId, catId, projId, taskParentId, itemType } = data;
+            
+            // Zoek de categorie en project
+            const cat = state.db.categories.find(c => c.id === catId);
+            if (!cat) return;
+            
+            const proj = cat.projects?.find(p => p.id === projId);
+            if (!proj) return;
+            
+            undoRedo.saveState();
+            
+            if (itemType === 'sub' && taskParentId) {
+                // Subtaak
+                const parentTask = proj.tasks?.find(t => t.id === taskParentId);
+                if (!parentTask) return;
+                
+                const subtask = parentTask.subtasks?.find(s => s.id === taskId);
+                if (!subtask) return;
+                
+                subtask.scheduledDate = dayTimestamp;
+            } else {
+                // Normale taak
+                const task = proj.tasks?.find(t => t.id === taskId);
+                if (!task) return;
+                
+                task.scheduledDate = dayTimestamp;
+            }
+            
+            await app.save();
+            this.render();
+            app.setStatus('Item verplaatst', 'success');
+        } catch (error) {
+            console.error('Drop error:', error);
+            app.setStatus('Fout bij verplaatsen', 'error');
+        }
+    },
+    
+    openTask(catId, projId, taskId) {
+        // Schakel terug naar normale view en selecteer de taak
+        state.currentView = 'all';
+        state.sel.cat = catId;
+        state.sel.proj = projId;
+        state.sel.task = taskId;
+        app.render();
+    }
+};
+
+const reminders = {
+    check() {
+        console.log('Reminders check starting...');
+        
+        // Check if reminders are enabled
+        const enabled = localStorage.getItem('remindersEnabled') !== 'false'; // default true
+        if (!enabled) {
+            console.log('Reminders disabled');
+            return;
+        }
+        
+        const now = new Date();
+        const today = now.setHours(0, 0, 0, 0);
+        const lastCheck = localStorage.getItem('lastReminderCheck');
+        const lastCheckDate = lastCheck ? parseInt(lastCheck) : null;
+        
+        console.log('Today:', today, 'Last check:', lastCheckDate);
+        
+        // Check voor EERSTE GEBRUIK OOIT
+        const isFirstUse = !localStorage.getItem('hasUsedAppBefore') && 
+                          state.db.categories.length === 0;
+        
+        console.log('First use?', isFirstUse, 'Categories:', state.db.categories.length);
+        
+        if (isFirstUse) {
+            // Eerste gebruik ooit - toon wizard direct zonder reminder
+            console.log('🎉 EERSTE GEBRUIK - Opening wizard directly!');
+            localStorage.setItem('hasUsedAppBefore', 'true');
+            localStorage.setItem('lastReminderCheck', today.toString());
+            setTimeout(() => {
+                morningWizard.open();
+            }, 500);
+            return;
+        }
+        
+        // Toon bij eerste load van de dag of als het een nieuwe dag is
+        if (!lastCheckDate || lastCheckDate !== today) {
+            console.log('New day detected - showing reminder');
+            const dayOfWeek = now.getDay();
+            
+            if (dayOfWeek === 1) {
+                // Monday - Week planning reminder
+                console.log('Monday - Week reminder');
+                this.showWeekReminder();
+            } else {
+                // Other days - Daily reminder
+                console.log('Daily reminder');
+                this.showDailyReminder();
+            }
+            
+            localStorage.setItem('lastReminderCheck', today.toString());
+        } else {
+            console.log('Already checked today - skipping reminder');
+        }
+    },
+    
+    showWeekReminder() {
+        const modal = document.getElementById('reminderModal');
+        const title = document.getElementById('reminderTitle');
+        const message = document.getElementById('reminderMessage');
+        const btn = document.getElementById('reminderActionBtn');
+        
+        title.innerHTML = '&#127774; Goedemorgen! Nieuwe week!';
+        message.textContent = 'Het is maandag! Wil je even je week doornemen en plannen?';
+        btn.innerHTML = '&#128197; Ja, week plannen!';
+        btn.onclick = () => {
+            this.dismiss();
+            app.changeView('week');
+        };
+        
+        modal.classList.add('show');
+        
+        // Auto-dismiss after 15 seconds
+        setTimeout(() => this.dismiss(), 15000);
+    },
+    
+    showDailyReminder() {
+        const modal = document.getElementById('reminderModal');
+        const title = document.getElementById('reminderTitle');
+        const message = document.getElementById('reminderMessage');
+        const btn = document.getElementById('reminderActionBtn');
+        
+        title.innerHTML = '&#9749; Goedemorgen!';
+        message.textContent = 'Wil je even indelen wat je vandaag gaat doen?';
+        btn.innerHTML = '&#128197; Ja, dag indelen!';
+        btn.onclick = () => {
+            this.dismiss();
+            morningWizard.open();
+        };
+        
+        modal.classList.add('show');
+        
+        // Auto-dismiss after 15 seconds
+        setTimeout(() => this.dismiss(), 15000);
+    },
+    
+    accept() {
+        // Action button onclick is set in show functions
+        this.dismiss();
+    },
+    
+    dismiss() {
+        const modal = document.getElementById('reminderModal');
+        modal.classList.remove('show');
+    },
+    
+    disableForever() {
+        localStorage.setItem('remindersEnabled', 'false');
+        this.dismiss();
+        app.setStatus('Herinneringen uitgeschakeld. Aanzetten via Settings.', 'info');
+    },
+    
+    enable() {
+        localStorage.setItem('remindersEnabled', 'true');
+        // Reset last check so it shows today
+        localStorage.removeItem('lastReminderCheck');
+        app.setStatus('Herinneringen ingeschakeld', 'success');
+    }
+};
+
+const celebration = {
+    show(taskName) {
+        const overlay = document.getElementById('celebrationOverlay');
+        const emoji = document.getElementById('celebrationEmoji');
+        const text = document.getElementById('celebrationText');
+        const subtext = document.getElementById('celebrationSubtext');
+        
+        // Random celebratory emoji
+        const emojis = ['🔥', '🎉', '⚡', '🌟', '💪', '🚀', '✨', '🎊', '👏', '🏆'];
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        // Random celebratory text
+        const texts = ['Geweldig!', 'Top gedaan!', 'Yes!', 'Gelukt!', 'Fantastisch!', 'Super!', 'Bravo!'];
+        text.textContent = texts[Math.floor(Math.random() * texts.length)];
+        
+        // Show task name if short enough
+        if (taskName && taskName.length < 30) {
+            subtext.textContent = `"${taskName}" voltooid!`;
+        } else {
+            subtext.textContent = 'Taak voltooid!';
+        }
+        
+        overlay.classList.add('show');
+        
+        // Auto-hide after 2 seconds
+        setTimeout(() => this.hide(), 2000);
+    },
+    
+    hide() {
+        const overlay = document.getElementById('celebrationOverlay');
+        overlay.classList.remove('show');
+    }
+};
+
+// Parkeerplaats (Quick Capture)
+const parkingLot = {
+    inbox: [],
+    
+    init() {
+        const input = document.getElementById('parkingLotInput');
+        if (!input) return;
+        
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && input.value.trim()) {
+                this.capture(input.value.trim());
+                input.value = '';
+            }
+        });
+    },
+    
+    capture(text) {
+        this.inbox.push({
+            id: `inbox-${Date.now()}`,
+            text: sanitizer.sanitize(text),
+            timestamp: Date.now()
+        });
+        this.save();
+        // Subtiele feedback
+        const input = document.getElementById('parkingLotInput');
+        input.placeholder = '✓ Geparkeerd';
+        setTimeout(() => {
+            input.placeholder = 'Type gedachte... (Enter = Opslaan)';
+        }, 1500);
+    },
+    
+    save() {
+        localStorage.setItem('parkingLotInbox', JSON.stringify(this.inbox));
+    },
+    
+    load() {
+        const saved = localStorage.getItem('parkingLotInbox');
+        this.inbox = saved ? JSON.parse(saved) : [];
+    }
+};
+
+// Morning Wizard
+const morningWizard = {
+    currentStep: 1,
+    yesterdayTasks: [],
+    selectedBigThree: [],
+    
+    open() {
+        console.log('Morning Wizard opening...');
+        this.currentStep = 1;
+        this.yesterdayTasks = this.getYesterdayTasks();
+        this.selectedBigThree = [];
+        
+        const overlay = document.getElementById('morningWizard');
+        overlay.classList.add('show');
+        
+        // Setup button handlers
+        const wizardNext = document.getElementById('wizardNext');
+        const wizardBack = document.getElementById('wizardBack');
+        console.log('Wizard buttons:', wizardNext, wizardBack);
+        if (wizardNext) {
+            wizardNext.onclick = () => {
+                console.log('Next button clicked!');
+                this.next();
+            };
+        }
+        if (wizardBack) {
+            wizardBack.onclick = () => {
+                console.log('Back button clicked!');
+                this.back();
+            };
+        }
+        
+        this.renderStep();
+    },
+    
+    close() {
+        document.getElementById('morningWizard').classList.remove('show');
+    },
+    
+    getYesterdayTasks() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayTimestamp = yesterday.setHours(0,0,0,0);
+        
+        const tasks = [];
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.scheduledDate === yesterdayTimestamp && !task.done) {
+                        tasks.push({
+                            ...task,
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id
+                        });
+                    }
+                });
+            });
+        });
+        return tasks;
+    },
+    
+    renderStep() {
+        // Update progress dots
+        document.querySelectorAll('.progress-dot').forEach(dot => {
+            const step = parseInt(dot.dataset.step);
+            dot.classList.toggle('active', step === this.currentStep);
+        });
+        
+        // Update buttons
+        document.getElementById('wizardBack').style.display = this.currentStep > 1 ? 'block' : 'none';
+        
+        const content = document.getElementById('wizardContent');
+        
+        if (this.currentStep === 1) {
+            this.renderStep1(content);
+        } else if (this.currentStep === 2) {
+            this.renderStep2(content);
+        } else if (this.currentStep === 3) {
+            this.renderStep3(content);
+        }
+    },
+    
+    renderStep1(content) {
+        document.getElementById('wizardTitle').textContent = 'Opruimen ✨';
+        document.getElementById('wizardSubtitle').textContent = 'Wat doe je met gisteren\'s taken?';
+        
+        if (this.yesterdayTasks.length === 0) {
+            content.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+                    <div style="font-size: 20px; color: var(--text-main); font-weight: 600;">Geen taken van gisteren!</div>
+                    <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Goed bezig. Laten we verder gaan.</div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="wizard-question">Welke taken van gisteren moeten vandaag alsnog?</div>
+                <div class="wizard-cards" id="yesterdayCards"></div>
+            `;
+            
+            const cardsContainer = content.querySelector('#yesterdayCards');
+            this.yesterdayTasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'wizard-card';
+                card.innerHTML = `
+                    <div class="wizard-card-title">${task.name}</div>
+                    <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="wizard-btn wizard-btn-primary" style="flex: 1; padding: 8px 16px;" data-action="today" data-task-id="${task.id}">
+                            Vandaag
+                        </button>
+                        <button class="wizard-btn wizard-btn-secondary" style="flex: 1; padding: 8px 16px;" data-action="later" data-task-id="${task.id}">
+                            Later
+                        </button>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+                
+                // Event listeners
+                card.querySelector('[data-action="today"]').onclick = () => this.moveToToday(task);
+                card.querySelector('[data-action="later"]').onclick = () => this.moveToLater(task);
+            });
+        }
+    },
+    
+    moveToToday(task) {
+        const today = new Date().setHours(0,0,0,0);
+        
+        // Vind de echte task
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                const realTask = proj.tasks?.find(t => t.id === task.id);
+                if (realTask) {
+                    realTask.scheduledDate = today;
+                }
+            });
+        });
+        
+        // Verwijder uit lijst
+        this.yesterdayTasks = this.yesterdayTasks.filter(t => t.id !== task.id);
+        app.save();
+        this.renderStep();
+    },
+    
+    moveToLater(task) {
+        // Verwijder scheduledDate
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                const realTask = proj.tasks?.find(t => t.id === task.id);
+                if (realTask) {
+                    realTask.scheduledDate = null;
+                }
+            });
+        });
+        
+        this.yesterdayTasks = this.yesterdayTasks.filter(t => t.id !== task.id);
+        app.save();
+        this.renderStep();
+    },
+    
+    renderStep2(content) {
+        document.getElementById('wizardTitle').textContent = 'De Big Three 🎯';
+        document.getElementById('wizardSubtitle').textContent = 'Kies max. 3 prioriteiten voor vandaag';
+        
+        const today = new Date().setHours(0,0,0,0);
+        const availableTasks = [];
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
+                        availableTasks.push({
+                            ...task,
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id
+                        });
+                    }
+                });
+            });
+        });
+        
+        content.innerHTML = `
+            <div class="wizard-question">Wat MOET vandaag echt af? (Max 3)</div>
+            <div id="selectedCount" style="text-align: center; color: var(--text-muted); margin-bottom: 16px;">
+                ${this.selectedBigThree.length}/3 gekozen
+            </div>
+            <div class="wizard-cards" id="bigThreeCards"></div>
+        `;
+        
+        const cardsContainer = content.querySelector('#bigThreeCards');
+        availableTasks.forEach(task => {
+            const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+            const card = document.createElement('div');
+            card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
+            card.innerHTML = `
+                <div class="wizard-card-title">${task.name}</div>
+                <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+            `;
+            
+            card.onclick = () => {
+                if (isSelected) {
+                    this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
+                } else {
+                    if (this.selectedBigThree.length < 3) {
+                        this.selectedBigThree.push(task);
+                    }
+                }
+                this.renderStep();
+            };
+            
+            cardsContainer.appendChild(card);
+        });
+    },
+    
+    renderStep3(content) {
+        document.getElementById('wizardTitle').textContent = 'Volgorde 📋';
+        document.getElementById('wizardSubtitle').textContent = 'Waar begin je mee?';
+        
+        document.getElementById('wizardNext').textContent = 'Start de dag!';
+        
+        content.innerHTML = `
+            <div class="wizard-question">Sleep de taken in de volgorde waarin je ze wilt doen</div>
+            <div class="wizard-cards" id="orderCards"></div>
+        `;
+        
+        const cardsContainer = content.querySelector('#orderCards');
+        this.selectedBigThree.forEach((task, idx) => {
+            const card = document.createElement('div');
+            card.className = 'wizard-card';
+            card.draggable = true;
+            card.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--text-muted);">${idx + 1}</div>
+                    <div style="flex: 1;">
+                        <div class="wizard-card-title">${task.name}</div>
+                        <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Drag & drop
+            card.addEventListener('dragstart', () => {
+                card.classList.add('dragging');
+            });
+            
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+            });
+            
+            cardsContainer.appendChild(card);
+        });
+        
+        // Drop zones
+        cardsContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = this.getDragAfterElement(cardsContainer, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (afterElement == null) {
+                cardsContainer.appendChild(dragging);
+            } else {
+                cardsContainer.insertBefore(dragging, afterElement);
+            }
+        });
+        
+        cardsContainer.addEventListener('drop', () => {
+            // Update order
+            const cards = [...cardsContainer.querySelectorAll('.wizard-card')];
+            const newOrder = cards.map((card, idx) => {
+                const taskName = card.querySelector('.wizard-card-title').textContent;
+                return this.selectedBigThree.find(t => t.name === taskName);
+            }).filter(Boolean);
+            this.selectedBigThree = newOrder;
+            this.renderStep();
+        });
+    },
+    
+    getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.wizard-card:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+    
+    next() {
+        console.log('Wizard next() called, currentStep:', this.currentStep);
+        if (this.currentStep < 3) {
+            this.currentStep++;
+            this.renderStep();
+        } else {
+            this.finish();
+        }
+    },
+    
+    back() {
+        if (this.currentStep > 1) {
+            this.currentStep--;
+            this.renderStep();
+        }
+    },
+    
+    finish() {
+        // Plan de Big Three voor vandaag
+        const today = new Date().setHours(0,0,0,0);
+        
+        this.selectedBigThree.forEach(task => {
+            state.db.categories.forEach(cat => {
+                cat.projects?.forEach(proj => {
+                    const realTask = proj.tasks?.find(t => t.id === task.id);
+                    if (realTask) {
+                        realTask.scheduledDate = today;
+                    }
+                });
+            });
+        });
+        
+        app.save();
+        this.close();
+        app.changeView('today');
+        app.setStatus('Dag ingepland! Succes! 💪', 'success');
+    }
+};
+
+// Session Review
+const sessionReview = {
+    currentIndex: 0,
+    items: [],
+    stats: {
+        focusTime: 0,
+        trashed: 0,
+        quickDone: 0,
+        later: 0
+    },
+    
+    open() {
+        // Brain dump vraag eerst
+        this.showBrainDump();
+    },
+    
+    showBrainDump() {
+        const overlay = document.getElementById('sessionReview');
+        const content = document.getElementById('reviewContent');
+        const actions = document.getElementById('reviewActions');
+        
+        overlay.classList.add('show');
+        
+        content.innerHTML = `
+            <div class="review-card">
+                <div class="review-card-title">Nog iets in je hoofd? 🧠</div>
+                <textarea class="brain-dump-input" id="brainDumpInput" placeholder="Typ hier alles wat je niet wilt vergeten voordat je pauze neemt..."></textarea>
+                <div style="font-size: 12px; color: var(--text-muted); text-align: center;">
+                    Leeg je hoofd. We sorteren het straks wel.
+                </div>
+            </div>
+        `;
+        
+        actions.innerHTML = `
+            <button class="wizard-btn wizard-btn-secondary" onclick="sessionReview.skipBrainDump()">Niks, verder</button>
+            <button class="wizard-btn wizard-btn-primary" onclick="sessionReview.saveBrainDump()">Opslaan & Verder</button>
+        `;
+        
+        document.getElementById('brainDumpInput').focus();
+    },
+    
+    skipBrainDump() {
+        this.startReview();
+    },
+    
+    saveBrainDump() {
+        const text = document.getElementById('brainDumpInput').value.trim();
+        if (text) {
+            // Split op regels en voeg toe aan parking lot
+            parkingLot.load();
+            text.split('\n').filter(line => line.trim()).forEach(line => {
+                parkingLot.inbox.push({
+                    id: `inbox-${Date.now()}-${Math.random()}`,
+                    text: sanitizer.sanitize(line.trim()),
+                    timestamp: Date.now()
+                });
+            });
+            parkingLot.save();
+        }
+        this.startReview();
+    },
+    
+    startReview() {
+        // Laad inbox
+        parkingLot.load();
+        this.items = [...parkingLot.inbox];
+        this.currentIndex = 0;
+        
+        if (this.items.length === 0) {
+            this.showCompletion();
+        } else {
+            this.renderCard();
+        }
+    },
+    
+    renderCard() {
+        const content = document.getElementById('reviewContent');
+        const actions = document.getElementById('reviewActions');
+        const item = this.items[this.currentIndex];
+        
+        content.innerHTML = `
+            <div class="review-card">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+                    ${this.currentIndex + 1} van ${this.items.length}
+                </div>
+                <div class="review-card-title">${item.text}</div>
+                <div class="review-actions">
+                    <button class="review-btn review-btn-trash" onclick="sessionReview.handleTrash()">
+                        <div class="review-btn-icon">🗑️</div>
+                        <div class="review-btn-label">Prullenbak</div>
+                        <div class="review-btn-key">Toets 1</div>
+                    </button>
+                    <button class="review-btn review-btn-quick" onclick="sessionReview.handleQuick()">
+                        <div class="review-btn-icon">⚡</div>
+                        <div class="review-btn-label">Max 2 Min. Doe Nu</div>
+                        <div class="review-btn-key">Toets 2</div>
+                    </button>
+                    <button class="review-btn review-btn-later" onclick="sessionReview.handleLater()">
+                        <div class="review-btn-icon">📦</div>
+                        <div class="review-btn-label">Later</div>
+                        <div class="review-btn-key">Toets 3</div>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        actions.innerHTML = '';
+        
+        // Keyboard shortcuts
+        const handler = (e) => {
+            if (e.key === '1') this.handleTrash();
+            else if (e.key === '2') this.handleQuick();
+            else if (e.key === '3') this.handleLater();
+        };
+        
+        document.addEventListener('keypress', handler);
+        // Store handler for cleanup
+        this.keyHandler = handler;
+    },
+    
+    handleTrash() {
+        this.stats.trashed++;
+        this.next();
+    },
+    
+    handleQuick() {
+        // Direct naar "is het gelukt?" vraag
+        this.askIfDone();
+    },
+    
+    askIfDone() {
+        const content = document.getElementById('reviewContent');
+        const item = this.items[this.currentIndex];
+        
+        content.innerHTML = `
+            <div class="review-card">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+                    ${this.currentIndex + 1} van ${this.items.length}
+                </div>
+                <div class="review-card-title" style="margin-bottom: 32px;">${item.text}</div>
+                
+                <div style="margin-bottom: 24px; text-align: center; padding: 20px; background: rgba(37, 99, 235, 0.05); border-radius: var(--radius-lg);">
+                    <div style="font-size: 14px; color: var(--text-muted);">
+                        ⚡ Max 2 minuten actie
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="wizard-btn wizard-btn-primary" onclick="sessionReview.markQuickDone()" style="width: 100%; padding: 20px; font-size: 16px;">
+                        ✅ Ja, het is af!
+                    </button>
+                    
+                    <div style="text-align: center; margin: 8px 0; color: var(--text-muted); font-size: 14px;">
+                        Niet gelukt?
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <button class="review-btn review-btn-trash" onclick="sessionReview.handleTrash()" style="padding: 16px;">
+                            <div style="font-size: 24px;">🗑️</div>
+                            <div style="font-size: 12px; margin-top: 8px;">Prullenbak</div>
+                        </button>
+                        <button class="review-btn review-btn-later" onclick="sessionReview.handleLater()" style="padding: 16px;">
+                            <div style="font-size: 24px;">📦</div>
+                            <div style="font-size: 12px; margin-top: 8px;">Voor Later</div>
+                        </button>
+                    </div>
+                    
+                    <button class="wizard-btn wizard-btn-secondary" onclick="sessionReview.renderCard()" style="width: 100%; margin-top: 8px;">
+                        Terug
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+    
+    markQuickDone() {
+        this.stats.quickDone++;
+        this.next();
+    },
+    
+    handleLater() {
+        const item = this.items[this.currentIndex];
+        this.stats.later++;
+        
+        // Maak nieuwe taak in "Ongeorganiseerd" categorie
+        let unsortedCat = state.db.categories.find(c => c.name === 'Ongeorganiseerd');
+        if (!unsortedCat) {
+            unsortedCat = {
+                id: `cat-${Date.now()}`,
+                name: 'Ongeorganiseerd',
+                icon: '📦',
+                projects: [{
+                    id: `proj-${Date.now()}`,
+                    name: 'Te Sorteren',
+                    icon: '📋',
+                    tasks: []
+                }]
+            };
+            state.db.categories.push(unsortedCat);
+        }
+        
+        const project = unsortedCat.projects[0];
+        if (!project.tasks) project.tasks = [];
+        
+        project.tasks.push({
+            id: `task-${Date.now()}`,
+            name: item.text,
+            done: false,
+            priority: 'none',
+            subtasks: []
+        });
+        
+        app.save();
+        this.next();
+    },
+    
+    next() {
+        this.currentIndex++;
+        
+        if (this.currentIndex >= this.items.length) {
+            // Clear inbox
+            parkingLot.inbox = [];
+            parkingLot.save();
+            
+            // Remove keyboard handler
+            if (this.keyHandler) {
+                document.removeEventListener('keypress', this.keyHandler);
+            }
+            
+            this.showCompletion();
+        } else {
+            this.renderCard();
+        }
+    },
+    
+    showCompletion() {
+        const content = document.getElementById('reviewContent');
+        const actions = document.getElementById('reviewActions');
+        
+        // Bereken focus tijd (als pomodoro actief was)
+        const focusMinutes = Math.round(this.stats.focusTime / 60) || 0;
+        
+        content.innerHTML = `
+            <div class="review-card">
+                <div class="review-card-title">🎉 Hoofd is leeg!</div>
+                
+                ${focusMinutes > 0 ? `
+                    <div class="review-stats">
+                        <div class="review-stat-title">Gefocust</div>
+                        <div class="review-stat-value">${focusMinutes} min</div>
+                    </div>
+                ` : ''}
+                
+                ${this.items.length > 0 ? `
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                        <div style="font-size: 14px; color: var(--text-muted);">
+                            ${this.stats.trashed} weggegooid · 
+                            ${this.stats.quickDone} direct gedaan · 
+                            ${this.stats.later} voor later
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="review-pause-suggestion">
+                    <div class="review-pause-text">💧 Tijd voor dopamine</div>
+                    <div style="font-size: 14px; color: var(--text-muted);">
+                        Ga even staan of haal water. Je hebt het verdiend.
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        actions.innerHTML = `
+            <button class="wizard-btn wizard-btn-primary" onclick="sessionReview.close()">Sluit en neem pauze</button>
+        `;
+    },
+    
+    close() {
+        document.getElementById('sessionReview').classList.remove('show');
     }
 };
 
@@ -4281,22 +6225,49 @@ const modal = {
         const taskFields = document.getElementById('taskFields');
 
         document.getElementById('modalTitle').textContent = mode === 'create' 
-            ? `Nieuwe ${type === 'cat' ? 'Categorie' : type === 'proj' ? 'Project' : 'Opdracht'}` 
+            ? `Nieuwe ${type === 'cat' ? 'Categorie' : type === 'proj' ? 'Project' : type === 'task' ? 'Opdracht' : 'Actie'}` 
             : 'Bewerken';
             
         nameInput.value = item ? item.name : '';
 
-        if (type === 'task') {
+        // Show task fields for both tasks and subtasks
+        if (type === 'task' || type === 'sub') {
             taskFields.style.display = 'block';
             
-            document.getElementById('modalDueDate').value = item?.dueDate ? 
-                new Date(item.dueDate).toISOString().split('T')[0] : '';
-            document.getElementById('modalDoDate').value = item?.doDate ? 
-                new Date(item.doDate).toISOString().split('T')[0] : '';
+            // Deadline - lokaal formatteren
+            if (item?.dueDate) {
+                const d = new Date(item.dueDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                document.getElementById('modalDueDate').value = `${year}-${month}-${day}`;
+            } else {
+                document.getElementById('modalDueDate').value = '';
+            }
+            
+            // Geplande datum - lokaal formatteren
+            if (item?.scheduledDate) {
+                const d = new Date(item.scheduledDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                document.getElementById('modalScheduledDate').value = `${year}-${month}-${day}`;
+            } else {
+                document.getElementById('modalScheduledDate').value = '';
+            }
+            
             document.getElementById('modalTimeEstimate').value = item?.timeEstimate || '';
             document.getElementById('modalPriority').value = item?.priority || 'none';
             document.getElementById('modalRecurring').value = item?.recurring?.frequency || '';
             document.getElementById('modalNotes').value = item?.notes || '';
+            
+            // Show checklist section for subtasks
+            if (type === 'sub') {
+                this.renderChecklistSection(item);
+            } else {
+                const checklistSection = document.getElementById('modalChecklistSection');
+                if (checklistSection) checklistSection.style.display = 'none';
+            }
         } else {
             taskFields.style.display = 'none';
         }
@@ -4403,6 +6374,78 @@ const modal = {
         nameInput.onkeypress = (e) => { if(e.key === 'Enter') this.save(); };
     },
 
+    renderChecklistSection(item) {
+        const checklistSection = document.getElementById('modalChecklistSection');
+        if (!checklistSection) return;
+        
+        checklistSection.style.display = 'block';
+        const checklistContainer = document.getElementById('modalChecklistItems');
+        checklistContainer.innerHTML = '';
+        
+        // Render existing checklist items
+        if (item?.checklist && item.checklist.length > 0) {
+            item.checklist.forEach((checkItem, idx) => {
+                const div = document.createElement('div');
+                div.className = 'checklist-item';
+                div.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-app); border-radius: var(--radius-md); margin-bottom: 6px;';
+                div.innerHTML = `
+                    <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-checklist-idx="${idx}" style="width: 16px; height: 16px;">
+                    <span style="flex: 1; font-size: 14px;">${checkItem.text}</span>
+                    <button class="action-btn danger" data-action="remove-checklist" data-idx="${idx}" title="Verwijder" style="width: 24px; height: 24px; font-size: 12px;">&#10005;</button>
+                `;
+                
+                // Checkbox toggle handler
+                const checkbox = div.querySelector('input[type="checkbox"]');
+                checkbox.onchange = () => {
+                    if (item.checklist[idx]) {
+                        item.checklist[idx].done = checkbox.checked;
+                    }
+                };
+                
+                // Remove button handler
+                const removeBtn = div.querySelector('[data-action="remove-checklist"]');
+                removeBtn.onclick = () => {
+                    if (item.checklist) {
+                        item.checklist.splice(idx, 1);
+                        this.renderChecklistSection(item);
+                    }
+                };
+                
+                checklistContainer.appendChild(div);
+            });
+        }
+        
+        // Add new checklist item input
+        const addDiv = document.createElement('div');
+        addDiv.style.cssText = 'display: flex; gap: 8px; margin-top: 8px;';
+        addDiv.innerHTML = `
+            <input type="text" id="newChecklistItemInput" placeholder="Nieuw checklist item..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 14px;">
+            <button class="btn btn-primary" id="addChecklistItemBtn" style="padding: 8px 16px;">Toevoegen</button>
+        `;
+        checklistContainer.appendChild(addDiv);
+        
+        // Add button handler
+        const addBtn = addDiv.querySelector('#addChecklistItemBtn');
+        const input = addDiv.querySelector('#newChecklistItemInput');
+        
+        const addItem = () => {
+            const text = sanitizer.sanitize(input.value.trim());
+            if (!text) return;
+            
+            if (!item.checklist) item.checklist = [];
+            item.checklist.push({ text, done: false });
+            
+            input.value = '';
+            this.renderChecklistSection(item);
+            input.focus();
+        };
+        
+        addBtn.onclick = addItem;
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') addItem();
+        };
+    },
+
     close() {
         const overlay = document.getElementById('modalOverlay');
         overlay.classList.remove('show');
@@ -4431,7 +6474,7 @@ const modal = {
             
             if (this.target.mode === 'edit') {
                 this.target.item.name = newName;
-                if (this.target.type !== 'task') {
+                if (this.target.type !== 'task' && this.target.type !== 'sub') {
                     this.target.item.icon = this.target.selectedIcon;
                 }
                 
@@ -4456,7 +6499,7 @@ const modal = {
                 }
             } else {
                 const newItem = helpers.createItem(newName, this.target.type);
-                if (this.target.type !== 'task') {
+                if (this.target.type !== 'task' && this.target.type !== 'sub') {
                     newItem.icon = this.target.selectedIcon;
                 }
                 
@@ -4464,14 +6507,21 @@ const modal = {
                 if(list) list.push(newItem);
             }
 
-            if (this.target.type === 'task') {
-                const item = this.target.item || helpers.getList('task').slice(-1)[0];
+            // Handle task and subtask fields
+            if (this.target.type === 'task' || this.target.type === 'sub') {
+                const item = this.target.item || helpers.getList(this.target.type).slice(-1)[0];
                 
                 const dueDate = document.getElementById('modalDueDate').value;
                 item.dueDate = dueDate ? new Date(dueDate).getTime() : null;
                 
-                const doDate = document.getElementById('modalDoDate').value;
-                item.doDate = doDate ? new Date(doDate).setHours(0,0,0,0) : null;
+                const scheduledDate = document.getElementById('modalScheduledDate').value;
+                if (scheduledDate) {
+                    // Fix timezone bug: parse lokaal ipv UTC
+                    const [year, month, day] = scheduledDate.split('-').map(Number);
+                    item.scheduledDate = new Date(year, month - 1, day).setHours(0,0,0,0);
+                } else {
+                    item.scheduledDate = null;
+                }
                 
                 item.timeEstimate = parseInt(document.getElementById('modalTimeEstimate').value) || null;
                 item.priority = document.getElementById('modalPriority').value;
@@ -4491,6 +6541,8 @@ const modal = {
                 } else {
                     item.recurring = null;
                 }
+                
+                // Checklist is already saved in renderChecklistSection, no need to do it here
             }
 
             await app.save();
@@ -4531,7 +6583,18 @@ const helpers = {
             notes: '',
             schedule: null  // { day: 'monday', time: '09:00' }
         };
-        if (type === 'sub') return { ...base, done: false, checklist: [], schedule: null };
+        if (type === 'sub') return { 
+            ...base, 
+            done: false, 
+            checklist: [], 
+            schedule: null,
+            dueDate: null,
+            doDate: null,
+            timeEstimate: null,
+            timeSpent: 0,
+            priority: 'none',
+            notes: ''
+        };
     },
     
     getList(type) {
@@ -4659,7 +6722,7 @@ const sessions = {
             const div = document.createElement('div');
             div.className = 'session-item';
             div.innerHTML = `
-                <span class="session-icon">âž•</span>
+                <span class="session-icon">⚡</span>
                 <input type="text" class="session-name-input" value="${session.name}" data-session-id="${session.id}">
                 <button class="action-btn danger" data-action="delete" data-session-id="${session.id}" title="Verwijder">&#128465;</button>
             `;
@@ -4693,7 +6756,7 @@ const sessions = {
         const div = document.createElement('div');
         div.className = 'session-item';
         div.innerHTML = `
-            <span class="session-icon">âž•</span>
+            <span class="session-icon">⚡</span>
             <input type="text" class="session-name-input new-session-input" placeholder="Naam voor nieuwe sessie..." autofocus>
             <button class="action-btn" data-action="save-new" title="Opslaan">&#10003;</button>
             <button class="action-btn danger" data-action="cancel-new" title="Annuleren">&#10006;</button>
@@ -4804,7 +6867,7 @@ const pomodoro = {
         });
         
         if (state.db.pomodoroSessions.length === 0) {
-            selector.innerHTML = '<option value="">Geen sessies - Maak er een aan via ➕⌨️ Sessies</option>';
+            selector.innerHTML = '<option value="">Geen sessies - Maak er een aan via ⚡⌨️ Sessies</option>';
         }
     },
 
@@ -4820,6 +6883,12 @@ const pomodoro = {
             overlay.style.display = 'none';
             this.stop();
         }, 300);
+        
+        // Open session review als er items in parking lot zijn
+        parkingLot.load();
+        if (parkingLot.inbox.length > 0 || this.isRunning) {
+            sessionReview.open();
+        }
     },
 
     setDuration(minutes) {
@@ -4898,6 +6967,12 @@ const pomodoro = {
         
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OeeSwgYZbnx56FPEg1Ms+fwtWEaBjmP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zvmwhBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg1Ms+fwtWEaBjiP1fPOeSsFJHbH8N+RQAoUXrTp66hVFApGnt/zv2whBSuBzvLZiTYIG2m88OeeSwgYZbnw56FQEg==');
         audio.play().catch(() => {});
+        
+        // Save focus time for stats
+        sessionReview.stats.focusTime = this.duration;
+        
+        // Sluit pomodoro en open session review
+        this.close();
     },
 
     updateDisplay() {
@@ -4937,7 +7012,7 @@ const pomodoro = {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Selecteer een sessie hierboven.<br>
-                    Maak een sessie aan via ➕⌨️ Sessies knop.
+                    Maak een sessie aan via ⚡⌨️ Sessies knop.
                 </div>
             `;
             return;
@@ -4965,7 +7040,7 @@ const pomodoro = {
                             pomodoroItems.push({
                                 type: 'subtask',
                                 item: subtask,
-                                context: `${proj.name} â†’ ${task.name}`,
+                                context: `${proj.name} → ${task.name}`,
                                 parentTask: task
                             });
                         }
@@ -4980,7 +7055,7 @@ const pomodoro = {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
                     Geen items voor deze sessie.<br>
-                    Voeg items toe via de ➕⌨️ knop bij taken.
+                    Voeg items toe via de ⚡⌨️ knop bij taken.
                 </div>
             `;
             return;
@@ -5054,9 +7129,13 @@ const pomodoro = {
             const checkbox = div.querySelector('.task-checkbox');
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
+                const wasNotDone = !pomItem.item.done;
                 pomItem.item.done = checkbox.checked;
                 if (pomItem.item.done) {
                     pomItem.item.completedAt = Date.now();
+                    if (wasNotDone) {
+                        celebration.show(pomItem.item.name);
+                    }
                 } else {
                     delete pomItem.item.completedAt;
                 }
@@ -5251,7 +7330,7 @@ const weekPlanner = {
         el.innerHTML = `
             <span class="task-time">${task.schedule.time}</span>
             <span class="task-name" title="${task.name}">${task.name}</span>
-            <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">✕</button>
+            <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">×</button>
         `;
         
         el.ondragstart = (e) => {
@@ -5279,7 +7358,7 @@ const weekPlanner = {
                         tasks.push({
                             task,
                             type: 'task',
-                            context: `${cat.name} â†’ ${proj.name}`
+                            context: `${cat.name} → ${proj.name}`
                         });
                     }
                     
@@ -5288,7 +7367,7 @@ const weekPlanner = {
                             tasks.push({
                                 task: sub,
                                 type: 'subtask',
-                                context: `${proj.name} â†’ ${task.name}`
+                                context: `${proj.name} → ${task.name}`
                             });
                         }
                     });
@@ -5327,7 +7406,7 @@ const weekPlanner = {
                 el.style.borderColor = 'var(--primary)';
             }
             el.style.cursor = 'pointer';
-            el.innerHTML = `<span>${cat.icon || '📄'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
+            el.innerHTML = `<span>${cat.icon || '📄Â'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
             el.onclick = () => {
                 state.miniDashboard.selectedCat = cat.id;
                 state.miniDashboard.selectedProj = null;
@@ -5630,7 +7709,7 @@ const feedbackSystem = {
         const preview = document.getElementById('feedbackScreenshotPreview');
         preview.className = 'feedback-screenshot-preview has-image';
         preview.innerHTML = `
-            <button class="feedback-screenshot-remove" onclick="feedbackSystem.removeImage()" title="Verwijder afbeelding">✕</button>
+            <button class="feedback-screenshot-remove" onclick="feedbackSystem.removeImage()" title="Verwijder afbeelding">×</button>
             <img src="${dataUrl}" alt="Preview">
         `;
     },
@@ -5739,7 +7818,7 @@ const feedbackSystem = {
         // Disable submit button
         const submitBtn = document.getElementById('feedbackSubmitBtn');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = 'â³ Versturen...';
+        submitBtn.innerHTML = '⏳ Versturen...';
         
         try {
             // Use uploaded/pasted screenshot if available
@@ -5820,7 +7899,7 @@ app.init();
     <div class="modal">
         <div class="modal-header">
             <h2 class="modal-title">⌨️ Sneltoetsen</h2>
-            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">✕</button>
+            <button class="pomodoro-close" onclick="app.hideKeyboardShortcuts()" aria-label="Sluiten">×</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
@@ -5871,49 +7950,77 @@ app.init();
     <p style="margin: 0; font-size: 12px; opacity: 0.8;">Je kunt nog steeds export/import gebruiken om je data op te slaan.</p>
 </div>
 
-<!-- Onboarding Overlay -->
-<div class="onboarding-overlay" id="onboardingOverlay">
-    <div class="onboarding-content">
-        <div class="onboarding-title">👋 Welkom bij ToDo Dashboard!</div>
-        <div class="onboarding-message">
-            Organiseer je werk in 4 eenvoudige lagen: Categorieën â†’ Projecten â†’ Opdrachten â†’ Subtaken
-        </div>
-        <div class="onboarding-steps">
-            <div class="onboarding-step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h3>📂 Kies je database</h3>
-                    <p>Klik op "Database Kiezen" om een JSON bestand te selecteren (of maak een nieuwe aan).</p>
-                </div>
-            </div>
-            <div class="onboarding-step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h3>📂️ Maak categorieën</h3>
-                    <p>Begin met het maken van categorieën (bijv. Werk, Privé, Projecten).</p>
-                </div>
-            </div>
-            <div class="onboarding-step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h3>âš¡ Gebruik sneltoetsen</h3>
-                    <p>
-                        <span class="keyboard-shortcut">Ctrl+K</span> Zoeken
-                        <span class="keyboard-shortcut">Ctrl+Z</span> Ongedaan maken
-                        <span class="keyboard-shortcut">Spatie</span> Snel toevoegen
-                        <span class="keyboard-shortcut">X</span> Toggle voltooid
-                    </p>
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="app.closeOnboarding()" style="font-size: 16px; padding: 12px 32px;">
-            🚀 Laten we beginnen!
+
+<!-- Daily/Weekly Reminder Modal -->
+<div class="reminder-modal" id="reminderModal">
+    <div class="reminder-header">
+        <span id="reminderTitle">🌅 Goedemorgen!</span>
+        <span class="reminder-close" onclick="reminders.dismiss()">&times;</span>
+    </div>
+    <div class="reminder-message" id="reminderMessage">
+        Wil je je week plannen?
+    </div>
+    <div class="reminder-actions">
+        <button class="reminder-btn reminder-btn-primary" id="reminderActionBtn" onclick="reminders.accept()">
+            Ja, plannen!
         </button>
+        <button class="reminder-btn reminder-btn-secondary" onclick="reminders.dismiss()">
+            Nu niet
+        </button>
+    </div>
+    <div class="reminder-dismiss">
+        <span class="reminder-dismiss-link" onclick="reminders.disableForever()">
+            Laat niet meer zien
+        </span>
+    </div>
+</div>
+
+<!-- Celebration Overlay -->
+<div class="celebration-overlay" id="celebrationOverlay">
+    <div class="celebration-content">
+        <div class="celebration-emoji" id="celebrationEmoji">🔥</div>
+        <div class="celebration-text" id="celebrationText">Geweldig!</div>
+        <div class="celebration-subtext" id="celebrationSubtext">Taak voltooid!</div>
+    </div>
+</div>
+
+<!-- Parkeerplaats (Quick Capture) -->
+<div class="parking-lot" id="parkingLot" style="display:none;">
+    <input type="text" class="parking-lot-input" id="parkingLotInput" placeholder="💭 Gedachte? Parkeer hem hier... (Enter om op te slaan)" />
+</div>
+
+<!-- Morning Wizard -->
+<div class="wizard-overlay" id="morningWizard">
+    <div class="wizard-header">
+        <div class="wizard-title" id="wizardTitle">Goedemorgen! 🌅</div>
+        <div class="wizard-subtitle" id="wizardSubtitle">Laten we je dag voorbereiden</div>
+        <div class="wizard-progress">
+            <div class="progress-dot" data-step="1"></div>
+            <div class="progress-dot" data-step="2"></div>
+            <div class="progress-dot" data-step="3"></div>
+        </div>
+    </div>
+    <div class="wizard-content" id="wizardContent"></div>
+    <div class="wizard-actions">
+        <button class="wizard-btn wizard-btn-secondary" id="wizardBack" style="display:none;">Vorige</button>
+        <button class="wizard-btn wizard-btn-primary" id="wizardNext">Volgende</button>
+    </div>
+</div>
+
+<!-- Session Review -->
+<div class="wizard-overlay" id="sessionReview">
+    <div class="wizard-header">
+        <div class="wizard-title">Hoofd leegmaken 🧠</div>
+        <div class="wizard-subtitle">Even je gedachten parkeren</div>
+    </div>
+    <div class="wizard-content" id="reviewContent"></div>
+    <div class="wizard-actions" id="reviewActions">
+        <button class="wizard-btn wizard-btn-primary" onclick="sessionReview.startReview()">Start Review</button>
     </div>
 </div>
 
 <!-- ===== FEEDBACK SYSTEM ===== -->
-<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛 Bug, â“ Vraag)" aria-label="Geef feedback">
+<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛Bug, ? Vraag)" aria-label="Geef feedback">
     💬
 </button>
 
@@ -5922,7 +8029,7 @@ app.init();
     <div class="modal">
         <div class="modal-header">
             <h2 class="modal-title">💬 Geef Feedback</h2>
-            <button class="pomodoro-close" onclick="feedbackSystem.close()" aria-label="Sluiten">✕</button>
+            <button class="pomodoro-close" onclick="feedbackSystem.close()" aria-label="Sluiten">×</button>
         </div>
         
         <div class="feedback-modal-content">
@@ -5930,13 +8037,13 @@ app.init();
                 <label class="form-label">Type Feedback</label>
                 <div class="feedback-type-selector">
                     <button class="feedback-type-btn selected" data-type="bug" onclick="feedbackSystem.selectType('bug')">
-                        🐛 Bug
+                        🐛Bug
                     </button>
                     <button class="feedback-type-btn" data-type="feature" onclick="feedbackSystem.selectType('feature')">
                         💡 Feature
                     </button>
                     <button class="feedback-type-btn" data-type="question" onclick="feedbackSystem.selectType('question')">
-                        â“ Vraag
+                        ? Vraag
                     </button>
                     <button class="feedback-type-btn" data-type="other" onclick="feedbackSystem.selectType('other')">
                         💬 Anders
@@ -5973,7 +8080,7 @@ app.init();
             <div id="feedbackScreenshotPreview"></div>
             
             <div class="feedback-info">
-                â„¹ï¸ Bedankt voor je hulp! 🙏
+                ℹ️ Bedankt voor je hulp! 🙏
             </div>
             
             <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
@@ -5991,5 +8098,30 @@ app.init();
 </div>
 
 </body>
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">&#9881; Instellingen</h2>
+            <button class="pomodoro-close" onclick="app.hideSettings()" aria-label="Sluiten">&#10005;</button>
+        </div>
+        
+        <div style="padding: 24px;">
+            <div class="form-group">
+                <label class="form-label">Dagelijkse Herinneringen</label>
+                <label class="toggle-filter" style="cursor: pointer;">
+                    <input type="checkbox" id="remindersEnabledCheck" checked onchange="app.toggleReminders()">
+                    <span>Toon dagelijkse herinneringen</span>
+                </label>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    Krijg een vriendelijke herinnering op maandagochtend om je week te plannen, en op andere dagen om je dag in te delen.
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="app.hideSettings()">Sluiten</button>
+        </div>
+    </div>
+</div>
 </html>
-
