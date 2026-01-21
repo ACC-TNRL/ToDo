@@ -1664,6 +1664,422 @@
         body.dark-mode .compatibility-warning { background: #78350f; border-color: #f59e0b; }
         .compatibility-warning.show { display: block; }
 
+        /* ===== TODAY PRIORITY LIST STYLES ===== */
+        .today-priority-container {
+            display: none;
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .today-priority-container.active {
+            display: block;
+        }
+        
+        .today-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .today-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .today-date {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        
+        .today-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .today-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        
+        .today-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .priority-section {
+            margin-bottom: 24px;
+        }
+        
+        .priority-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* TODAY ITEM CARDS - Base Styles */
+        .today-item {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            transition: all 0.2s ease;
+            cursor: move;
+            position: relative;
+        }
+        
+        .today-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .today-item.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+        
+        /* TASK CARD - Blue accent, larger */
+        .today-item.type-task {
+            border-left: 5px solid #3b82f6;
+            background: linear-gradient(to right, #eff6ff 0%, var(--bg-panel) 20px);
+        }
+        
+        body.dark-mode .today-item.type-task {
+            background: linear-gradient(to right, #1e3a8a 0%, var(--bg-panel) 20px);
+        }
+        
+        .today-item.type-task .item-type-badge {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        /* SUBTASK CARD - Green accent, medium */
+        .today-item.type-subtask {
+            border-left: 5px solid #22c55e;
+            background: linear-gradient(to right, #dcfce7 0%, var(--bg-panel) 20px);
+            padding: 14px;
+        }
+        
+        body.dark-mode .today-item.type-subtask {
+            background: linear-gradient(to right, #14532d 0%, var(--bg-panel) 20px);
+        }
+        
+        .today-item.type-subtask .item-type-badge {
+            background: #22c55e;
+            color: white;
+        }
+        
+        /* CHECKLIST CARD - Orange accent, compact */
+        .today-item.type-checklist {
+            border-left: 5px solid #f59e0b;
+            background: linear-gradient(to right, #fef3c7 0%, var(--bg-panel) 20px);
+            padding: 12px;
+        }
+        
+        body.dark-mode .today-item.type-checklist {
+            background: linear-gradient(to right, #78350f 0%, var(--bg-panel) 20px);
+        }
+        
+        .today-item.type-checklist .item-type-badge {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        /* Item Content Layout */
+        .today-item-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .item-type-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .today-item-title {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+        
+        .today-item.type-subtask .today-item-title {
+            font-size: 14px;
+        }
+        
+        .today-item.type-checklist .today-item-title {
+            font-size: 13px;
+        }
+        
+        .today-item-context {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .context-separator {
+            color: var(--text-light);
+        }
+        
+        .today-item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .today-action-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .today-action-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .today-action-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .today-action-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .today-action-btn.success {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+        
+        .today-action-btn.success:hover {
+            background: #16a34a;
+        }
+        
+        .today-action-btn.danger {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .today-action-btn.danger:hover {
+            background: #dc2626;
+        }
+        
+        /* Completed Section - Dopamine Design */
+        .today-completed-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid var(--border-color);
+        }
+        
+        .completed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #dcfce7 0%, #a7f3d0 100%);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+        }
+        
+        body.dark-mode .completed-header {
+            background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        }
+        
+        .completed-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+        }
+        
+        .completed-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #166534;
+        }
+        
+        body.dark-mode .completed-title {
+            color: #86efac;
+        }
+        
+        .completed-badge {
+            background: white;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        body.dark-mode .completed-badge {
+            background: #052e16;
+            color: #86efac;
+        }
+        
+        .completed-progress {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #166534;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        body.dark-mode .completed-progress {
+            color: #86efac;
+        }
+        
+        .completed-progress-bar {
+            width: 120px;
+            height: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        
+        .completed-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 99px;
+            transition: width 0.5s ease;
+        }
+        
+        .completed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .completed-list.collapsed {
+            display: none;
+        }
+        
+        .completed-toggle {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .completed-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        /* Completed Item Styling */
+        .today-item.completed {
+            opacity: 0.7;
+            border-style: dashed;
+            background: var(--bg-app);
+        }
+        
+        .today-item.completed:hover {
+            opacity: 1;
+        }
+        
+        .today-item.completed .today-item-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        
+        .today-item.completed .item-type-badge {
+            opacity: 0.7;
+        }
+        
+        /* Celebration Animation */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .today-item.just-completed {
+            animation: celebrate 0.5s ease;
+        }
+
+        /* Empty State */
+        .today-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        .today-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        
+        .today-empty-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .today-empty-hint {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
         /* ===== FEEDBACK SYSTEM STYLES ===== */
         .feedback-button {
             position: fixed;
@@ -1838,14 +2254,6 @@
         }
 
         /* ===== WEEK VIEW ===== */
-        .week-view-container {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            width: 100%;
-            gap: 20px;
-            overflow-y: auto;
-        }
         
         .week-header {
             display: flex;
@@ -1992,10 +2400,44 @@
             transform: rotate(2deg);
         }
         
+        /* Week Task Card Type Differentiation */
+        .week-task-card.type-task {
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .week-task-card.type-subtask {
+            border-left: 3px solid #22c55e;
+        }
+        
+        .week-task-card.type-checklist {
+            border-left: 3px solid #f59e0b;
+        }
+        
+        .week-task-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        
+        .week-task-badge {
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
         .week-task-title {
             font-weight: 500;
             color: var(--text-main);
-            margin-bottom: 4px;
+            flex: 1;
+            font-size: 13px;
+        }
+        
+        .week-task-card.type-subtask .week-task-title {
+            font-size: 12px;
+        }
+        
+        .week-task-card.type-checklist .week-task-title {
+            font-size: 11px;
         }
         
         .week-task-meta {
@@ -2054,6 +2496,19 @@
         .unscheduled-task:hover {
             border-color: var(--primary);
             box-shadow: var(--shadow-sm);
+        }
+        
+        /* Unscheduled Task Type Differentiation */
+        .unscheduled-task.type-task {
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .unscheduled-task.type-subtask {
+            border-left: 3px solid #22c55e;
+        }
+        
+        .unscheduled-task.type-checklist {
+            border-left: 3px solid #f59e0b;
         }
         
         /* Daily/Weekly Reminders */
@@ -2560,7 +3015,7 @@
 
     <div class="controls-area">
         <!-- Search Input -->
-        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="🔍 Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
+        <input type="text" id="searchInput" class="btn btn-secondary" placeholder="🔍 Zoeken... (Ctrl+K)" style="width: 220px; padding: 6px 12px;" aria-label="Zoeken in taken" />
         
         <!-- Undo/Redo Buttons -->
         <div class="undo-redo-controls">
@@ -2577,7 +3032,7 @@
             <option value="today">📅 Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
             <option value="week">📅 Week</option>
-            <option value="search" style="display:none;">🔍 Zoekresultaten</option>
+            <option value="search" style="display:none;">🔍 Zoekresultaten</option>
         </select>
         </button>
 
@@ -2688,6 +3143,44 @@
         </div>
     </div>
 
+</div>
+
+<!-- Today Priority List View -->
+<div class="today-priority-container" id="todayPriorityContainer">
+    <div class="today-header">
+        <div>
+            <div class="today-title">
+                📅 Vandaag
+                <span class="today-date" id="todayDate">Maandag 20 januari 2025</span>
+            </div>
+        </div>
+        <div class="today-stats">
+            <div class="today-stat">
+                <span>📄</span>
+                <span id="todayTaskCount">0</span>
+                <span>Opdrachten</span>
+            </div>
+            <div class="today-stat">
+                <span>✓</span>
+                <span id="todaySubtaskCount">0</span>
+                <span>Subtaken</span>
+            </div>
+            <div class="today-stat">
+                <span>□</span>
+                <span id="todayChecklistCount">0</span>
+                <span>Checklist</span>
+            </div>
+            <div class="today-stat">
+                <span>✅</span>
+                <span id="todayCompletedCount">0</span>
+                <span>Voltooid</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="today-list" id="todayList">
+        <!-- Will be populated by JavaScript -->
+    </div>
 </div>
 
 <!-- Week Planner View -->
@@ -3091,6 +3584,7 @@ const firebaseAuth = {
         if (!this.isEnabled) {
             loginBtn.style.display = 'none';
             userInfo.style.display = 'none';
+            app.setStatus('Lokaal', 'info');
             return;
         }
         
@@ -3101,9 +3595,11 @@ const firebaseAuth = {
             userInfo.querySelector('.user-email').textContent = email;
             const initial = email.charAt(0).toUpperCase();
             document.getElementById('userInitial').textContent = initial;
+            app.setStatus('Verbonden', 'success');
         } else {
             loginBtn.style.display = 'flex';
             userInfo.style.display = 'none';
+            app.setStatus('Lokaal', 'info');
         }
     },
     
@@ -3312,7 +3808,16 @@ const undoRedo = {
             state.db = JSON.parse(previousState);
             
             app.save();
-            app.render();
+            
+            // Render based on current view
+            if (state.currentView === 'today') {
+                todayView.render();
+            } else if (state.currentView === 'week') {
+                weekView.render();
+            } else {
+                app.render();
+            }
+            
             this.updateButtons();
             
             toastNotifications.show('info', 'Ongedaan gemaakt', '', 2000);
@@ -3334,7 +3839,16 @@ const undoRedo = {
             state.db = JSON.parse(redoState);
             
             app.save();
-            app.render();
+            
+            // Render based on current view
+            if (state.currentView === 'today') {
+                todayView.render();
+            } else if (state.currentView === 'week') {
+                weekView.render();
+            } else {
+                app.render();
+            }
+            
             this.updateButtons();
             
             toastNotifications.show('info', 'Opnieuw gedaan', '', 2000);
@@ -3742,27 +4256,39 @@ const app = {
         const dashboardContainer = document.querySelector('.dashboard-container');
         if (!dashboardContainer) return;
         
-        const weekContainer = dashboardContainer.querySelector('.week-view-container');
+        const weekContainer = document.getElementById('weekPlannerContainer');
+        const todayContainer = document.getElementById('todayPriorityContainer');
+        
+        // Hide all special containers first
+        if (weekContainer) weekContainer.classList.remove('active');
+        if (todayContainer) todayContainer.classList.remove('active');
         
         if (view === 'week') {
             // Week view
             document.querySelectorAll('.column').forEach(col => {
                 col.style.display = 'none';
             });
-            weekView.render();
-        } else {
-            // Normale views - verberg week container
             if (weekContainer) {
-                weekContainer.style.display = 'none';
+                weekContainer.classList.add('active');
+                weekView.render();
             }
-            
-            // Toon normale columns
+        } else if (view === 'today') {
+            // Today Priority List view
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'none';
+            });
+            if (todayContainer) {
+                todayContainer.classList.add('active');
+                todayView.render();
+            }
+        } else {
+            // Normal views (all, overdue, search)
             document.querySelectorAll('.column').forEach(col => {
                 col.style.display = 'flex';
             });
             
             if (view === 'all') {
-                // Reset column headers voor all view
+                // Reset column headers for all view
                 const taskColHeader = document.querySelector('#list-task').parentElement.querySelector('.col-header');
                 if (taskColHeader && !taskColHeader.innerHTML.includes('3. OPDRACHTEN')) {
                     taskColHeader.innerHTML = `
@@ -3879,16 +4405,26 @@ const app = {
                        `<span>&#8505;</span> ${msg}`;
         el.className = `status-pill ${type}`;
         
-        // Tijdelijke statussen keren terug naar "Verbonden" na 5 seconden
-        if (msg !== 'Verbonden') {
+        // Tijdelijke statussen keren terug naar status gebaseerd op Firebase connectie
+        if (msg !== 'Verbonden' && msg !== 'Lokaal') {
             setTimeout(() => {
-                this.setStatus('Verbonden', 'success');
+                // Alleen "Verbonden" tonen als daadwerkelijk ingelogd bij Firebase
+                if (firebaseAuth.currentUser && firebaseAuth.isEnabled) {
+                    this.setStatus('Verbonden', 'success');
+                } else {
+                    this.setStatus('Lokaal', 'info');
+                }
             }, 5000);
         }
     },
 
     render() {
         const showDone = document.getElementById('showDoneCheck').checked;
+
+        // Today and Week views have their own rendering
+        if (state.currentView === 'today' || state.currentView === 'week') {
+            return; // Already rendered by changeView()
+        }
 
         if (state.currentView !== 'all') {
             this.renderSmartView();
@@ -3900,12 +4436,6 @@ const app = {
             col.style.display = 'flex';
             col.style.maxWidth = '25%';
         });
-        
-        // Verberg week view als die er is
-        const weekContainer = document.querySelector('.week-view-container');
-        if (weekContainer) {
-            weekContainer.style.display = 'none';
-        }
 
         renderer.renderCol('cat', state.db.categories, state.sel.cat, (id) => {
             state.sel.cat = id; state.sel.proj = null; state.sel.task = null;
@@ -4019,7 +4549,7 @@ const app = {
             
             const footer = document.createElement('div');
             footer.className = 'list-footer';
-            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔍‘Â Klik op een item om ernaar te navigeren</div>';
+            footer.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">🔍 Klik op een item om ernaar te navigeren</div>';
             container.appendChild(footer);
             
             return;
@@ -4393,9 +4923,14 @@ const renderer = {
             actionButtons = `<button class="action-btn archive" data-action="archive" title="Archiveer">&#128230;</button>`;
         }
         if (type === 'sub') {
+            const today = new Date().setHours(0,0,0,0);
+            const todayBtn = item.scheduledDate === today
+                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">📅&#10060;</button>`
+                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">📅</button>`;
+            
             const pomodoroBtn = `<button class="action-btn" data-action="manage-sub-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
             const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">✓</button>`;
-            actionButtons = pomodoroBtn + checklistBtn;
+            actionButtons = todayBtn + pomodoroBtn + checklistBtn;
         }
 
         // Checklist items voor subtaken
@@ -4404,13 +4939,24 @@ const renderer = {
             let checklistItems = '';
             
             if (item.checklist && item.checklist.length > 0) {
-                checklistItems = item.checklist.map((checkItem, idx) => `
-                    <div class="checklist-item">
-                        <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
-                        <span>${checkItem.text}</span>
-                        <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: auto;">×</button>
-                    </div>
-                `).join('');
+                const today = new Date().setHours(0,0,0,0);
+                checklistItems = item.checklist.map((checkItem, idx) => {
+                    const todayBtn = checkItem.scheduledDate === today
+                        ? `<button class="action-btn" data-action="remove-checklist-today" data-index="${idx}" title="Verwijder uit vandaag" style="width: 24px; height: 18px; font-size: 10px;">📅&#10060;</button>`
+                        : `<button class="action-btn" data-action="set-checklist-today" data-index="${idx}" title="Plan voor vandaag" style="width: 18px; height: 18px; font-size: 10px;">📅</button>`;
+                    
+                    const pomodoroBtn = `<button class="action-btn" data-action="add-checklist-pomodoro" data-index="${idx}" title="Toevoegen aan Pomodoro" style="width: 18px; height: 18px; font-size: 10px;">⏱️</button>`;
+                    
+                    return `
+                        <div class="checklist-item">
+                            <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
+                            <span>${checkItem.text}</span>
+                            ${todayBtn}
+                            ${pomodoroBtn}
+                            <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: 4px;">×</button>
+                        </div>
+                    `;
+                }).join('');
             }
             
             // Add input field if adding new item
@@ -4582,6 +5128,50 @@ const renderer = {
             };
         });
         
+        // Checklist today buttons
+        el.querySelectorAll('[data-action="set-checklist-today"]').forEach(todayBtn => {
+            todayBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const idx = parseInt(todayBtn.dataset.index);
+                if (item.checklist && item.checklist[idx]) {
+                    const today = new Date().setHours(0, 0, 0, 0);
+                    if (!item.checklist[idx].scheduledDate) {
+                        item.checklist[idx].scheduledDate = today;
+                        item.checklist[idx].todayPriority = 999;
+                        await app.save();
+                        app.setStatus("Checklist item toegevoegd aan vandaag", "success");
+                        app.render();
+                    }
+                }
+            };
+        });
+        
+        el.querySelectorAll('[data-action="remove-checklist-today"]').forEach(todayBtn => {
+            todayBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const idx = parseInt(todayBtn.dataset.index);
+                if (item.checklist && item.checklist[idx]) {
+                    delete item.checklist[idx].scheduledDate;
+                    delete item.checklist[idx].todayPriority;
+                    await app.save();
+                    app.setStatus("Checklist item verwijderd uit vandaag", "success");
+                    app.render();
+                }
+            };
+        });
+        
+        // Checklist pomodoro buttons
+        el.querySelectorAll('[data-action="add-checklist-pomodoro"]').forEach(pomodoroBtn => {
+            pomodoroBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const idx = parseInt(pomodoroBtn.dataset.index);
+                if (item.checklist && item.checklist[idx]) {
+                    // Use existing manageItemSessions functionality
+                    crud.manageItemSessions(item.checklist[idx], 'checklist');
+                }
+            };
+        });
+        
         // Checklist input field
         const checklistInput = el.querySelector('.checklist-input');
         if (checklistInput) {
@@ -4698,29 +5288,83 @@ const crud = {
         app.render();
     },
 
-    async setToday(taskId) {
-        const task = helpers.findTaskById(taskId);
+    async setToday(itemId) {
         undoRedo.saveState();
-        if (!task) return;
-        
         const today = new Date().setHours(0, 0, 0, 0);
-        task.scheduledDate = today;
+        let itemFound = false;
         
-        await app.save();
-        app.render();
-        app.setStatus("Taak ingepland voor vandaag", "success");
+        // Try to find as task
+        const task = helpers.findTaskById(itemId);
+        if (task) {
+            task.scheduledDate = today;
+            task.todayPriority = 999;
+            itemFound = true;
+            await app.save();
+            app.render();
+            app.setStatus("Taak ingepland voor vandaag", "success");
+            return;
+        }
+        
+        // Try to find as subtask
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.subtasks) {
+                        const subtask = task.subtasks.find(sub => sub.id === itemId);
+                        if (subtask) {
+                            subtask.scheduledDate = today;
+                            subtask.todayPriority = 999;
+                            itemFound = true;
+                        }
+                    }
+                });
+            });
+        });
+        
+        if (itemFound) {
+            await app.save();
+            app.render();
+            app.setStatus("Subtaak ingepland voor vandaag", "success");
+        }
     },
 
-    async removeFromToday(taskId) {
-        const task = helpers.findTaskById(taskId);
-        if (!task) return;
+    async removeFromToday(itemId) {
         undoRedo.saveState();
+        let itemFound = false;
         
-        task.scheduledDate = null;
+        // Try to find as task
+        const task = helpers.findTaskById(itemId);
+        if (task) {
+            delete task.scheduledDate;
+            delete task.todayPriority;
+            itemFound = true;
+            await app.save();
+            app.render();
+            app.setStatus("Taak verwijderd uit vandaag", "success");
+            return;
+        }
         
-        await app.save();
-        app.render();
-        app.setStatus("Taak verwijderd uit vandaag", "success");
+        // Try to find as subtask
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.subtasks) {
+                        const subtask = task.subtasks.find(sub => sub.id === itemId);
+                        if (subtask) {
+                            delete subtask.scheduledDate;
+                            delete subtask.todayPriority;
+                            itemFound = true;
+                        }
+                    }
+                });
+            });
+        });
+        
+        if (itemFound) {
+            await app.save();
+            app.render();
+            app.setStatus("Subtaak verwijderd uit vandaag", "success");
+        }
     },
 
     async manageItemSessions(item, itemType) {
@@ -4951,6 +5595,480 @@ const views = {
     }
 };
 
+const todayView = {
+    getAllTodayItems() {
+        const items = [];
+        const today = new Date().setHours(0,0,0,0);
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Tasks scheduled for today
+                    if (task.scheduledDate === today) {
+                        items.push({
+                            type: 'task',
+                            item: task,
+                            id: task.id,
+                            catId: cat.id,
+                            projId: proj.id,
+                            context: `${cat.name} → ${proj.name}`,
+                            priority: task.todayPriority || 999,
+                            done: task.done || false
+                        });
+                    }
+                    
+                    // Subtasks scheduled for today
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (sub.scheduledDate === today) {
+                                items.push({
+                                    type: 'subtask',
+                                    item: sub,
+                                    id: sub.id,
+                                    catId: cat.id,
+                                    projId: proj.id,
+                                    taskId: task.id,
+                                    context: `${cat.name} → ${proj.name} → ${task.name}`,
+                                    priority: sub.todayPriority || 999,
+                                    done: sub.done || false
+                                });
+                            }
+                            
+                            // Checklist items scheduled for today (independent of parent)
+                            if (sub.checklist) {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (checkItem.scheduledDate === today) {
+                                        items.push({
+                                            type: 'checklist',
+                                            item: checkItem,
+                                            id: `${sub.id}-check-${idx}`,
+                                            catId: cat.id,
+                                            projId: proj.id,
+                                            taskId: task.id,
+                                            subtaskId: sub.id,
+                                            checklistIndex: idx,
+                                            context: `${cat.name} → ${proj.name} → ${task.name} → ${sub.name}`,
+                                            priority: checkItem.todayPriority || 999,
+                                            done: checkItem.done || false
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        
+        // Sort by priority
+        items.sort((a, b) => a.priority - b.priority);
+        return items;
+    },
+    
+    render() {
+        const allItems = this.getAllTodayItems();
+        const list = document.getElementById('todayList');
+        const dateEl = document.getElementById('todayDate');
+        
+        // Update date
+        const today = new Date();
+        const days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+        const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+        dateEl.textContent = `${days[today.getDay()]} ${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+        
+        // Separate completed and active items
+        const activeItems = allItems.filter(i => !i.done);
+        const completedItems = allItems.filter(i => i.done);
+        
+        // Sort completed items by completion time (most recent first)
+        completedItems.sort((a, b) => {
+            const aTime = a.item.completedAt || 0;
+            const bTime = b.item.completedAt || 0;
+            return bTime - aTime;
+        });
+        
+        // Update stats
+        const taskCount = allItems.filter(i => i.type === 'task' && !i.done).length;
+        const subtaskCount = allItems.filter(i => i.type === 'subtask' && !i.done).length;
+        const checklistCount = allItems.filter(i => i.type === 'checklist' && !i.done).length;
+        const completedCount = completedItems.length;
+        
+        document.getElementById('todayTaskCount').textContent = taskCount;
+        document.getElementById('todaySubtaskCount').textContent = subtaskCount;
+        document.getElementById('todayChecklistCount').textContent = checklistCount;
+        document.getElementById('todayCompletedCount').textContent = completedCount;
+        
+        // Clear list
+        list.innerHTML = '';
+        
+        if (allItems.length === 0) {
+            list.innerHTML = `
+                <div class="today-empty">
+                    <div class="today-empty-icon">📅</div>
+                    <div class="today-empty-text">Geen taken ingepland voor vandaag</div>
+                    <div class="today-empty-hint">Gebruik de 📅 knop bij taken, subtaken of checklist items</div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render active items
+        activeItems.forEach((itemData, index) => {
+            const card = this.createCard(itemData, index, false);
+            list.appendChild(card);
+        });
+        
+        // Render completed section if there are completed items
+        if (completedItems.length > 0) {
+            const completedSection = this.createCompletedSection(completedItems, allItems.length);
+            list.appendChild(completedSection);
+        }
+    },
+    
+    createCompletedSection(completedItems, totalItems) {
+        const section = document.createElement('div');
+        section.className = 'today-completed-section';
+        
+        const percentage = Math.round((completedItems.length / totalItems) * 100);
+        const isCollapsed = localStorage.getItem('todayCompletedCollapsed') === 'true';
+        
+        section.innerHTML = `
+            <div class="completed-header" onclick="todayView.toggleCompleted()">
+                <div class="completed-title">
+                    <span class="completed-toggle ${isCollapsed ? 'collapsed' : ''}">▼</span>
+                    <span>🎉 Voltooid!</span>
+                    <div class="completed-badge">
+                        <span>✨</span>
+                        <span>${completedItems.length}</span>
+                    </div>
+                </div>
+                <div class="completed-progress">
+                    <span>${percentage}% klaar</span>
+                    <div class="completed-progress-bar">
+                        <div class="completed-progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="completed-list ${isCollapsed ? 'collapsed' : ''}" id="completedList"></div>
+        `;
+        
+        const completedList = section.querySelector('#completedList');
+        completedItems.forEach((itemData, index) => {
+            const card = this.createCard(itemData, index, true);
+            completedList.appendChild(card);
+        });
+        
+        return section;
+    },
+    
+    toggleCompleted() {
+        const list = document.querySelector('.completed-list');
+        const toggle = document.querySelector('.completed-toggle');
+        const isCollapsed = list.classList.toggle('collapsed');
+        toggle.classList.toggle('collapsed');
+        localStorage.setItem('todayCompletedCollapsed', isCollapsed);
+    },
+    
+    createCard(itemData, index, isCompleted) {
+        const { type, item, context } = itemData;
+        const card = document.createElement('div');
+        card.className = `today-item type-${type} ${itemData.done ? 'completed' : ''}`;
+        card.dataset.id = itemData.id;
+        card.dataset.type = type;
+        card.dataset.catId = itemData.catId;
+        card.dataset.projId = itemData.projId;
+        card.dataset.taskId = itemData.taskId || '';
+        card.dataset.subtaskId = itemData.subtaskId || '';
+        card.dataset.checklistIndex = itemData.checklistIndex || '';
+        card.dataset.priority = index;
+        
+        // Only make active items draggable
+        if (!isCompleted) {
+            card.draggable = true;
+        }
+        
+        // Type badges
+        const typeBadges = {
+            task: '📄 Opdracht',
+            subtask: '✓ Subtaak',
+            checklist: '□ Checklist'
+        };
+        
+        // Actions based on type
+        let actionButtons = '';
+        if (!isCompleted) {
+            // All types can be added to Pomodoro and completed
+            actionButtons = `
+                <button class="today-action-btn success" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
+                    ✅ ${itemData.done ? 'Heropen' : (type === 'checklist' ? 'Afvinken' : 'Voltooien')}
+                </button>
+                <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${item.name || item.text}')">
+                    ⏱️ Pomodoro
+                </button>
+                <button class="today-action-btn danger" onclick="todayView.removeFromToday('${itemData.id}', '${type}')">
+                    🗑️ Verwijder
+                </button>
+            `;
+        } else {
+            // Completed items can only be reopened
+            actionButtons = `
+                <button class="today-action-btn" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
+                    ↩️ Heropen
+                </button>
+            `;
+        }
+        
+        card.innerHTML = `
+            <div class="today-item-header">
+                ${!isCompleted ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">⋮⋮</div>' : ''}
+                <div class="item-type-badge">${typeBadges[type]}</div>
+                <div class="today-item-title">${item.name || item.text}</div>
+            </div>
+            <div class="today-item-context">${context}</div>
+            <div class="today-item-actions">
+                ${actionButtons}
+            </div>
+        `;
+        
+        // Drag and drop handlers (only for active items)
+        if (!isCompleted) {
+            card.addEventListener('dragstart', (e) => {
+                // Save undo state before reordering
+                undoRedo.saveState();
+                
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', itemData.id);
+                card.classList.add('dragging');
+            });
+            
+            card.addEventListener('dragend', async () => {
+                card.classList.remove('dragging');
+                await this.updatePriorities();
+            });
+            
+            card.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const list = document.getElementById('todayList');
+                const afterElement = this.getDragAfterElement(list, e.clientY);
+                const dragging = document.querySelector('.dragging');
+                if (dragging) {
+                    if (afterElement == null) {
+                        // Check if we're trying to append to completed section
+                        const completedSection = list.querySelector('.today-completed-section');
+                        if (completedSection) {
+                            list.insertBefore(dragging, completedSection);
+                        } else {
+                            list.appendChild(dragging);
+                        }
+                    } else {
+                        list.insertBefore(dragging, afterElement);
+                    }
+                }
+            });
+        }
+        
+        return card;
+    },
+    
+    async updatePriorities() {
+        // Update priorities based on current DOM order
+        const cards = document.querySelectorAll('.today-item:not(.completed)');
+        const today = new Date().setHours(0,0,0,0);
+        
+        cards.forEach((card, index) => {
+            const itemId = card.dataset.id;
+            const type = card.dataset.type;
+            
+            state.db.categories.forEach(cat => {
+                cat.projects?.forEach(proj => {
+                    proj.tasks?.forEach(task => {
+                        if (type === 'task' && task.id === itemId && task.scheduledDate === today) {
+                            task.todayPriority = index;
+                        }
+                        
+                        if (task.subtasks) {
+                            task.subtasks.forEach(sub => {
+                                if (type === 'subtask' && sub.id === itemId && sub.scheduledDate === today) {
+                                    sub.todayPriority = index;
+                                }
+                                
+                                if (sub.checklist && type === 'checklist') {
+                                    sub.checklist.forEach((checkItem, idx) => {
+                                        if (itemId === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                            checkItem.todayPriority = index;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+        
+        await app.save();
+    },
+    
+    getDragAfterElement(container, y) {
+        // Only consider active (non-completed) items for drag positioning
+        const draggableElements = [...container.querySelectorAll('.today-item:not(.dragging):not(.completed)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+    
+    async toggleDone(id, type, event) {
+        // Save undo state before making changes
+        undoRedo.saveState();
+        
+        const today = new Date().setHours(0,0,0,0);
+        let itemFound = false;
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                        task.done = !task.done;
+                        if (task.done) {
+                            task.completedAt = Date.now();
+                            celebration.show(task.name);
+                        } else {
+                            delete task.completedAt;
+                        }
+                        itemFound = true;
+                    }
+                    
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                                sub.done = !sub.done;
+                                if (sub.done) {
+                                    sub.completedAt = Date.now();
+                                    celebration.show(sub.name);
+                                } else {
+                                    delete sub.completedAt;
+                                }
+                                itemFound = true;
+                            }
+                            
+                            if (sub.checklist && type === 'checklist') {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                        checkItem.done = !checkItem.done;
+                                        if (checkItem.done) {
+                                            checkItem.completedAt = Date.now();
+                                            celebration.show(checkItem.text);
+                                        } else {
+                                            delete checkItem.completedAt;
+                                        }
+                                        itemFound = true;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        
+        if (itemFound) {
+            await app.save();
+            this.render();
+        }
+    },
+    
+    async removeFromToday(id, type) {
+        // Save undo state before making changes
+        undoRedo.saveState();
+        
+        const today = new Date().setHours(0,0,0,0);
+        let itemFound = false;
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                        delete task.scheduledDate;
+                        delete task.todayPriority;
+                        itemFound = true;
+                    }
+                    
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                                delete sub.scheduledDate;
+                                delete sub.todayPriority;
+                                itemFound = true;
+                            }
+                            
+                            if (sub.checklist && type === 'checklist') {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                        delete checkItem.scheduledDate;
+                                        delete checkItem.todayPriority;
+                                        itemFound = true;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        
+        if (itemFound) {
+            await app.save();
+            app.setStatus('Item verwijderd van vandaag', 'success');
+            this.render();
+        }
+    },
+    
+    addToPomodoro(id, type, itemName) {
+        // Find the actual item object
+        let item = null;
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (type === 'task' && task.id === id) {
+                        item = task;
+                    }
+                    
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (type === 'subtask' && sub.id === id) {
+                                item = sub;
+                            }
+                            
+                            if (sub.checklist && type === 'checklist') {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (id === `${sub.id}-check-${idx}`) {
+                                        item = checkItem;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        
+        if (item) {
+            // Use existing manageItemSessions functionality from crud
+            const itemType = type === 'task' ? 'task' : (type === 'subtask' ? 'sub' : 'checklist');
+            crud.manageItemSessions(item, itemType);
+        }
+    }
+};
+
 const weekView = {
     currentWeekStart: null,
     
@@ -5004,7 +6122,7 @@ const weekView = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    // Taken
+                    // Tasks
                     if (task.scheduledDate === dayTimestamp && !task.done) {
                         items.push({
                             ...task,
@@ -5017,18 +6135,41 @@ const weekView = {
                         });
                     }
                     
-                    // Subtaken
+                    // Subtasks
                     task.subtasks?.forEach(sub => {
                         if (sub.scheduledDate === dayTimestamp && !sub.done) {
                             items.push({
                                 ...sub,
-                                _type: 'sub',
+                                _type: 'subtask',
                                 _cat: cat.name,
                                 _proj: proj.name,
                                 _task: task.name,
                                 _catId: cat.id,
                                 _projId: proj.id,
-                                _taskId: task.id
+                                _taskId: task.id,
+                                _subtaskId: sub.id
+                            });
+                        }
+                        
+                        // Checklist items
+                        if (sub.checklist) {
+                            sub.checklist.forEach((checkItem, idx) => {
+                                if (checkItem.scheduledDate === dayTimestamp && !checkItem.done) {
+                                    items.push({
+                                        ...checkItem,
+                                        _type: 'checklist',
+                                        _cat: cat.name,
+                                        _proj: proj.name,
+                                        _task: task.name,
+                                        _subtask: sub.name,
+                                        _catId: cat.id,
+                                        _projId: proj.id,
+                                        _taskId: task.id,
+                                        _subtaskId: sub.id,
+                                        _checklistIndex: idx,
+                                        id: `${sub.id}-check-${idx}` // Create unique ID for checklist items
+                                    });
+                                }
                             });
                         }
                     });
@@ -5045,7 +6186,7 @@ const weekView = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    // Taken zonder scheduledDate
+                    // Tasks zonder scheduledDate
                     if (!task.scheduledDate && !task.done) {
                         const hasFutureDueDate = !task.dueDate || task.dueDate >= today;
                         if (hasFutureDueDate) {
@@ -5061,22 +6202,45 @@ const weekView = {
                         }
                     }
                     
-                    // Subtaken zonder scheduledDate
+                    // Subtasks zonder scheduledDate
                     task.subtasks?.forEach(sub => {
                         if (!sub.scheduledDate && !sub.done) {
                             const hasFutureDueDate = !sub.dueDate || sub.dueDate >= today;
                             if (hasFutureDueDate) {
                                 items.push({
                                     ...sub,
-                                    _type: 'sub',
+                                    _type: 'subtask',
                                     _cat: cat.name,
                                     _proj: proj.name,
                                     _task: task.name,
                                     _catId: cat.id,
                                     _projId: proj.id,
-                                    _taskId: task.id
+                                    _taskId: task.id,
+                                    _subtaskId: sub.id
                                 });
                             }
+                        }
+                        
+                        // Checklist items zonder scheduledDate
+                        if (sub.checklist) {
+                            sub.checklist.forEach((checkItem, idx) => {
+                                if (!checkItem.scheduledDate && !checkItem.done) {
+                                    items.push({
+                                        ...checkItem,
+                                        _type: 'checklist',
+                                        _cat: cat.name,
+                                        _proj: proj.name,
+                                        _task: task.name,
+                                        _subtask: sub.name,
+                                        _catId: cat.id,
+                                        _projId: proj.id,
+                                        _taskId: task.id,
+                                        _subtaskId: sub.id,
+                                        _checklistIndex: idx,
+                                        id: `${sub.id}-check-${idx}`
+                                    });
+                                }
+                            });
                         }
                     });
                 });
@@ -5086,24 +6250,9 @@ const weekView = {
     },
     
     render() {
-        const container = document.querySelector('.dashboard-container');
-        if (!container) return;
-        
-        // Verberg normale columns
-        document.querySelectorAll('.column').forEach(col => {
-            col.style.display = 'none';
-        });
-        
-        // Check of week view container al bestaat
-        let weekContainer = container.querySelector('.week-view-container');
-        if (!weekContainer) {
-            weekContainer = document.createElement('div');
-            weekContainer.className = 'week-view-container';
-            container.appendChild(weekContainer);
-        }
-        
-        // Zorg dat week container zichtbaar is
-        weekContainer.style.display = 'flex';
+        // Use the existing week planner container
+        const weekContainer = document.getElementById('weekPlannerContainer');
+        if (!weekContainer) return;
         
         const days = [];
         for (let i = 0; i < 7; i++) {
@@ -5116,11 +6265,11 @@ const weekView = {
         weekContainer.innerHTML = `
             <div class="week-header">
                 <div class="week-nav">
-                    <button class="week-nav-btn" onclick="weekView.prevWeek()" title="Vorige week">&#9664;</button>
+                    <button class="week-nav-btn" onclick="weekView.prevWeek()" title="Vorige week">◀</button>
                     <div class="week-title">
                         Week ${this.getWeekNumber(this.currentWeekStart)}: ${this.formatWeekRange(this.currentWeekStart)}
                     </div>
-                    <button class="week-nav-btn" onclick="weekView.nextWeek()" title="Volgende week">&#9654;</button>
+                    <button class="week-nav-btn" onclick="weekView.nextWeek()" title="Volgende week">▶</button>
                 </div>
                 <button class="btn btn-primary" onclick="weekView.goToToday()">
                     Vandaag
@@ -5171,47 +6320,85 @@ const weekView = {
     },
     
     renderTaskCard(item) {
-        const priorityIcon = item.priority === 'high' ? '&#128308;' : item.priority === 'medium' ? '&#128992;' : '';
-        const typeIcon = item._type === 'sub' ? '&#x2022; ' : ''; // bullet voor subtaken
-        const meta = item._type === 'sub' 
-            ? `${item._cat} / ${item._proj} / ${item._task}`
-            : `${item._cat} / ${item._proj}`;
+        const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '';
+        
+        // Type badges and icons matching today view
+        let typeBadge = '';
+        let typeClass = '';
+        let meta = '';
+        
+        if (item._type === 'task') {
+            typeBadge = '📄';
+            typeClass = 'type-task';
+            meta = `${item._cat} → ${item._proj}`;
+        } else if (item._type === 'subtask') {
+            typeBadge = '✓';
+            typeClass = 'type-subtask';
+            meta = `${item._cat} → ${item._proj} → ${item._task}`;
+        } else if (item._type === 'checklist') {
+            typeBadge = '□';
+            typeClass = 'type-checklist';
+            meta = `${item._cat} → ${item._proj} → ${item._task} → ${item._subtask}`;
+        }
         
         return `
-            <div class="week-task-card" 
+            <div class="week-task-card ${typeClass}" 
                  draggable="true"
                  data-task-id="${item.id}"
                  data-cat-id="${item._catId}"
                  data-proj-id="${item._projId}"
                  data-task-parent-id="${item._taskId || ''}"
+                 data-subtask-id="${item._subtaskId || ''}"
+                 data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
                  data-item-type="${item._type || 'task'}"
                  onclick="weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}')">
-                <div class="week-task-title">${typeIcon}${priorityIcon} ${item.name}</div>
-                <div class="week-task-meta">
-                    <span>${meta}</span>
+                <div class="week-task-header">
+                    <span class="week-task-badge">${typeBadge}</span>
+                    <div class="week-task-title">${priorityIcon} ${item.name || item.text}</div>
                 </div>
+                <div class="week-task-meta">${meta}</div>
             </div>
         `;
     },
     
     renderUnscheduledTask(item) {
-        const priorityIcon = item.priority === 'high' ? '&#128308;' : item.priority === 'medium' ? '&#128992;' : '';
-        const typeIcon = item._type === 'sub' ? '&#x2022; ' : '';
-        const meta = item._type === 'sub' 
-            ? `${item._cat} / ${item._proj} / ${item._task}`
-            : `${item._cat} / ${item._proj}`;
+        const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '';
+        
+        // Type badges matching today view
+        let typeBadge = '';
+        let typeClass = '';
+        let meta = '';
+        
+        if (item._type === 'task') {
+            typeBadge = '📄';
+            typeClass = 'type-task';
+            meta = `${item._cat} → ${item._proj}`;
+        } else if (item._type === 'subtask') {
+            typeBadge = '✓';
+            typeClass = 'type-subtask';
+            meta = `${item._cat} → ${item._proj} → ${item._task}`;
+        } else if (item._type === 'checklist') {
+            typeBadge = '□';
+            typeClass = 'type-checklist';
+            meta = `${item._cat} → ${item._proj} → ${item._task} → ${item._subtask}`;
+        }
             
         return `
-            <div class="unscheduled-task" 
+            <div class="unscheduled-task ${typeClass}" 
                  draggable="true"
                  data-task-id="${item.id}"
                  data-cat-id="${item._catId}"
                  data-proj-id="${item._projId}"
                  data-task-parent-id="${item._taskId || ''}"
+                 data-subtask-id="${item._subtaskId || ''}"
+                 data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
                  data-item-type="${item._type || 'task'}"
                  title="${meta}">
-                <div style="font-weight: 500;">${typeIcon}${priorityIcon} ${item.name}</div>
-                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${meta}</div>
+                <div style="display: flex; align-items: center; gap: 6px; font-weight: 500;">
+                    <span>${typeBadge}</span>
+                    <span>${priorityIcon} ${item.name || item.text}</span>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; margin-left: 22px;">${meta}</div>
             </div>
         `;
     },
@@ -5227,6 +6414,8 @@ const weekView = {
                     catId: el.dataset.catId,
                     projId: el.dataset.projId,
                     taskParentId: el.dataset.taskParentId || null,
+                    subtaskId: el.dataset.subtaskId || null,
+                    checklistIndex: el.dataset.checklistIndex !== '' ? parseInt(el.dataset.checklistIndex) : null,
                     itemType: el.dataset.itemType || 'task'
                 }));
             });
@@ -5249,7 +6438,7 @@ const weekView = {
         
         try {
             const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-            const { taskId, catId, projId, taskParentId, itemType } = data;
+            const { taskId, catId, projId, taskParentId, subtaskId, checklistIndex, itemType } = data;
             
             // Zoek de categorie en project
             const cat = state.db.categories.find(c => c.id === catId);
@@ -5260,7 +6449,16 @@ const weekView = {
             
             undoRedo.saveState();
             
-            if (itemType === 'sub' && taskParentId) {
+            if (itemType === 'checklist' && taskParentId && subtaskId !== null && checklistIndex !== null) {
+                // Checklist item
+                const parentTask = proj.tasks?.find(t => t.id === taskParentId);
+                if (!parentTask) return;
+                
+                const subtask = parentTask.subtasks?.find(s => s.id === subtaskId);
+                if (!subtask || !subtask.checklist || !subtask.checklist[checklistIndex]) return;
+                
+                subtask.checklist[checklistIndex].scheduledDate = dayTimestamp;
+            } else if (itemType === 'subtask' && taskParentId) {
                 // Subtaak
                 const parentTask = proj.tasks?.find(t => t.id === taskParentId);
                 if (!parentTask) return;
@@ -5279,7 +6477,14 @@ const weekView = {
             
             await app.save();
             this.render();
-            app.setStatus('Item verplaatst', 'success');
+            
+            // Als item naar vandaag wordt verplaatst, update ook de vandaag view
+            const today = new Date().setHours(0, 0, 0, 0);
+            if (dayTimestamp === today && state.currentView === 'today') {
+                todayView.render();
+            }
+            
+            app.setStatus('Item ingepland', 'success');
         } catch (error) {
             console.error('Drop error:', error);
             app.setStatus('Fout bij verplaatsen', 'error');
@@ -7044,6 +8249,22 @@ const pomodoro = {
                                 parentTask: task
                             });
                         }
+                        
+                        // Check checklist items (independent of parent)
+                        if (subtask.checklist) {
+                            subtask.checklist.forEach((checkItem, idx) => {
+                                if (checkItem.pomodoroSessions && checkItem.pomodoroSessions.includes(state.activePomodoroSession)) {
+                                    pomodoroItems.push({
+                                        type: 'checklist',
+                                        item: checkItem,
+                                        context: `${proj.name} → ${task.name} → ${subtask.name}`,
+                                        parentTask: task,
+                                        parentSubtask: subtask,
+                                        checklistIndex: idx
+                                    });
+                                }
+                            });
+                        }
                     });
                 });
             });
@@ -7066,12 +8287,22 @@ const pomodoro = {
             const div = document.createElement('div');
             div.className = `pomodoro-task-item ${pomItem.item.done ? 'completed' : ''}`;
             
+            // Type badge
+            let typeBadge = '';
+            if (pomItem.type === 'task') typeBadge = '📄';
+            else if (pomItem.type === 'subtask') typeBadge = '✓';
+            else if (pomItem.type === 'checklist') typeBadge = '□';
+            
+            // Item name/text
+            const itemText = pomItem.item.name || pomItem.item.text;
+            
             div.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
                     <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${pomItem.context}</div>
                     <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 14px;">${typeBadge}</span>
                         <input type="checkbox" class="task-checkbox" ${pomItem.item.done ? 'checked' : ''}>
-                        <span class="pomodoro-task-name" style="flex: 1;">${pomItem.item.name}</span>
+                        <span class="pomodoro-task-name" style="flex: 1;">${itemText}</span>
                         <button class="action-btn danger" data-action="remove-from-session" title="Verwijder uit deze sessie" style="display: flex;">&#10006;</button>
                     </div>
                 </div>
@@ -7098,6 +8329,14 @@ const pomodoro = {
                             } else if (pomItem.type === 'subtask') {
                                 task.subtasks?.forEach(sub => {
                                     if (sub.id === pomItem.item.id) {
+                                        foundCatId = cat.id;
+                                        foundProjId = proj.id;
+                                        foundTaskId = task.id;
+                                    }
+                                });
+                            } else if (pomItem.type === 'checklist') {
+                                task.subtasks?.forEach(sub => {
+                                    if (sub.checklist && pomItem.parentSubtask && sub.id === pomItem.parentSubtask.id) {
                                         foundCatId = cat.id;
                                         foundProjId = proj.id;
                                         foundTaskId = task.id;
@@ -7134,7 +8373,8 @@ const pomodoro = {
                 if (pomItem.item.done) {
                     pomItem.item.completedAt = Date.now();
                     if (wasNotDone) {
-                        celebration.show(pomItem.item.name);
+                        const itemName = pomItem.item.name || pomItem.item.text;
+                        celebration.show(itemName);
                     }
                 } else {
                     delete pomItem.item.completedAt;
