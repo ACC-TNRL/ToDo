@@ -3010,7 +3010,7 @@
         <svg class="brand-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
-        <span class="brand-title">ToDo Dashboard - Marvin Edition</span>
+        <span class="brand-title">ToDo Dashboard</span>
     </div>
 
     <div class="controls-area">
@@ -4945,7 +4945,7 @@ const renderer = {
                         ? `<button class="action-btn" data-action="remove-checklist-today" data-index="${idx}" title="Verwijder uit vandaag" style="width: 24px; height: 18px; font-size: 10px;">📅&#10060;</button>`
                         : `<button class="action-btn" data-action="set-checklist-today" data-index="${idx}" title="Plan voor vandaag" style="width: 18px; height: 18px; font-size: 10px;">📅</button>`;
                     
-                    const pomodoroBtn = `<button class="action-btn" data-action="add-checklist-pomodoro" data-index="${idx}" title="Toevoegen aan Pomodoro" style="width: 18px; height: 18px; font-size: 10px;">⏱️</button>`;
+                    const pomodoroBtn = `<button class="action-btn" data-action="add-checklist-pomodoro" data-index="${idx}" title="Toevoegen aan Pomodoro" style="width: 18px; height: 18px; font-size: 10px;">⏱</button>`;
                     
                     return `
                         <div class="checklist-item">
@@ -5803,7 +5803,7 @@ const todayView = {
                     ✅ ${itemData.done ? 'Heropen' : (type === 'checklist' ? 'Afvinken' : 'Voltooien')}
                 </button>
                 <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${item.name || item.text}')">
-                    ⏱️ Pomodoro
+                    ⏱ Pomodoro
                 </button>
                 <button class="today-action-btn danger" onclick="todayView.removeFromToday('${itemData.id}', '${type}')">
                     🗑️ Verwijder
