@@ -1199,6 +1199,22 @@
         .pomodoro-task-item.completed {
             opacity: 0.5;
         }
+        
+        .pomodoro-task-item.dragging {
+            opacity: 0.5;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: grabbing;
+        }
+        
+        .pomodoro-task-item .drag-handle {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .pomodoro-task-item:hover .drag-handle {
+            opacity: 1;
+        }
 
         .pomodoro-task-item .task-checkbox {
             flex-shrink: 0;
@@ -7530,7 +7546,8 @@ const morningWizard = {
         mainCard.style.cursor = 'pointer';
         mainCard.innerHTML = `
             <div style="display: flex; align-items: start; gap: 8px;">
-                ${hasSubtasks ? `<span class="task-expand-toggle" style="cursor: pointer; font-size: 14px; color: var(--text-muted); user-select: none; min-width: 14px; display: inline-block;">${isExpanded ? '▼' : '▶'}</span>` : '<span style="width: 14px; min-width: 14px; display: inline-block;"></span>'}
+                ${hasSubtasks ? `<span class="task-expand-toggle" style="cursor: pointer; font-size: 16px; color: var(--text-muted); user-select: none; min-width: 20px; display: inline-block; padding: 2px;">${isExpanded ? '▼' : '▶'}</span>` : '<span style="width: 20px; min-width: 20px; display: inline-block;"></span>'}
+                <input type="checkbox" class="task-select-checkbox" style="margin-top: 2px; cursor: pointer; width: 18px; height: 18px; min-width: 18px;" />
                 <div style="flex: 1; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
                     <div style="flex: 1;">
                         <div class="wizard-card-title">📄 ${task.name}</div>
@@ -7544,8 +7561,9 @@ const morningWizard = {
             </div>
         `;
         
-        // Update selection state
-        this.updateCardSelectionState(mainCard);
+        // Update checkbox state
+        const checkbox = mainCard.querySelector('.task-select-checkbox');
+        this.updateCheckboxState(checkbox, 'task', task.id);
         
         // Toggle expand handler
         const toggleEl = mainCard.querySelector('.task-expand-toggle');
@@ -7556,10 +7574,23 @@ const morningWizard = {
             });
         }
         
-        // Task selection handler
-        mainCard.addEventListener('click', (e) => {
-            if (e.target.classList.contains('task-expand-toggle')) return;
+        // Checkbox selection handler
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.handleItemSelection('task', task.id, task, mainCard);
+        });
+        
+        // Card click = expand (if has subtasks)
+        mainCard.addEventListener('click', (e) => {
+            // Don't expand if clicking on checkbox or toggle
+            if (e.target.classList.contains('task-select-checkbox') || 
+                e.target.classList.contains('task-expand-toggle')) {
+                return;
+            }
+            // Only expand if has subtasks
+            if (hasSubtasks) {
+                this.toggleTaskExpand(task.id);
+            }
         });
         
         cardWrapper.appendChild(mainCard);
@@ -7568,7 +7599,7 @@ const morningWizard = {
         if (hasSubtasks) {
             const expandedArea = document.createElement('div');
             expandedArea.setAttribute('data-expanded-area', task.id);
-            expandedArea.style.cssText = `margin-left: 22px; margin-top: 8px; padding: 8px; background: var(--bg-base); border-radius: 4px; border-left: 3px solid var(--border-color); display: ${isExpanded ? 'block' : 'none'};`;
+            expandedArea.style.cssText = `margin-left: 46px; margin-top: 8px; padding: 8px; background: var(--bg-base); border-radius: 4px; border-left: 3px solid var(--border-color); display: ${isExpanded ? 'block' : 'none'};`;
             
             // Get actual subtasks from database
             const actualTask = state.db.categories
@@ -7598,16 +7629,18 @@ const morningWizard = {
         subCard.style.cssText = 'padding: 6px 8px; margin: 4px 0; font-size: 13px; cursor: pointer; border-radius: 4px; background: var(--bg-panel);';
         subCard.innerHTML = `
             <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" class="task-select-checkbox" style="cursor: pointer; width: 16px; height: 16px; min-width: 16px;" />
                 <span style="font-size: 12px;">✓</span>
                 <span style="flex: 1;">${sub.name}</span>
             </div>
         `;
         
-        // Update selection state
-        this.updateCardSelectionState(subCard);
+        // Update checkbox state
+        const checkbox = subCard.querySelector('.task-select-checkbox');
+        this.updateCheckboxState(checkbox, 'subtask', sub.id);
         
-        // Subtask selection handler
-        subCard.addEventListener('click', (e) => {
+        // Checkbox selection handler
+        checkbox.addEventListener('click', (e) => {
             e.stopPropagation();
             const itemData = {
                 type: 'subtask',
@@ -7645,16 +7678,18 @@ const morningWizard = {
         checkCard.style.cssText = 'padding: 4px 8px; margin: 2px 0 2px 20px; font-size: 12px; cursor: pointer; border-radius: 4px; background: var(--bg-base);';
         checkCard.innerHTML = `
             <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" class="task-select-checkbox" style="cursor: pointer; width: 14px; height: 14px; min-width: 14px;" />
                 <span style="font-size: 11px;">□</span>
                 <span style="flex: 1;">${checkItem.text}</span>
             </div>
         `;
         
-        // Update selection state
-        this.updateCardSelectionState(checkCard);
+        // Update checkbox state
+        const checkbox = checkCard.querySelector('.task-select-checkbox');
+        this.updateCheckboxState(checkbox, 'checklist', `${parentSub.id}-check-${idx}`, parentSub.id, idx);
         
-        // Checklist selection handler
-        checkCard.addEventListener('click', (e) => {
+        // Checkbox selection handler
+        checkbox.addEventListener('click', (e) => {
             e.stopPropagation();
             const itemData = {
                 type: 'checklist',
@@ -7675,6 +7710,72 @@ const morningWizard = {
         });
         
         container.appendChild(checkCard);
+    },
+    
+    renderFlatItemCard(item, container) {
+        // For flat list rendering (used in age view)
+        // Type badge en extra info
+        let typeBadge = '';
+        let extraInfo = '';
+        
+        if (item.type === 'task') {
+            typeBadge = '📄';
+            if (item._totalSubtasks > 0) {
+                extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    🔢 ${item._openSubtasks}/${item._totalSubtasks} subtaken open
+                </div>`;
+            }
+        } else if (item.type === 'subtask') {
+            typeBadge = '✓';
+            if (item._totalChecklist > 0) {
+                extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    □ ${item._openChecklist}/${item._totalChecklist} checklist items
+                </div>`;
+            }
+        } else if (item.type === 'checklist') {
+            typeBadge = '□';
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'wizard-card';
+        card.setAttribute('data-item-type', item.type);
+        card.setAttribute('data-item-id', item.id);
+        card.style.margin = '8px';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                <div style="display: flex; align-items: start; gap: 8px; flex: 1;">
+                    <input type="checkbox" class="task-select-checkbox" style="margin-top: 2px; cursor: pointer; width: 18px; height: 18px; min-width: 18px;" />
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                            <span style="font-size: 14px;">${typeBadge}</span>
+                            <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
+                        </div>
+                        <div class="wizard-card-meta">${item._context}</div>
+                        ${extraInfo}
+                    </div>
+                </div>
+                ${item.ageBadge ? `<div style="font-size: 11px; color: ${item.ageColor}; white-space: nowrap; font-weight: 600; background: ${item.ageColor}15; padding: 4px 8px; border-radius: 4px;">
+                    ${item.ageBadge}
+                </div>` : ''}
+            </div>
+        `;
+        
+        // Update checkbox state
+        const checkbox = card.querySelector('.task-select-checkbox');
+        if (item.type === 'checklist') {
+            this.updateCheckboxState(checkbox, item.type, item.id, item._subtaskId, item._checklistIndex);
+        } else {
+            this.updateCheckboxState(checkbox, item.type, item.id);
+        }
+        
+        // Checkbox selection handler
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleItemSelection(item.type, item.id, item, card);
+        });
+        
+        container.appendChild(card);
     },
     
     handleItemSelection(type, id, itemData, cardElement) {
@@ -7737,6 +7838,24 @@ const morningWizard = {
         } else {
             cardElement.classList.remove('selected');
         }
+        
+        // Update checkbox if present
+        const checkbox = cardElement.querySelector('.task-select-checkbox');
+        if (checkbox) {
+            checkbox.checked = isSelected;
+        }
+    },
+    
+    updateCheckboxState(checkbox, type, id, subtaskId = null, checklistIndex = null) {
+        // Check if item is selected
+        const isSelected = this.selectedBigThree.some(t => {
+            if (type === 'checklist') {
+                return t.type === 'checklist' && t._subtaskId === subtaskId && t._checklistIndex === checklistIndex;
+            }
+            return t.type === type && t.id === id;
+        });
+        
+        checkbox.checked = isSelected;
     },
     
     renderByAge(content) {
@@ -7919,65 +8038,7 @@ const morningWizard = {
             // Render taken MET SUBTASK INFO
             const contentEl = section.querySelector(`#content-bigthree-age-${group.key}`);
             items.forEach(item => {
-                const isSelected = this.selectedBigThree.some(t => t.id === item.id);
-                
-                // Type badge en extra info
-                let typeBadge = '';
-                let extraInfo = '';
-                
-                if (item.type === 'task') {
-                    typeBadge = '📄';
-                    if (item._totalSubtasks > 0) {
-                        extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                            🔢 ${item._openSubtasks}/${item._totalSubtasks} subtaken open
-                        </div>`;
-                    }
-                } else if (item.type === 'subtask') {
-                    typeBadge = '✓';
-                    if (item._totalChecklist > 0) {
-                        extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                            □ ${item._openChecklist}/${item._totalChecklist} checklist items
-                        </div>`;
-                    }
-                } else if (item.type === 'checklist') {
-                    typeBadge = '□';
-                }
-                
-                const card = document.createElement('div');
-                card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
-                card.style.margin = '8px';
-                card.style.cursor = 'pointer';
-                card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                                <span style="font-size: 14px;">${typeBadge}</span>
-                                <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
-                            </div>
-                            <div class="wizard-card-meta">${item._context}</div>
-                            ${extraInfo}
-                        </div>
-                        ${item.ageBadge ? `<div style="font-size: 11px; color: ${item.ageColor}; white-space: nowrap; font-weight: 600; background: ${item.ageColor}15; padding: 4px 8px; border-radius: 4px;">
-                            ${item.ageBadge}
-                        </div>` : ''}
-                    </div>
-                `;
-                
-                card.onclick = () => {
-                    if (isSelected) {
-                        this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== item.id);
-                    } else {
-                        if (this.selectedBigThree.length < 3) {
-                            this.selectedBigThree.push(item);
-                        } else {
-                            card.style.animation = 'shake 0.3s';
-                            setTimeout(() => card.style.animation = '', 300);
-                        }
-                    }
-                    this.renderStep();
-                };
-                
-                contentEl.appendChild(card);
+                this.renderFlatItemCard(item, contentEl);
             });
         });
     },
@@ -9452,6 +9513,13 @@ const pomodoro = {
         
         console.log('Total pomodoro items found:', pomodoroItems.length);
         
+        // Sort items by saved order for this session
+        pomodoroItems.sort((a, b) => {
+            const orderA = a.item.pomodoroOrder?.[state.activePomodoroSession] ?? 999;
+            const orderB = b.item.pomodoroOrder?.[state.activePomodoroSession] ?? 999;
+            return orderA - orderB;
+        });
+        
         if (pomodoroItems.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
@@ -9463,9 +9531,11 @@ const pomodoro = {
         }
 
         container.innerHTML = '';
-        pomodoroItems.forEach(pomItem => {
+        pomodoroItems.forEach((pomItem, index) => {
             const div = document.createElement('div');
             div.className = `pomodoro-task-item ${pomItem.item.done ? 'completed' : ''}`;
+            div.draggable = true;
+            div.setAttribute('data-pomodoro-index', index);
             
             // Type badge
             let typeBadge = '';
@@ -9480,6 +9550,7 @@ const pomodoro = {
                 <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
                     <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${pomItem.context}</div>
                     <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="drag-handle" style="cursor: move; color: var(--text-muted); font-size: 16px; user-select: none;" title="Sleep om te herordenen">⋮⋮</div>
                         <span style="font-size: 14px;">${typeBadge}</span>
                         <input type="checkbox" class="task-checkbox" ${pomItem.item.done ? 'checked' : ''}>
                         <span class="pomodoro-task-name" style="flex: 1;">${itemText}</span>
@@ -9488,9 +9559,37 @@ const pomodoro = {
                 </div>
             `;
             
+            // Drag and drop handlers
+            div.addEventListener('dragstart', (e) => {
+                div.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', index);
+            });
+            
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+                // Save new order
+                this.savePomodoroOrder(pomodoroItems);
+            });
+            
+            div.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = this.getDragAfterElement(container, e.clientY);
+                const dragging = container.querySelector('.dragging');
+                if (dragging) {
+                    if (afterElement == null) {
+                        container.appendChild(dragging);
+                    } else {
+                        container.insertBefore(dragging, afterElement);
+                    }
+                }
+            });
+            
             div.onclick = (e) => {
-                // Prevent clicking on checkbox or remove button
-                if (e.target.closest('.task-checkbox') || e.target.closest('[data-action="remove-from-session"]')) {
+                // Prevent clicking on checkbox, remove button, or drag handle
+                if (e.target.closest('.task-checkbox') || 
+                    e.target.closest('[data-action="remove-from-session"]') ||
+                    e.target.closest('.drag-handle')) {
                     return;
                 }
                 
@@ -9582,6 +9681,43 @@ const pomodoro = {
             
             container.appendChild(div);
         });
+    },
+    
+    getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.pomodoro-task-item:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+    
+    savePomodoroOrder(pomodoroItems) {
+        // Get current DOM order
+        const container = document.getElementById('pomodoroTaskList');
+        const items = [...container.querySelectorAll('.pomodoro-task-item')];
+        
+        // Create ordered array based on DOM positions
+        const orderedItems = items.map(itemEl => {
+            const index = parseInt(itemEl.getAttribute('data-pomodoro-index'));
+            return pomodoroItems[index];
+        });
+        
+        // Save pomodoroOrder to each item
+        orderedItems.forEach((pomItem, newIndex) => {
+            if (!pomItem.item.pomodoroOrder) {
+                pomItem.item.pomodoroOrder = {};
+            }
+            pomItem.item.pomodoroOrder[state.activePomodoroSession] = newIndex;
+        });
+        
+        app.save();
     }
 };
 
@@ -10500,7 +10636,7 @@ app.init();
             <div id="feedbackScreenshotPreview"></div>
             
             <div class="feedback-info">
-                ℹ️ Bedankt voor je hulp! 🙏
+                ℹ️ Bedankt voor je hulp! 🙏
             </div>
             
             <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
