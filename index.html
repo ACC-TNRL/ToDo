@@ -5533,7 +5533,7 @@ const crud = {
         }
         
         // Toon modal met checkboxes
-        const result = await this.showSessionsModal(item.name, sessionsList);
+        const result = await this.showSessionsModal(item.text || item.name, sessionsList);
         if (!result) return;
         
         // Update item met geselecteerde sessies
@@ -5541,7 +5541,7 @@ const crud = {
         
         await app.save();
         app.render();
-        app.setStatus(`Sessies bijgewerkt voor ${itemType === 'task' ? 'opdracht' : 'subtaak'}`, "success");
+        app.setStatus(`Sessies bijgewerkt voor ${itemType === 'task' ? 'opdracht' : itemType === 'checklist' ? 'checklist item' : 'subtaak'}`, "success");
     },
 
     showSessionsModal(itemName, sessionsList) {
