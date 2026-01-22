@@ -1628,6 +1628,11 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
         
         /* Toast Notifications */
         .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; pointer-events: none; }
@@ -6757,13 +6762,13 @@ const parkingLot = {
 // Morning Wizard
 const morningWizard = {
     currentStep: 1,
-    yesterdayTasks: [],
+    overdueTasks: [],
     selectedBigThree: [],
     
     open() {
         console.log('Morning Wizard opening...');
         this.currentStep = 1;
-        this.yesterdayTasks = this.getYesterdayTasks();
+        this.overdueTasks = this.getOverdueTasks();
         this.selectedBigThree = [];
         
         const overlay = document.getElementById('morningWizard');
@@ -6793,22 +6798,39 @@ const morningWizard = {
         document.getElementById('morningWizard').classList.remove('show');
     },
     
-    getYesterdayTasks() {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayTimestamp = yesterday.setHours(0,0,0,0);
+    getOverdueTasks() {
+        // Haal ALLE oude taken op (scheduledDate < vandaag)
+        const today = new Date();
+        const todayTimestamp = today.setHours(0,0,0,0);
         
         const tasks = [];
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    if (task.scheduledDate === yesterdayTimestamp && !task.done) {
+                    // Alle taken met scheduledDate < vandaag EN niet afgerond
+                    if (task.scheduledDate && task.scheduledDate < todayTimestamp && !task.done) {
+                        const daysAgo = Math.floor((todayTimestamp - task.scheduledDate) / (1000 * 60 * 60 * 24));
+                        
+                        // Bepaal periode voor groepering
+                        let period;
+                        if (daysAgo === 1) {
+                            period = 'yesterday';
+                        } else if (daysAgo <= 7) {
+                            period = 'thisWeek';
+                        } else if (daysAgo <= 14) {
+                            period = 'lastWeek';
+                        } else {
+                            period = 'older';
+                        }
+                        
                         tasks.push({
                             ...task,
                             _cat: cat.name,
                             _proj: proj.name,
                             _catId: cat.id,
-                            _projId: proj.id
+                            _projId: proj.id,
+                            _daysAgo: daysAgo,
+                            _period: period
                         });
                     }
                 });
@@ -6840,31 +6862,91 @@ const morningWizard = {
     
     renderStep1(content) {
         document.getElementById('wizardTitle').textContent = 'Opruimen ✨';
-        document.getElementById('wizardSubtitle').textContent = 'Wat doe je met gisteren\'s taken?';
+        document.getElementById('wizardSubtitle').textContent = 'Wat doe je met oude ingeplande taken?';
         document.getElementById('wizardNext').textContent = 'Volgende';
         
-        if (this.yesterdayTasks.length === 0) {
+        if (this.overdueTasks.length === 0) {
             content.innerHTML = `
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-                    <div style="font-size: 20px; color: var(--text-main); font-weight: 600;">Geen taken van gisteren!</div>
-                    <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Goed bezig. Laten we verder gaan.</div>
+                    <div style="font-size: 20px; color: var(--text-main); font-weight: 600;">Geen oude taken!</div>
+                    <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Alles staat op schema. Laten we verder gaan.</div>
                 </div>
             `;
-        } else {
-            content.innerHTML = `
-                <div class="wizard-question">Welke taken van gisteren moeten vandaag alsnog?</div>
-                <div class="wizard-cards" id="yesterdayCards"></div>
+            return;
+        }
+        
+        // Groepeer taken per periode
+        const groups = {
+            yesterday: this.overdueTasks.filter(t => t._period === 'yesterday'),
+            thisWeek: this.overdueTasks.filter(t => t._period === 'thisWeek'),
+            lastWeek: this.overdueTasks.filter(t => t._period === 'lastWeek'),
+            older: this.overdueTasks.filter(t => t._period === 'older')
+        };
+        
+        content.innerHTML = `
+            <div class="wizard-question">Wat doe je met deze oude ingeplande taken?</div>
+            <div id="overdueGroups"></div>
+        `;
+        
+        const container = content.querySelector('#overdueGroups');
+        
+        // Render elke groep
+        const periodConfig = [
+            { key: 'yesterday', title: '🟠 Gisteren', color: '#ff9800', defaultOpen: true },
+            { key: 'thisWeek', title: '🟡 Deze week', color: '#ffc107', defaultOpen: true },
+            { key: 'lastWeek', title: '⚪ Vorige week', color: '#94a3b8', defaultOpen: false },
+            { key: 'older', title: '⚫ Ouder', color: '#64748b', defaultOpen: false }
+        ];
+        
+        periodConfig.forEach(period => {
+            const tasks = groups[period.key];
+            if (tasks.length === 0) return;
+            
+            const section = document.createElement('div');
+            section.style.marginBottom = '16px';
+            section.innerHTML = `
+                <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
+                    <div class="overdue-section-header" style="padding: 12px 16px; background: ${period.color}15; border-bottom: 1px solid ${period.color}30; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="morningWizard.toggleSection('${period.key}')">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="section-toggle" id="toggle-${period.key}" style="transition: transform 0.2s;">${period.defaultOpen ? '▼' : '▶'}</span>
+                            <span style="font-weight: 600; color: var(--text-main);">${period.title}</span>
+                            <span style="background: ${period.color}30; color: ${period.color}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${tasks.length}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="wizard-btn wizard-btn-primary" style="padding: 4px 12px; font-size: 12px;" onclick="event.stopPropagation(); morningWizard.bulkMoveToToday('${period.key}')">
+                                ✓ Alles vandaag
+                            </button>
+                            <button class="wizard-btn wizard-btn-secondary" style="padding: 4px 12px; font-size: 12px;" onclick="event.stopPropagation(); morningWizard.bulkClearSchedule('${period.key}')">
+                                → Later
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overdue-section-content" id="content-${period.key}" style="display: ${period.defaultOpen ? 'block' : 'none'}; padding: 8px;">
+                    </div>
+                </div>
             `;
             
-            const cardsContainer = content.querySelector('#yesterdayCards');
-            this.yesterdayTasks.forEach(task => {
+            container.appendChild(section);
+            
+            // Render taken in deze groep
+            const contentEl = section.querySelector(`#content-${period.key}`);
+            tasks.forEach(task => {
+                const daysText = task._daysAgo === 1 ? 'gisteren' : `${task._daysAgo} dagen geleden`;
                 const card = document.createElement('div');
                 card.className = 'wizard-card';
+                card.style.margin = '8px';
                 card.innerHTML = `
-                    <div class="wizard-card-title">${task.name}</div>
-                    <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
-                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div style="flex: 1;">
+                            <div class="wizard-card-title">${task.name}</div>
+                            <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-left: 8px;">
+                            📅 ${daysText}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
                         <button class="wizard-btn wizard-btn-primary" style="flex: 1; padding: 8px 16px;" data-action="today" data-task-id="${task.id}">
                             Vandaag
                         </button>
@@ -6873,13 +6955,67 @@ const morningWizard = {
                         </button>
                     </div>
                 `;
-                cardsContainer.appendChild(card);
                 
                 // Event listeners
                 card.querySelector('[data-action="today"]').onclick = () => this.moveToToday(task);
                 card.querySelector('[data-action="later"]').onclick = () => this.moveToLater(task);
+                
+                contentEl.appendChild(card);
             });
+        });
+    },
+    
+    toggleSection(periodKey) {
+        const content = document.getElementById(`content-${periodKey}`);
+        const toggle = document.getElementById(`toggle-${periodKey}`);
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '▶';
         }
+    },
+    
+    bulkMoveToToday(periodKey) {
+        const today = new Date().setHours(0,0,0,0);
+        const tasks = this.overdueTasks.filter(t => t._period === periodKey);
+        
+        tasks.forEach(task => {
+            state.db.categories.forEach(cat => {
+                cat.projects?.forEach(proj => {
+                    const realTask = proj.tasks?.find(t => t.id === task.id);
+                    if (realTask) {
+                        realTask.scheduledDate = today;
+                    }
+                });
+            });
+        });
+        
+        // Verwijder uit lijst
+        this.overdueTasks = this.overdueTasks.filter(t => t._period !== periodKey);
+        app.save();
+        this.renderStep();
+    },
+    
+    bulkClearSchedule(periodKey) {
+        const tasks = this.overdueTasks.filter(t => t._period === periodKey);
+        
+        tasks.forEach(task => {
+            state.db.categories.forEach(cat => {
+                cat.projects?.forEach(proj => {
+                    const realTask = proj.tasks?.find(t => t.id === task.id);
+                    if (realTask) {
+                        realTask.scheduledDate = null;
+                    }
+                });
+            });
+        });
+        
+        // Verwijder uit lijst
+        this.overdueTasks = this.overdueTasks.filter(t => t._period !== periodKey);
+        app.save();
+        this.renderStep();
     },
     
     moveToToday(task) {
@@ -6896,7 +7032,7 @@ const morningWizard = {
         });
         
         // Verwijder uit lijst
-        this.yesterdayTasks = this.yesterdayTasks.filter(t => t.id !== task.id);
+        this.overdueTasks = this.overdueTasks.filter(t => t.id !== task.id);
         app.save();
         this.renderStep();
     },
@@ -6912,7 +7048,7 @@ const morningWizard = {
             });
         });
         
-        this.yesterdayTasks = this.yesterdayTasks.filter(t => t.id !== task.id);
+        this.overdueTasks = this.overdueTasks.filter(t => t.id !== task.id);
         app.save();
         this.renderStep();
     },
@@ -6923,55 +7059,176 @@ const morningWizard = {
         document.getElementById('wizardNext').textContent = 'Volgende';
         
         const today = new Date().setHours(0,0,0,0);
+        const sevenDaysFromNow = today + (7 * 24 * 60 * 60 * 1000);
         const availableTasks = [];
         
+        // Verzamel alle beschikbare taken
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
                     if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
+                        // Bepaal urgentie op basis van DEADLINE (dueDate), niet scheduledDate
+                        let urgency = 'later';
+                        let dueBadge = '';
+                        let dueColor = '#94a3b8';
+                        
+                        if (task.dueDate) {
+                            const daysUntilDue = Math.ceil((task.dueDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysUntilDue < 0) {
+                                // Overdue
+                                urgency = 'urgent';
+                                dueBadge = `⚠️ ${Math.abs(daysUntilDue)} ${Math.abs(daysUntilDue) === 1 ? 'dag' : 'dagen'} te laat`;
+                                dueColor = '#ef4444';
+                            } else if (daysUntilDue === 0) {
+                                // Due vandaag
+                                urgency = 'urgent';
+                                dueBadge = '⏰ Deadline vandaag';
+                                dueColor = '#ef4444';
+                            } else if (daysUntilDue === 1) {
+                                // Due morgen
+                                urgency = 'thisWeek';
+                                dueBadge = '📅 Deadline morgen';
+                                dueColor = '#f59e0b';
+                            } else if (daysUntilDue <= 7) {
+                                // Due deze week
+                                urgency = 'thisWeek';
+                                dueBadge = `📆 Deadline over ${daysUntilDue} dagen`;
+                                dueColor = '#fbbf24';
+                            }
+                        }
+                        
                         availableTasks.push({
                             ...task,
                             _cat: cat.name,
                             _proj: proj.name,
                             _catId: cat.id,
-                            _projId: proj.id
+                            _projId: proj.id,
+                            _urgency: urgency,
+                            _dueBadge: dueBadge,
+                            _dueColor: dueColor
                         });
                     }
                 });
             });
         });
         
+        // Groepeer taken
+        const groups = {
+            urgent: availableTasks.filter(t => t._urgency === 'urgent'),
+            thisWeek: availableTasks.filter(t => t._urgency === 'thisWeek'),
+            later: availableTasks.filter(t => t._urgency === 'later')
+        };
+        
+        // Smart default: auto-selecteer top 3 urgent taken als er nog geen selectie is
+        if (this.selectedBigThree.length === 0 && groups.urgent.length > 0) {
+            this.selectedBigThree = groups.urgent.slice(0, Math.min(3, groups.urgent.length));
+        }
+        
+        // Count selected per categorie
+        const selectedUrgent = this.selectedBigThree.filter(t => t._urgency === 'urgent').length;
+        const selectedThisWeek = this.selectedBigThree.filter(t => t._urgency === 'thisWeek').length;
+        const selectedLater = this.selectedBigThree.length - selectedUrgent - selectedThisWeek;
+        
         content.innerHTML = `
             <div class="wizard-question">Wat MOET vandaag echt af? (Max 3)</div>
-            <div id="selectedCount" style="text-align: center; color: var(--text-muted); margin-bottom: 16px;">
-                ${this.selectedBigThree.length}/3 gekozen
+            <div id="selectedCount" style="text-align: center; margin-bottom: 16px;">
+                <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
+                ${selectedUrgent > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedUrgent} urgent</span>` : ''}
+                ${selectedThisWeek > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedThisWeek} deze week</span>` : ''}
+                ${selectedLater > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedLater} later</span>` : ''}
             </div>
-            <div class="wizard-cards" id="bigThreeCards"></div>
+            <div id="bigThreeGroups"></div>
         `;
         
-        const cardsContainer = content.querySelector('#bigThreeCards');
-        availableTasks.forEach(task => {
-            const isSelected = this.selectedBigThree.some(t => t.id === task.id);
-            const card = document.createElement('div');
-            card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
-            card.innerHTML = `
-                <div class="wizard-card-title">${task.name}</div>
-                <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+        const container = content.querySelector('#bigThreeGroups');
+        
+        // Render groepen
+        const groupConfig = [
+            { key: 'urgent', title: '🔴 URGENT', subtitle: 'Deadline vandaag of verlopen', color: '#ef4444', defaultOpen: true },
+            { key: 'thisWeek', title: '🟡 Deze Week', subtitle: 'Deadline binnen 7 dagen', color: '#f59e0b', defaultOpen: true },
+            { key: 'later', title: '⚪ Later', subtitle: 'Geen deadline of later', color: '#94a3b8', defaultOpen: false }
+        ];
+        
+        groupConfig.forEach(group => {
+            const tasks = groups[group.key];
+            if (tasks.length === 0 && group.key !== 'later') return; // Altijd later sectie tonen
+            
+            const section = document.createElement('div');
+            section.style.marginBottom = '16px';
+            section.innerHTML = `
+                <div style="background: var(--bg-panel); border: 1px solid ${group.color}40; border-radius: var(--radius-md); overflow: hidden;">
+                    <div style="padding: 12px 16px; background: ${group.color}10; border-bottom: 1px solid ${group.color}30; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="morningWizard.toggleBigThreeSection('${group.key}')">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="section-toggle" id="toggle-bigthree-${group.key}" style="transition: transform 0.2s;">${group.defaultOpen ? '▼' : '▶'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${group.title}</span>
+                                <span style="background: ${group.color}30; color: ${group.color}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${tasks.length}</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-left: 24px; margin-top: 2px;">${group.subtitle}</div>
+                        </div>
+                    </div>
+                    <div class="bigthree-section-content" id="content-bigthree-${group.key}" style="display: ${group.defaultOpen ? 'block' : 'none'}; padding: 8px;">
+                    </div>
+                </div>
             `;
             
-            card.onclick = () => {
-                if (isSelected) {
-                    this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
-                } else {
-                    if (this.selectedBigThree.length < 3) {
-                        this.selectedBigThree.push(task);
-                    }
-                }
-                this.renderStep();
-            };
+            container.appendChild(section);
             
-            cardsContainer.appendChild(card);
+            // Render taken
+            const contentEl = section.querySelector(`#content-bigthree-${group.key}`);
+            if (tasks.length === 0) {
+                contentEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Geen taken in deze categorie</div>';
+            } else {
+                tasks.forEach(task => {
+                    const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+                    const card = document.createElement('div');
+                    card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
+                    card.style.margin = '8px';
+                    card.style.cursor = 'pointer';
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                            <div style="flex: 1;">
+                                <div class="wizard-card-title">${task.name}</div>
+                                <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                            </div>
+                            ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
+                                ${task._dueBadge}
+                            </div>` : ''}
+                        </div>
+                    `;
+                    
+                    card.onclick = () => {
+                        if (isSelected) {
+                            this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
+                        } else {
+                            if (this.selectedBigThree.length < 3) {
+                                this.selectedBigThree.push(task);
+                            } else {
+                                // Max bereikt - geef feedback
+                                card.style.animation = 'shake 0.3s';
+                                setTimeout(() => card.style.animation = '', 300);
+                            }
+                        }
+                        this.renderStep();
+                    };
+                    
+                    contentEl.appendChild(card);
+                });
+            }
         });
+    },
+    
+    toggleBigThreeSection(groupKey) {
+        const content = document.getElementById(`content-bigthree-${groupKey}`);
+        const toggle = document.getElementById(`toggle-bigthree-${groupKey}`);
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '▶';
+        }
     },
     
     renderStep3(content) {
@@ -7069,15 +7326,16 @@ const morningWizard = {
     },
     
     finish() {
-        // Plan de Big Three voor vandaag
+        // Plan de Big Three voor vandaag met volgorde
         const today = new Date().setHours(0,0,0,0);
         
-        this.selectedBigThree.forEach(task => {
+        this.selectedBigThree.forEach((task, index) => {
             state.db.categories.forEach(cat => {
                 cat.projects?.forEach(proj => {
                     const realTask = proj.tasks?.find(t => t.id === task.id);
                     if (realTask) {
                         realTask.scheduledDate = today;
+                        realTask.todayPriority = index; // Implementeer volgorde uit wizard!
                     }
                 });
             });
