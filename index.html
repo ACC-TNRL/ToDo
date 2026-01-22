@@ -1843,6 +1843,34 @@
             line-height: 1.4;
         }
         
+        .today-navigate-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        
+        .today-item:hover .today-navigate-btn {
+            opacity: 1;
+        }
+        
+        .today-navigate-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(2px);
+        }
+        
         .today-item.type-subtask .today-item-title {
             font-size: 14px;
         }
@@ -5865,6 +5893,14 @@ const todayView = {
         localStorage.setItem('todayCompletedCollapsed', isCollapsed);
     },
     
+    navigateToItem(catId, projId, taskId) {
+        // Navigate to all view and select the item
+        state.sel.cat = catId;
+        state.sel.proj = projId;
+        state.sel.task = taskId;
+        app.changeView('all');
+    },
+    
     createCard(itemData, index, isCompleted) {
         const { type, item, context } = itemData;
         const card = document.createElement('div');
@@ -5919,6 +5955,11 @@ const todayView = {
                 ${!isCompleted ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">⋮⋮</div>' : ''}
                 <div class="item-type-badge">${typeBadges[type]}</div>
                 <div class="today-item-title">${item.name || item.text}</div>
+                <button class="today-navigate-btn" 
+                        onclick="event.stopPropagation(); todayView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || itemData.id}');"
+                        title="Ga naar deze taak in alles view">
+                    →
+                </button>
             </div>
             <div class="today-item-context">${context}</div>
             <div class="today-item-actions">
@@ -7457,202 +7498,245 @@ const morningWizard = {
                 contentEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Geen taken in deze categorie</div>';
             } else {
                 tasks.forEach(task => {
-                    const isTaskSelected = this.selectedBigThree.some(t => t.type === 'task' && t.id === task.id);
-                    const isExpanded = this.expandedTasks.includes(task.id);
-                    const hasSubtasks = task._totalSubtasks > 0;
-                    
-                    // Build subtask badges
-                    let subtaskInfo = '';
-                    if (hasSubtasks) {
-                        subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
-                            <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
-                            ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
-                            ${task._dueTodaySubtasks > 0 ? `<span style="color: #f59e0b; font-weight: 600;">📅 ${task._dueTodaySubtasks} vandaag</span>` : ''}
-                        </div>`;
-                    }
-                    
-                    const card = document.createElement('div');
-                    card.style.margin = '8px';
-                    
-                    // Main task card
-                    const mainCard = document.createElement('div');
-                    mainCard.className = `wizard-card ${isTaskSelected ? 'selected' : ''}`;
-                    mainCard.style.cursor = 'pointer';
-                    mainCard.innerHTML = `
-                        <div style="display: flex; align-items: start; gap: 8px;">
-                            ${hasSubtasks ? `<span class="task-expand-toggle" style="cursor: pointer; font-size: 14px; color: var(--text-muted); user-select: none;">${isExpanded ? '▼' : '▶'}</span>` : '<span style="width: 14px;"></span>'}
-                            <div style="flex: 1; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
-                                <div style="flex: 1;">
-                                    <div class="wizard-card-title">📄 ${task.name}</div>
-                                    <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
-                                    ${subtaskInfo}
-                                </div>
-                                ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
-                                    ${task._dueBadge}
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Click handlers
-                    const toggleEl = mainCard.querySelector('.task-expand-toggle');
-                    if (toggleEl) {
-                        toggleEl.onclick = (e) => {
-                            e.stopPropagation();
-                            this.toggleTaskExpand(task.id);
-                        };
-                    }
-                    
-                    mainCard.onclick = (e) => {
-                        // Don't trigger if clicking on toggle
-                        if (e.target.classList.contains('task-expand-toggle')) return;
-                        
-                        if (isTaskSelected) {
-                            this.selectedBigThree = this.selectedBigThree.filter(t => !(t.type === 'task' && t.id === task.id));
-                        } else {
-                            if (this.selectedBigThree.length < 3) {
-                                this.selectedBigThree.push({
-                                    type: 'task',
-                                    id: task.id,
-                                    name: task.name,
-                                    _cat: task._cat,
-                                    _proj: task._proj,
-                                    _catId: task._catId,
-                                    _projId: task._projId,
-                                    _urgency: task._urgency,
-                                    _rawItem: task
-                                });
-                            } else {
-                                mainCard.style.animation = 'shake 0.3s';
-                                setTimeout(() => mainCard.style.animation = '', 300);
-                            }
-                        }
-                        this.renderStep();
-                    };
-                    
-                    card.appendChild(mainCard);
-                    
-                    // Expanded subtasks/checklist area
-                    if (isExpanded && hasSubtasks) {
-                        const expandedArea = document.createElement('div');
-                        expandedArea.style.cssText = 'margin-left: 22px; margin-top: 8px; padding: 8px; background: var(--bg-base); border-radius: 4px; border-left: 3px solid var(--border-color);';
-                        
-                        // Get actual subtasks from database
-                        const actualTask = state.db.categories
-                            .find(c => c.id === task._catId)?.projects
-                            ?.find(p => p.id === task._projId)?.tasks
-                            ?.find(t => t.id === task.id);
-                        
-                        if (actualTask && actualTask.subtasks) {
-                            actualTask.subtasks.forEach(sub => {
-                                if (!sub.done) {
-                                    const isSubSelected = this.selectedBigThree.some(t => t.type === 'subtask' && t.id === sub.id);
-                                    
-                                    const subCard = document.createElement('div');
-                                    subCard.className = `wizard-card-sub ${isSubSelected ? 'selected' : ''}`;
-                                    subCard.style.cssText = 'padding: 6px 8px; margin: 4px 0; font-size: 13px; cursor: pointer; border-radius: 4px; background: var(--bg-panel);';
-                                    subCard.innerHTML = `
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <span style="font-size: 12px;">✓</span>
-                                            <span style="flex: 1;">${sub.name}</span>
-                                        </div>
-                                    `;
-                                    
-                                    subCard.onclick = (e) => {
-                                        e.stopPropagation();
-                                        
-                                        if (isSubSelected) {
-                                            this.selectedBigThree = this.selectedBigThree.filter(t => !(t.type === 'subtask' && t.id === sub.id));
-                                        } else {
-                                            if (this.selectedBigThree.length < 3) {
-                                                this.selectedBigThree.push({
-                                                    type: 'subtask',
-                                                    id: sub.id,
-                                                    name: sub.name,
-                                                    _cat: task._cat,
-                                                    _proj: task._proj,
-                                                    _task: task.name,
-                                                    _catId: task._catId,
-                                                    _projId: task._projId,
-                                                    _taskId: task.id,
-                                                    _subtaskId: sub.id,
-                                                    _rawItem: sub
-                                                });
-                                            } else {
-                                                subCard.style.animation = 'shake 0.3s';
-                                                setTimeout(() => subCard.style.animation = '', 300);
-                                            }
-                                        }
-                                        this.renderStep();
-                                    };
-                                    
-                                    expandedArea.appendChild(subCard);
-                                    
-                                    // Checklist items onder subtask
-                                    if (sub.checklist && sub.checklist.length > 0) {
-                                        sub.checklist.forEach((checkItem, idx) => {
-                                            if (!checkItem.done) {
-                                                const isCheckSelected = this.selectedBigThree.some(t => 
-                                                    t.type === 'checklist' && t._subtaskId === sub.id && t._checklistIndex === idx
-                                                );
-                                                
-                                                const checkCard = document.createElement('div');
-                                                checkCard.className = `wizard-card-check ${isCheckSelected ? 'selected' : ''}`;
-                                                checkCard.style.cssText = 'padding: 4px 8px; margin: 2px 0 2px 20px; font-size: 12px; cursor: pointer; border-radius: 4px; background: var(--bg-base);';
-                                                checkCard.innerHTML = `
-                                                    <div style="display: flex; align-items: center; gap: 6px;">
-                                                        <span style="font-size: 11px;">□</span>
-                                                        <span style="flex: 1;">${checkItem.text}</span>
-                                                    </div>
-                                                `;
-                                                
-                                                checkCard.onclick = (e) => {
-                                                    e.stopPropagation();
-                                                    
-                                                    if (isCheckSelected) {
-                                                        this.selectedBigThree = this.selectedBigThree.filter(t => 
-                                                            !(t.type === 'checklist' && t._subtaskId === sub.id && t._checklistIndex === idx)
-                                                        );
-                                                    } else {
-                                                        if (this.selectedBigThree.length < 3) {
-                                                            this.selectedBigThree.push({
-                                                                type: 'checklist',
-                                                                id: `${sub.id}-check-${idx}`,
-                                                                name: checkItem.text,
-                                                                _cat: task._cat,
-                                                                _proj: task._proj,
-                                                                _task: task.name,
-                                                                _subtask: sub.name,
-                                                                _catId: task._catId,
-                                                                _projId: task._projId,
-                                                                _taskId: task.id,
-                                                                _subtaskId: sub.id,
-                                                                _checklistIndex: idx,
-                                                                _rawItem: checkItem
-                                                            });
-                                                        } else {
-                                                            checkCard.style.animation = 'shake 0.3s';
-                                                            setTimeout(() => checkCard.style.animation = '', 300);
-                                                        }
-                                                    }
-                                                    this.renderStep();
-                                                };
-                                                
-                                                expandedArea.appendChild(checkCard);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                        
-                        card.appendChild(expandedArea);
-                    }
-                    
-                    contentEl.appendChild(card);
+                    this.renderTaskCard(task, contentEl);
                 });
             }
         });
+    },
+    
+    renderTaskCard(task, container) {
+        const hasSubtasks = task._totalSubtasks > 0;
+        const isExpanded = this.expandedTasks.includes(task.id);
+        
+        // Build subtask badges
+        let subtaskInfo = '';
+        if (hasSubtasks) {
+            subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
+                ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
+                ${task._dueTodaySubtasks > 0 ? `<span style="color: #f59e0b; font-weight: 600;">📅 ${task._dueTodaySubtasks} vandaag</span>` : ''}
+            </div>`;
+        }
+        
+        const cardWrapper = document.createElement('div');
+        cardWrapper.style.margin = '8px';
+        cardWrapper.setAttribute('data-task-card', task.id);
+        
+        // Main task card
+        const mainCard = document.createElement('div');
+        mainCard.className = 'wizard-card';
+        mainCard.setAttribute('data-item-type', 'task');
+        mainCard.setAttribute('data-item-id', task.id);
+        mainCard.style.cursor = 'pointer';
+        mainCard.innerHTML = `
+            <div style="display: flex; align-items: start; gap: 8px;">
+                ${hasSubtasks ? `<span class="task-expand-toggle" style="cursor: pointer; font-size: 14px; color: var(--text-muted); user-select: none; min-width: 14px; display: inline-block;">${isExpanded ? '▼' : '▶'}</span>` : '<span style="width: 14px; min-width: 14px; display: inline-block;"></span>'}
+                <div style="flex: 1; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                    <div style="flex: 1;">
+                        <div class="wizard-card-title">📄 ${task.name}</div>
+                        <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                        ${subtaskInfo}
+                    </div>
+                    ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
+                        ${task._dueBadge}
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        // Update selection state
+        this.updateCardSelectionState(mainCard);
+        
+        // Toggle expand handler
+        const toggleEl = mainCard.querySelector('.task-expand-toggle');
+        if (toggleEl) {
+            toggleEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleTaskExpand(task.id);
+            });
+        }
+        
+        // Task selection handler
+        mainCard.addEventListener('click', (e) => {
+            if (e.target.classList.contains('task-expand-toggle')) return;
+            this.handleItemSelection('task', task.id, task, mainCard);
+        });
+        
+        cardWrapper.appendChild(mainCard);
+        
+        // Expanded area (always render if has subtasks)
+        if (hasSubtasks) {
+            const expandedArea = document.createElement('div');
+            expandedArea.setAttribute('data-expanded-area', task.id);
+            expandedArea.style.cssText = `margin-left: 22px; margin-top: 8px; padding: 8px; background: var(--bg-base); border-radius: 4px; border-left: 3px solid var(--border-color); display: ${isExpanded ? 'block' : 'none'};`;
+            
+            // Get actual subtasks from database
+            const actualTask = state.db.categories
+                .find(c => c.id === task._catId)?.projects
+                ?.find(p => p.id === task._projId)?.tasks
+                ?.find(t => t.id === task.id);
+            
+            if (actualTask && actualTask.subtasks) {
+                actualTask.subtasks.forEach(sub => {
+                    if (!sub.done) {
+                        this.renderSubtaskCard(sub, task, expandedArea);
+                    }
+                });
+            }
+            
+            cardWrapper.appendChild(expandedArea);
+        }
+        
+        container.appendChild(cardWrapper);
+    },
+    
+    renderSubtaskCard(sub, parentTask, container) {
+        const subCard = document.createElement('div');
+        subCard.className = 'wizard-card-sub';
+        subCard.setAttribute('data-item-type', 'subtask');
+        subCard.setAttribute('data-item-id', sub.id);
+        subCard.style.cssText = 'padding: 6px 8px; margin: 4px 0; font-size: 13px; cursor: pointer; border-radius: 4px; background: var(--bg-panel);';
+        subCard.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 12px;">✓</span>
+                <span style="flex: 1;">${sub.name}</span>
+            </div>
+        `;
+        
+        // Update selection state
+        this.updateCardSelectionState(subCard);
+        
+        // Subtask selection handler
+        subCard.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemData = {
+                type: 'subtask',
+                id: sub.id,
+                name: sub.name,
+                _cat: parentTask._cat,
+                _proj: parentTask._proj,
+                _task: parentTask.name,
+                _catId: parentTask._catId,
+                _projId: parentTask._projId,
+                _taskId: parentTask.id,
+                _subtaskId: sub.id,
+                _rawItem: sub
+            };
+            this.handleItemSelection('subtask', sub.id, itemData, subCard);
+        });
+        
+        container.appendChild(subCard);
+        
+        // Checklist items
+        if (sub.checklist && sub.checklist.length > 0) {
+            sub.checklist.forEach((checkItem, idx) => {
+                if (!checkItem.done) {
+                    this.renderChecklistCard(checkItem, idx, sub, parentTask, container);
+                }
+            });
+        }
+    },
+    
+    renderChecklistCard(checkItem, idx, parentSub, parentTask, container) {
+        const checkCard = document.createElement('div');
+        checkCard.className = 'wizard-card-check';
+        checkCard.setAttribute('data-item-type', 'checklist');
+        checkCard.setAttribute('data-item-id', `${parentSub.id}-check-${idx}`);
+        checkCard.style.cssText = 'padding: 4px 8px; margin: 2px 0 2px 20px; font-size: 12px; cursor: pointer; border-radius: 4px; background: var(--bg-base);';
+        checkCard.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 11px;">□</span>
+                <span style="flex: 1;">${checkItem.text}</span>
+            </div>
+        `;
+        
+        // Update selection state
+        this.updateCardSelectionState(checkCard);
+        
+        // Checklist selection handler
+        checkCard.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemData = {
+                type: 'checklist',
+                id: `${parentSub.id}-check-${idx}`,
+                name: checkItem.text,
+                _cat: parentTask._cat,
+                _proj: parentTask._proj,
+                _task: parentTask.name,
+                _subtask: parentSub.name,
+                _catId: parentTask._catId,
+                _projId: parentTask._projId,
+                _taskId: parentTask.id,
+                _subtaskId: parentSub.id,
+                _checklistIndex: idx,
+                _rawItem: checkItem
+            };
+            this.handleItemSelection('checklist', `${parentSub.id}-check-${idx}`, itemData, checkCard);
+        });
+        
+        container.appendChild(checkCard);
+    },
+    
+    handleItemSelection(type, id, itemData, cardElement) {
+        // Check if already selected
+        const isSelected = this.selectedBigThree.some(t => {
+            if (type === 'checklist') {
+                return t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex;
+            }
+            return t.type === type && t.id === id;
+        });
+        
+        if (isSelected) {
+            // Deselect
+            this.selectedBigThree = this.selectedBigThree.filter(t => {
+                if (type === 'checklist') {
+                    return !(t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex);
+                }
+                return !(t.type === type && t.id === id);
+            });
+        } else {
+            // Select (if under limit)
+            if (this.selectedBigThree.length < 3) {
+                this.selectedBigThree.push(itemData);
+            } else {
+                // Max reached - shake feedback
+                cardElement.style.animation = 'shake 0.3s';
+                setTimeout(() => cardElement.style.animation = '', 300);
+                return;
+            }
+        }
+        
+        // Update UI
+        this.updateCardSelectionState(cardElement);
+        this.updateSelectionCount();
+    },
+    
+    updateCardSelectionState(cardElement) {
+        const type = cardElement.getAttribute('data-item-type');
+        const id = cardElement.getAttribute('data-item-id');
+        
+        if (!type || !id) return;
+        
+        // Check if selected
+        const isSelected = this.selectedBigThree.some(t => {
+            if (type === 'checklist') {
+                // For checklist, match by subtaskId and index
+                const parts = id.split('-check-');
+                if (parts.length === 2) {
+                    const subtaskId = parts[0];
+                    const checkIndex = parseInt(parts[1]);
+                    return t.type === 'checklist' && t._subtaskId === subtaskId && t._checklistIndex === checkIndex;
+                }
+            }
+            return t.type === type && t.id === id;
+        });
+        
+        // Update class
+        if (isSelected) {
+            cardElement.classList.add('selected');
+        } else {
+            cardElement.classList.remove('selected');
+        }
     },
     
     renderByAge(content) {
@@ -7912,12 +7996,54 @@ const morningWizard = {
     
     toggleTaskExpand(taskId) {
         const index = this.expandedTasks.indexOf(taskId);
+        const cardWrapper = document.querySelector(`[data-task-card="${taskId}"]`);
+        if (!cardWrapper) return;
+        
+        const toggleEl = cardWrapper.querySelector('.task-expand-toggle');
+        const expandedArea = cardWrapper.querySelector(`[data-expanded-area="${taskId}"]`);
+        
         if (index > -1) {
+            // Collapse
             this.expandedTasks.splice(index, 1);
+            if (toggleEl) toggleEl.textContent = '▶';
+            if (expandedArea) expandedArea.style.display = 'none';
         } else {
+            // Expand
             this.expandedTasks.push(taskId);
+            if (toggleEl) toggleEl.textContent = '▼';
+            if (expandedArea) expandedArea.style.display = 'block';
         }
-        this.renderStep();
+        // NO renderStep() call! Direct DOM manipulation only
+    },
+    
+    updateSelectionCount() {
+        // Update count display without full re-render
+        const countEl = document.getElementById('selectedCount');
+        if (!countEl) return;
+        
+        if (this.sortMode === 'deadline') {
+            const selectedUrgent = this.selectedBigThree.filter(t => t._urgency === 'urgent').length;
+            const selectedThisWeek = this.selectedBigThree.filter(t => t._urgency === 'thisWeek').length;
+            const selectedLater = this.selectedBigThree.length - selectedUrgent - selectedThisWeek;
+            
+            countEl.innerHTML = `
+                <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
+                ${selectedUrgent > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedUrgent} urgent</span>` : ''}
+                ${selectedThisWeek > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedThisWeek} deze week</span>` : ''}
+                ${selectedLater > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedLater} later</span>` : ''}
+            `;
+        } else {
+            const selectedOld = this.selectedBigThree.filter(t => t.ageGroup === 'old').length;
+            const selectedMedium = this.selectedBigThree.filter(t => t.ageGroup === 'medium').length;
+            const selectedNew = this.selectedBigThree.length - selectedOld - selectedMedium;
+            
+            countEl.innerHTML = `
+                <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
+                ${selectedOld > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedOld} oud</span>` : ''}
+                ${selectedMedium > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedMedium} medium</span>` : ''}
+                ${selectedNew > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedNew} nieuw</span>` : ''}
+            `;
+        }
     },
     
     renderStep3(content) {
