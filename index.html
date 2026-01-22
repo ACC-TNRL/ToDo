@@ -2437,6 +2437,34 @@
             font-size: 13px;
         }
         
+        .week-task-navigate {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        
+        .week-task-card:hover .week-task-navigate {
+            opacity: 1;
+        }
+        
+        .week-task-navigate:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(2px);
+        }
+        
         .week-task-card.type-subtask .week-task-title {
             font-size: 12px;
         }
@@ -6392,11 +6420,15 @@ const weekView = {
                  data-task-parent-id="${item._taskId || ''}"
                  data-subtask-id="${item._subtaskId || ''}"
                  data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
-                 data-item-type="${item._type || 'task'}"
-                 onclick="weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}')">
+                 data-item-type="${item._type || 'task'}">
                 <div class="week-task-header">
                     <span class="week-task-badge">${typeBadge}</span>
                     <div class="week-task-title">${priorityIcon} ${item.name || item.text}</div>
+                    <button class="week-task-navigate" 
+                            onclick="event.stopPropagation(); weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}');"
+                            title="Ga naar deze taak in alles view">
+                        →
+                    </button>
                 </div>
                 <div class="week-task-meta">${meta}</div>
             </div>
@@ -6764,12 +6796,14 @@ const morningWizard = {
     currentStep: 1,
     overdueTasks: [],
     selectedBigThree: [],
+    sortMode: 'deadline', // 'deadline' of 'age'
     
     open() {
         console.log('Morning Wizard opening...');
         this.currentStep = 1;
         this.overdueTasks = this.getOverdueTasks();
         this.selectedBigThree = [];
+        this.sortMode = 'deadline'; // Reset to default
         
         const overlay = document.getElementById('morningWizard');
         overlay.classList.add('show');
@@ -6799,19 +6833,18 @@ const morningWizard = {
     },
     
     getOverdueTasks() {
-        // Haal ALLE oude taken op (scheduledDate < vandaag)
+        // Haal ALLE oude items op (scheduledDate < vandaag): tasks, subtasks, checklist items
         const today = new Date();
         const todayTimestamp = today.setHours(0,0,0,0);
         
-        const tasks = [];
+        const items = [];
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    // Alle taken met scheduledDate < vandaag EN niet afgerond
+                    // 1. TASKS met scheduledDate < vandaag EN niet afgerond
                     if (task.scheduledDate && task.scheduledDate < todayTimestamp && !task.done) {
                         const daysAgo = Math.floor((todayTimestamp - task.scheduledDate) / (1000 * 60 * 60 * 24));
                         
-                        // Bepaal periode voor groepering
                         let period;
                         if (daysAgo === 1) {
                             period = 'yesterday';
@@ -6823,20 +6856,98 @@ const morningWizard = {
                             period = 'older';
                         }
                         
-                        tasks.push({
-                            ...task,
+                        items.push({
+                            type: 'task',
+                            item: task,
+                            id: task.id,
+                            name: task.name,
                             _cat: cat.name,
                             _proj: proj.name,
                             _catId: cat.id,
                             _projId: proj.id,
+                            _taskId: task.id,
                             _daysAgo: daysAgo,
                             _period: period
+                        });
+                    }
+                    
+                    // 2. SUBTASKS met scheduledDate < vandaag EN niet afgerond
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (sub.scheduledDate && sub.scheduledDate < todayTimestamp && !sub.done) {
+                                const daysAgo = Math.floor((todayTimestamp - sub.scheduledDate) / (1000 * 60 * 60 * 24));
+                                
+                                let period;
+                                if (daysAgo === 1) {
+                                    period = 'yesterday';
+                                } else if (daysAgo <= 7) {
+                                    period = 'thisWeek';
+                                } else if (daysAgo <= 14) {
+                                    period = 'lastWeek';
+                                } else {
+                                    period = 'older';
+                                }
+                                
+                                items.push({
+                                    type: 'subtask',
+                                    item: sub,
+                                    id: sub.id,
+                                    name: sub.name,
+                                    _cat: cat.name,
+                                    _proj: proj.name,
+                                    _task: task.name,
+                                    _catId: cat.id,
+                                    _projId: proj.id,
+                                    _taskId: task.id,
+                                    _subtaskId: sub.id,
+                                    _daysAgo: daysAgo,
+                                    _period: period
+                                });
+                            }
+                            
+                            // 3. CHECKLIST ITEMS met scheduledDate < vandaag EN niet afgerond
+                            if (sub.checklist) {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (checkItem.scheduledDate && checkItem.scheduledDate < todayTimestamp && !checkItem.done) {
+                                        const daysAgo = Math.floor((todayTimestamp - checkItem.scheduledDate) / (1000 * 60 * 60 * 24));
+                                        
+                                        let period;
+                                        if (daysAgo === 1) {
+                                            period = 'yesterday';
+                                        } else if (daysAgo <= 7) {
+                                            period = 'thisWeek';
+                                        } else if (daysAgo <= 14) {
+                                            period = 'lastWeek';
+                                        } else {
+                                            period = 'older';
+                                        }
+                                        
+                                        items.push({
+                                            type: 'checklist',
+                                            item: checkItem,
+                                            id: `${sub.id}-check-${idx}`,
+                                            name: checkItem.text,
+                                            _cat: cat.name,
+                                            _proj: proj.name,
+                                            _task: task.name,
+                                            _subtask: sub.name,
+                                            _catId: cat.id,
+                                            _projId: proj.id,
+                                            _taskId: task.id,
+                                            _subtaskId: sub.id,
+                                            _checklistIndex: idx,
+                                            _daysAgo: daysAgo,
+                                            _period: period
+                                        });
+                                    }
+                                });
+                            }
                         });
                     }
                 });
             });
         });
-        return tasks;
+        return items;
     },
     
     renderStep() {
@@ -6931,34 +7042,50 @@ const morningWizard = {
             
             // Render taken in deze groep
             const contentEl = section.querySelector(`#content-${period.key}`);
-            tasks.forEach(task => {
-                const daysText = task._daysAgo === 1 ? 'gisteren' : `${task._daysAgo} dagen geleden`;
+            tasks.forEach(item => {
+                const daysText = item._daysAgo === 1 ? 'gisteren' : `${item._daysAgo} dagen geleden`;
+                
+                // Type badges en context
+                let typeBadge = '';
+                let context = '';
+                if (item.type === 'task') {
+                    typeBadge = '📄 Opdracht';
+                    context = `${item._cat} / ${item._proj}`;
+                } else if (item.type === 'subtask') {
+                    typeBadge = '✓ Subtaak';
+                    context = `${item._cat} / ${item._proj} / ${item._task}`;
+                } else if (item.type === 'checklist') {
+                    typeBadge = '□ Checklist';
+                    context = `${item._cat} / ${item._proj} / ${item._task} / ${item._subtask}`;
+                }
+                
                 const card = document.createElement('div');
                 card.className = 'wizard-card';
                 card.style.margin = '8px';
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <div style="flex: 1;">
-                            <div class="wizard-card-title">${task.name}</div>
-                            <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">${typeBadge}</div>
+                            <div class="wizard-card-title">${item.name}</div>
+                            <div class="wizard-card-meta">${context}</div>
                         </div>
                         <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-left: 8px;">
                             📅 ${daysText}
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="wizard-btn wizard-btn-primary" style="flex: 1; padding: 8px 16px;" data-action="today" data-task-id="${task.id}">
+                        <button class="wizard-btn wizard-btn-primary" style="flex: 1; padding: 8px 16px;" data-action="today" data-item-id="${item.id}">
                             Vandaag
                         </button>
-                        <button class="wizard-btn wizard-btn-secondary" style="flex: 1; padding: 8px 16px;" data-action="later" data-task-id="${task.id}">
+                        <button class="wizard-btn wizard-btn-secondary" style="flex: 1; padding: 8px 16px;" data-action="later" data-item-id="${item.id}">
                             Later
                         </button>
                     </div>
                 `;
                 
                 // Event listeners
-                card.querySelector('[data-action="today"]').onclick = () => this.moveToToday(task);
-                card.querySelector('[data-action="later"]').onclick = () => this.moveToLater(task);
+                card.querySelector('[data-action="today"]').onclick = () => this.moveToToday(item);
+                card.querySelector('[data-action="later"]').onclick = () => this.moveToLater(item);
                 
                 contentEl.appendChild(card);
             });
@@ -6979,76 +7106,159 @@ const morningWizard = {
     
     bulkMoveToToday(periodKey) {
         const today = new Date().setHours(0,0,0,0);
-        const tasks = this.overdueTasks.filter(t => t._period === periodKey);
+        const items = this.overdueTasks.filter(t => t._period === periodKey);
         
-        tasks.forEach(task => {
+        items.forEach(item => {
             state.db.categories.forEach(cat => {
+                if (cat.id !== item._catId) return;
                 cat.projects?.forEach(proj => {
-                    const realTask = proj.tasks?.find(t => t.id === task.id);
-                    if (realTask) {
-                        realTask.scheduledDate = today;
+                    if (proj.id !== item._projId) return;
+                    
+                    if (item.type === 'task') {
+                        const realTask = proj.tasks?.find(t => t.id === item._taskId);
+                        if (realTask) realTask.scheduledDate = today;
+                    } else if (item.type === 'subtask') {
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
+                            if (realSub) realSub.scheduledDate = today;
+                        });
+                    } else if (item.type === 'checklist') {
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            task.subtasks?.forEach(sub => {
+                                if (sub.id !== item._subtaskId) return;
+                                if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                    sub.checklist[item._checklistIndex].scheduledDate = today;
+                                }
+                            });
+                        });
                     }
                 });
             });
         });
         
-        // Verwijder uit lijst
         this.overdueTasks = this.overdueTasks.filter(t => t._period !== periodKey);
         app.save();
         this.renderStep();
     },
     
     bulkClearSchedule(periodKey) {
-        const tasks = this.overdueTasks.filter(t => t._period === periodKey);
+        const items = this.overdueTasks.filter(t => t._period === periodKey);
         
-        tasks.forEach(task => {
+        items.forEach(item => {
             state.db.categories.forEach(cat => {
+                if (cat.id !== item._catId) return;
                 cat.projects?.forEach(proj => {
-                    const realTask = proj.tasks?.find(t => t.id === task.id);
-                    if (realTask) {
-                        realTask.scheduledDate = null;
+                    if (proj.id !== item._projId) return;
+                    
+                    if (item.type === 'task') {
+                        const realTask = proj.tasks?.find(t => t.id === item._taskId);
+                        if (realTask) realTask.scheduledDate = null;
+                    } else if (item.type === 'subtask') {
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
+                            if (realSub) realSub.scheduledDate = null;
+                        });
+                    } else if (item.type === 'checklist') {
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            task.subtasks?.forEach(sub => {
+                                if (sub.id !== item._subtaskId) return;
+                                if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                    sub.checklist[item._checklistIndex].scheduledDate = null;
+                                }
+                            });
+                        });
                     }
                 });
             });
         });
         
-        // Verwijder uit lijst
         this.overdueTasks = this.overdueTasks.filter(t => t._period !== periodKey);
         app.save();
         this.renderStep();
     },
     
-    moveToToday(task) {
+    moveToToday(item) {
         const today = new Date().setHours(0,0,0,0);
         
-        // Vind de echte task
         state.db.categories.forEach(cat => {
+            if (cat.id !== item._catId) return;
             cat.projects?.forEach(proj => {
-                const realTask = proj.tasks?.find(t => t.id === task.id);
-                if (realTask) {
-                    realTask.scheduledDate = today;
+                if (proj.id !== item._projId) return;
+                
+                if (item.type === 'task') {
+                    // Direct task
+                    const realTask = proj.tasks?.find(t => t.id === item._taskId);
+                    if (realTask) {
+                        realTask.scheduledDate = today;
+                    }
+                } else if (item.type === 'subtask') {
+                    // Subtask binnen task
+                    proj.tasks?.forEach(task => {
+                        if (task.id !== item._taskId) return;
+                        const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
+                        if (realSub) {
+                            realSub.scheduledDate = today;
+                        }
+                    });
+                } else if (item.type === 'checklist') {
+                    // Checklist item binnen subtask binnen task
+                    proj.tasks?.forEach(task => {
+                        if (task.id !== item._taskId) return;
+                        task.subtasks?.forEach(sub => {
+                            if (sub.id !== item._subtaskId) return;
+                            if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                sub.checklist[item._checklistIndex].scheduledDate = today;
+                            }
+                        });
+                    });
                 }
             });
         });
         
         // Verwijder uit lijst
-        this.overdueTasks = this.overdueTasks.filter(t => t.id !== task.id);
+        this.overdueTasks = this.overdueTasks.filter(t => t.id !== item.id);
         app.save();
         this.renderStep();
     },
     
-    moveToLater(task) {
-        // Verwijder scheduledDate
+    moveToLater(item) {
         state.db.categories.forEach(cat => {
+            if (cat.id !== item._catId) return;
             cat.projects?.forEach(proj => {
-                const realTask = proj.tasks?.find(t => t.id === task.id);
-                if (realTask) {
-                    realTask.scheduledDate = null;
+                if (proj.id !== item._projId) return;
+                
+                if (item.type === 'task') {
+                    const realTask = proj.tasks?.find(t => t.id === item._taskId);
+                    if (realTask) {
+                        realTask.scheduledDate = null;
+                    }
+                } else if (item.type === 'subtask') {
+                    proj.tasks?.forEach(task => {
+                        if (task.id !== item._taskId) return;
+                        const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
+                        if (realSub) {
+                            realSub.scheduledDate = null;
+                        }
+                    });
+                } else if (item.type === 'checklist') {
+                    proj.tasks?.forEach(task => {
+                        if (task.id !== item._taskId) return;
+                        task.subtasks?.forEach(sub => {
+                            if (sub.id !== item._subtaskId) return;
+                            if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                sub.checklist[item._checklistIndex].scheduledDate = null;
+                            }
+                        });
+                    });
                 }
             });
         });
         
-        this.overdueTasks = this.overdueTasks.filter(t => t.id !== task.id);
+        this.overdueTasks = this.overdueTasks.filter(t => t.id !== item.id);
         app.save();
         this.renderStep();
     },
@@ -7058,16 +7268,59 @@ const morningWizard = {
         document.getElementById('wizardSubtitle').textContent = 'Kies max. 3 prioriteiten voor vandaag';
         document.getElementById('wizardNext').textContent = 'Volgende';
         
+        // Toggle tussen deadline en age sorting
+        content.innerHTML = `
+            <div class="wizard-question">Wat MOET vandaag echt af? (Max 3)</div>
+            <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;">
+                <button class="wizard-btn ${this.sortMode === 'deadline' ? 'wizard-btn-primary' : 'wizard-btn-secondary'}" 
+                        style="padding: 6px 16px; font-size: 13px;"
+                        onclick="morningWizard.setSortMode('deadline')">
+                    📅 Op Deadline
+                </button>
+                <button class="wizard-btn ${this.sortMode === 'age' ? 'wizard-btn-primary' : 'wizard-btn-secondary'}" 
+                        style="padding: 6px 16px; font-size: 13px;"
+                        onclick="morningWizard.setSortMode('age')">
+                    📆 Op Leeftijd
+                </button>
+            </div>
+            <div id="selectedCount" style="text-align: center; margin-bottom: 16px;">
+            </div>
+            <div id="bigThreeGroups"></div>
+        `;
+        
+        // Render based on sortMode
+        if (this.sortMode === 'deadline') {
+            this.renderByDeadline(content);
+        } else {
+            this.renderByAge(content);
+        }
+    },
+    
+    setSortMode(mode) {
+        this.sortMode = mode;
+        this.renderStep();
+    },
+    
+    renderByDeadline(content) {
         const today = new Date().setHours(0,0,0,0);
-        const sevenDaysFromNow = today + (7 * 24 * 60 * 60 * 1000);
         const availableTasks = [];
         
-        // Verzamel alle beschikbare taken
+        // Verzamel alle beschikbare taken MET subtask info
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
                     if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
-                        // Bepaal urgentie op basis van DEADLINE (dueDate), niet scheduledDate
+                        // Tel subtasks
+                        const totalSubtasks = task.subtasks ? task.subtasks.length : 0;
+                        const openSubtasks = task.subtasks ? task.subtasks.filter(s => !s.done).length : 0;
+                        const overdueSubtasks = task.subtasks ? task.subtasks.filter(s => 
+                            !s.done && s.dueDate && s.dueDate < today
+                        ).length : 0;
+                        const dueTodaySubtasks = task.subtasks ? task.subtasks.filter(s => 
+                            !s.done && s.dueDate && s.dueDate === today
+                        ).length : 0;
+                        
+                        // Bepaal urgentie op basis van DEADLINE (dueDate)
                         let urgency = 'later';
                         let dueBadge = '';
                         let dueColor = '#94a3b8';
@@ -7076,22 +7329,18 @@ const morningWizard = {
                             const daysUntilDue = Math.ceil((task.dueDate - today) / (1000 * 60 * 60 * 24));
                             
                             if (daysUntilDue < 0) {
-                                // Overdue
                                 urgency = 'urgent';
                                 dueBadge = `⚠️ ${Math.abs(daysUntilDue)} ${Math.abs(daysUntilDue) === 1 ? 'dag' : 'dagen'} te laat`;
                                 dueColor = '#ef4444';
                             } else if (daysUntilDue === 0) {
-                                // Due vandaag
                                 urgency = 'urgent';
                                 dueBadge = '⏰ Deadline vandaag';
                                 dueColor = '#ef4444';
                             } else if (daysUntilDue === 1) {
-                                // Due morgen
                                 urgency = 'thisWeek';
                                 dueBadge = '📅 Deadline morgen';
                                 dueColor = '#f59e0b';
                             } else if (daysUntilDue <= 7) {
-                                // Due deze week
                                 urgency = 'thisWeek';
                                 dueBadge = `📆 Deadline over ${daysUntilDue} dagen`;
                                 dueColor = '#fbbf24';
@@ -7106,7 +7355,11 @@ const morningWizard = {
                             _projId: proj.id,
                             _urgency: urgency,
                             _dueBadge: dueBadge,
-                            _dueColor: dueColor
+                            _dueColor: dueColor,
+                            _totalSubtasks: totalSubtasks,
+                            _openSubtasks: openSubtasks,
+                            _overdueSubtasks: overdueSubtasks,
+                            _dueTodaySubtasks: dueTodaySubtasks
                         });
                     }
                 });
@@ -7125,20 +7378,17 @@ const morningWizard = {
             this.selectedBigThree = groups.urgent.slice(0, Math.min(3, groups.urgent.length));
         }
         
-        // Count selected per categorie
+        // Update count display
         const selectedUrgent = this.selectedBigThree.filter(t => t._urgency === 'urgent').length;
         const selectedThisWeek = this.selectedBigThree.filter(t => t._urgency === 'thisWeek').length;
         const selectedLater = this.selectedBigThree.length - selectedUrgent - selectedThisWeek;
         
-        content.innerHTML = `
-            <div class="wizard-question">Wat MOET vandaag echt af? (Max 3)</div>
-            <div id="selectedCount" style="text-align: center; margin-bottom: 16px;">
-                <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
-                ${selectedUrgent > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedUrgent} urgent</span>` : ''}
-                ${selectedThisWeek > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedThisWeek} deze week</span>` : ''}
-                ${selectedLater > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedLater} later</span>` : ''}
-            </div>
-            <div id="bigThreeGroups"></div>
+        const countEl = content.querySelector('#selectedCount');
+        countEl.innerHTML = `
+            <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
+            ${selectedUrgent > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedUrgent} urgent</span>` : ''}
+            ${selectedThisWeek > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedThisWeek} deze week</span>` : ''}
+            ${selectedLater > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedLater} later</span>` : ''}
         `;
         
         const container = content.querySelector('#bigThreeGroups');
@@ -7152,7 +7402,7 @@ const morningWizard = {
         
         groupConfig.forEach(group => {
             const tasks = groups[group.key];
-            if (tasks.length === 0 && group.key !== 'later') return; // Altijd later sectie tonen
+            if (tasks.length === 0 && group.key !== 'later') return;
             
             const section = document.createElement('div');
             section.style.marginBottom = '16px';
@@ -7175,13 +7425,24 @@ const morningWizard = {
             
             container.appendChild(section);
             
-            // Render taken
+            // Render taken MET SUBTASK INFO
             const contentEl = section.querySelector(`#content-bigthree-${group.key}`);
             if (tasks.length === 0) {
                 contentEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Geen taken in deze categorie</div>';
             } else {
                 tasks.forEach(task => {
                     const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+                    
+                    // Build subtask badges
+                    let subtaskInfo = '';
+                    if (task._totalSubtasks > 0) {
+                        subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                            <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
+                            ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
+                            ${task._dueTodaySubtasks > 0 ? `<span style="color: #f59e0b; font-weight: 600;">📅 ${task._dueTodaySubtasks} vandaag</span>` : ''}
+                        </div>`;
+                    }
+                    
                     const card = document.createElement('div');
                     card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
                     card.style.margin = '8px';
@@ -7191,6 +7452,7 @@ const morningWizard = {
                             <div style="flex: 1;">
                                 <div class="wizard-card-title">${task.name}</div>
                                 <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                                ${subtaskInfo}
                             </div>
                             ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
                                 ${task._dueBadge}
@@ -7205,7 +7467,6 @@ const morningWizard = {
                             if (this.selectedBigThree.length < 3) {
                                 this.selectedBigThree.push(task);
                             } else {
-                                // Max bereikt - geef feedback
                                 card.style.animation = 'shake 0.3s';
                                 setTimeout(() => card.style.animation = '', 300);
                             }
@@ -7216,6 +7477,178 @@ const morningWizard = {
                     contentEl.appendChild(card);
                 });
             }
+        });
+    },
+    
+    renderByAge(content) {
+        const today = new Date().setHours(0,0,0,0);
+        const availableTasks = [];
+        
+        // Verzamel alle beschikbare taken MET leeftijd en subtask info
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
+                        // Bereken leeftijd
+                        const createdDate = task.createdAt || today;
+                        const daysOld = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                        
+                        // Bepaal leeftijd categorie
+                        let ageGroup = 'new';
+                        let ageBadge = '';
+                        let ageColor = '#94a3b8';
+                        
+                        if (daysOld > 30) {
+                            // Ouder dan 1 maand
+                            ageGroup = 'old';
+                            const months = Math.floor(daysOld / 30);
+                            ageBadge = `🕐 ${months} ${months === 1 ? 'maand' : 'maanden'} oud`;
+                            ageColor = '#ef4444';
+                        } else if (daysOld > 7) {
+                            // 1-4 weken oud
+                            ageGroup = 'medium';
+                            const weeks = Math.floor(daysOld / 7);
+                            ageBadge = `🕐 ${weeks} ${weeks === 1 ? 'week' : 'weken'} oud`;
+                            ageColor = '#f59e0b';
+                        } else if (daysOld > 0) {
+                            // Minder dan 1 week
+                            ageGroup = 'new';
+                            ageBadge = `🕐 ${daysOld} ${daysOld === 1 ? 'dag' : 'dagen'} oud`;
+                            ageColor = '#94a3b8';
+                        }
+                        
+                        // Tel subtasks
+                        const totalSubtasks = task.subtasks ? task.subtasks.length : 0;
+                        const openSubtasks = task.subtasks ? task.subtasks.filter(s => !s.done).length : 0;
+                        const overdueSubtasks = task.subtasks ? task.subtasks.filter(s => 
+                            !s.done && s.dueDate && s.dueDate < today
+                        ).length : 0;
+                        const dueTodaySubtasks = task.subtasks ? task.subtasks.filter(s => 
+                            !s.done && s.dueDate && s.dueDate === today
+                        ).length : 0;
+                        
+                        availableTasks.push({
+                            ...task,
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id,
+                            _ageGroup: ageGroup,
+                            _ageBadge: ageBadge,
+                            _ageColor: ageColor,
+                            _daysOld: daysOld,
+                            _totalSubtasks: totalSubtasks,
+                            _openSubtasks: openSubtasks,
+                            _overdueSubtasks: overdueSubtasks,
+                            _dueTodaySubtasks: dueTodaySubtasks
+                        });
+                    }
+                });
+            });
+        });
+        
+        // Groepeer taken op leeftijd
+        const groups = {
+            old: availableTasks.filter(t => t._ageGroup === 'old'),
+            medium: availableTasks.filter(t => t._ageGroup === 'medium'),
+            new: availableTasks.filter(t => t._ageGroup === 'new')
+        };
+        
+        // Update count display
+        const selectedOld = this.selectedBigThree.filter(t => t._ageGroup === 'old').length;
+        const selectedMedium = this.selectedBigThree.filter(t => t._ageGroup === 'medium').length;
+        const selectedNew = this.selectedBigThree.length - selectedOld - selectedMedium;
+        
+        const countEl = content.querySelector('#selectedCount');
+        countEl.innerHTML = `
+            <span style="color: var(--text-main); font-weight: 600;">${this.selectedBigThree.length}/3 gekozen</span>
+            ${selectedOld > 0 ? `<span style="margin-left: 12px; color: #ef4444;">🔴 ${selectedOld} oud</span>` : ''}
+            ${selectedMedium > 0 ? `<span style="margin-left: 8px; color: #f59e0b;">🟡 ${selectedMedium} medium</span>` : ''}
+            ${selectedNew > 0 ? `<span style="margin-left: 8px; color: #94a3b8;">⚪ ${selectedNew} nieuw</span>` : ''}
+        `;
+        
+        const container = content.querySelector('#bigThreeGroups');
+        
+        // Render groepen
+        const groupConfig = [
+            { key: 'old', title: '🔴 Ouder dan 1 maand', subtitle: 'Mogelijk te groot of onduidelijk', color: '#ef4444', defaultOpen: true },
+            { key: 'medium', title: '🟡 1-4 weken oud', subtitle: 'Lopende taken', color: '#f59e0b', defaultOpen: true },
+            { key: 'new', title: '⚪ Nieuwer dan 1 week', subtitle: 'Recente taken', color: '#94a3b8', defaultOpen: false }
+        ];
+        
+        groupConfig.forEach(group => {
+            const tasks = groups[group.key];
+            if (tasks.length === 0) return;
+            
+            const section = document.createElement('div');
+            section.style.marginBottom = '16px';
+            section.innerHTML = `
+                <div style="background: var(--bg-panel); border: 1px solid ${group.color}40; border-radius: var(--radius-md); overflow: hidden;">
+                    <div style="padding: 12px 16px; background: ${group.color}10; border-bottom: 1px solid ${group.color}30; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="morningWizard.toggleBigThreeSection('age-${group.key}')">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="section-toggle" id="toggle-bigthree-age-${group.key}" style="transition: transform 0.2s;">${group.defaultOpen ? '▼' : '▶'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${group.title}</span>
+                                <span style="background: ${group.color}30; color: ${group.color}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${tasks.length}</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-left: 24px; margin-top: 2px;">${group.subtitle}</div>
+                        </div>
+                    </div>
+                    <div class="bigthree-section-content" id="content-bigthree-age-${group.key}" style="display: ${group.defaultOpen ? 'block' : 'none'}; padding: 8px;">
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(section);
+            
+            // Render taken MET SUBTASK INFO
+            const contentEl = section.querySelector(`#content-bigthree-age-${group.key}`);
+            tasks.forEach(task => {
+                const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+                
+                // Build subtask badges
+                let subtaskInfo = '';
+                if (task._totalSubtasks > 0) {
+                    subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                        <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
+                        ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
+                        ${task._dueTodaySubtasks > 0 ? `<span style="color: #f59e0b; font-weight: 600;">📅 ${task._dueTodaySubtasks} vandaag</span>` : ''}
+                    </div>`;
+                }
+                
+                const card = document.createElement('div');
+                card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
+                card.style.margin = '8px';
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                        <div style="flex: 1;">
+                            <div class="wizard-card-title">${task.name}</div>
+                            <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                            ${subtaskInfo}
+                        </div>
+                        ${task._ageBadge ? `<div style="font-size: 11px; color: ${task._ageColor}; white-space: nowrap; font-weight: 600; background: ${task._ageColor}15; padding: 4px 8px; border-radius: 4px;">
+                            ${task._ageBadge}
+                        </div>` : ''}
+                    </div>
+                `;
+                
+                card.onclick = () => {
+                    if (isSelected) {
+                        this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
+                    } else {
+                        if (this.selectedBigThree.length < 3) {
+                            this.selectedBigThree.push(task);
+                        } else {
+                            card.style.animation = 'shake 0.3s';
+                            setTimeout(() => card.style.animation = '', 300);
+                        }
+                    }
+                    this.renderStep();
+                };
+                
+                contentEl.appendChild(card);
+            });
         });
     },
     
