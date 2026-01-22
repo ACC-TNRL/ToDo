@@ -7587,7 +7587,7 @@ const morningWizard = {
         }
         
         // Checkbox selection handler
-        checkbox.addEventListener('click', (e) => {
+        checkbox.addEventListener('change', (e) => {
             e.stopPropagation();
             this.handleItemSelection('task', task.id, task, mainCard);
         });
@@ -7652,7 +7652,7 @@ const morningWizard = {
         this.updateCheckboxState(checkbox, 'subtask', sub.id);
         
         // Checkbox selection handler
-        checkbox.addEventListener('click', (e) => {
+        checkbox.addEventListener('change', (e) => {
             e.stopPropagation();
             const itemData = {
                 type: 'subtask',
@@ -7701,7 +7701,7 @@ const morningWizard = {
         this.updateCheckboxState(checkbox, 'checklist', `${parentSub.id}-check-${idx}`, parentSub.id, idx);
         
         // Checkbox selection handler
-        checkbox.addEventListener('click', (e) => {
+        checkbox.addEventListener('change', (e) => {
             e.stopPropagation();
             const itemData = {
                 type: 'checklist',
@@ -7782,7 +7782,7 @@ const morningWizard = {
         }
         
         // Checkbox selection handler
-        checkbox.addEventListener('click', (e) => {
+        checkbox.addEventListener('change', (e) => {
             e.stopPropagation();
             this.handleItemSelection(item.type, item.id, item, card);
         });
@@ -7791,32 +7791,39 @@ const morningWizard = {
     },
     
     handleItemSelection(type, id, itemData, cardElement) {
-        // Check if already selected
-        const isSelected = this.selectedBigThree.some(t => {
+        const checkbox = cardElement.querySelector('.task-select-checkbox');
+        if (!checkbox) return;
+        
+        // Use the actual checkbox state, not just toggle
+        const shouldSelect = checkbox.checked;
+        
+        // Check if already in array
+        const currentlyInArray = this.selectedBigThree.some(t => {
             if (type === 'checklist') {
                 return t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex;
             }
             return t.type === type && t.id === id;
         });
         
-        if (isSelected) {
-            // Deselect
+        if (shouldSelect && !currentlyInArray) {
+            // Want to select but not in array yet
+            if (this.selectedBigThree.length < 3) {
+                this.selectedBigThree.push(itemData);
+            } else {
+                // Max reached - prevent and shake
+                checkbox.checked = false;
+                cardElement.style.animation = 'shake 0.3s';
+                setTimeout(() => cardElement.style.animation = '', 300);
+                return;
+            }
+        } else if (!shouldSelect && currentlyInArray) {
+            // Want to deselect and currently in array
             this.selectedBigThree = this.selectedBigThree.filter(t => {
                 if (type === 'checklist') {
                     return !(t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex);
                 }
                 return !(t.type === type && t.id === id);
             });
-        } else {
-            // Select (if under limit)
-            if (this.selectedBigThree.length < 3) {
-                this.selectedBigThree.push(itemData);
-            } else {
-                // Max reached - shake feedback
-                cardElement.style.animation = 'shake 0.3s';
-                setTimeout(() => cardElement.style.animation = '', 300);
-                return;
-            }
         }
         
         // Update UI
@@ -10648,7 +10655,7 @@ app.init();
             <div id="feedbackScreenshotPreview"></div>
             
             <div class="feedback-info">
-                ℹ️ Bedankt voor je hulp! 🙏
+                ℹ️ Bedankt voor je hulp! 🙏
             </div>
             
             <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
