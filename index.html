@@ -689,15 +689,8 @@
         }
         
         .task-select-checkbox {
-            appearance: auto;
-            -webkit-appearance: checkbox;
-            -moz-appearance: checkbox;
             cursor: pointer;
             accent-color: var(--primary);
-        }
-        
-        .task-select-checkbox:checked {
-            background-color: var(--primary);
         }
 
         .status-badge.status-done {
@@ -7794,7 +7787,10 @@ const morningWizard = {
         const checkbox = cardElement.querySelector('.task-select-checkbox');
         if (!checkbox) return;
         
-        // Check if currently in array (source of truth)
+        // Browser heeft checkbox.checked al geupdate, lees die waarde
+        const wantsToBeSelected = checkbox.checked;
+        
+        // Check if currently in array
         const indexInArray = this.selectedBigThree.findIndex(t => {
             if (type === 'checklist') {
                 return t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex;
@@ -7804,26 +7800,30 @@ const morningWizard = {
         
         const isInArray = indexInArray !== -1;
         
-        if (isInArray) {
-            // Already in array → remove
-            this.selectedBigThree.splice(indexInArray, 1);
-            checkbox.checked = false;
-        } else {
-            // Not in array → add (if space available)
+        if (wantsToBeSelected && !isInArray) {
+            // Wil selecteren maar is niet in array
             if (this.selectedBigThree.length < 3) {
-                this.selectedBigThree.push(itemData);
-                checkbox.checked = true;
+                // Voeg type toe aan itemData voor correcte matching later
+                this.selectedBigThree.push({ ...itemData, type: type });
             } else {
-                // Max reached - prevent and shake
+                // Max bereikt - force uncheck
                 checkbox.checked = false;
                 cardElement.style.animation = 'shake 0.3s';
                 setTimeout(() => cardElement.style.animation = '', 300);
+                this.updateSelectionCount();
                 return;
             }
+        } else if (!wantsToBeSelected && isInArray) {
+            // Wil deselecteren en is in array
+            this.selectedBigThree.splice(indexInArray, 1);
         }
         
-        // Update UI
-        this.updateCardSelectionState(cardElement);
+        // Update UI - gebruik checkbox state (die is correct)
+        if (checkbox.checked) {
+            cardElement.classList.add('selected');
+        } else {
+            cardElement.classList.remove('selected');
+        }
         this.updateSelectionCount();
     },
     
