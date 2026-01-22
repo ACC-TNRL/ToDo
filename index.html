@@ -2869,6 +2869,32 @@
             color: var(--text-muted);
         }
         
+        .wizard-card-sub {
+            transition: all 0.2s;
+        }
+        
+        .wizard-card-sub:hover {
+            background: var(--bg-hover) !important;
+        }
+        
+        .wizard-card-sub.selected {
+            background: rgba(37, 99, 235, 0.1) !important;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .wizard-card-check {
+            transition: all 0.2s;
+        }
+        
+        .wizard-card-check:hover {
+            background: var(--bg-hover) !important;
+        }
+        
+        .wizard-card-check.selected {
+            background: rgba(37, 99, 235, 0.08) !important;
+            border-left: 2px solid var(--primary);
+        }
+        
         .wizard-actions {
             display: flex;
             gap: 12px;
@@ -6567,11 +6593,10 @@ const weekView = {
     
     openTask(catId, projId, taskId) {
         // Schakel terug naar normale view en selecteer de taak
-        state.currentView = 'all';
         state.sel.cat = catId;
         state.sel.proj = projId;
         state.sel.task = taskId;
-        app.render();
+        app.changeView('all');
     }
 };
 
@@ -6796,6 +6821,7 @@ const morningWizard = {
     currentStep: 1,
     overdueTasks: [],
     selectedBigThree: [],
+    expandedTasks: [], // Track which tasks are expanded to show subtasks
     sortMode: 'deadline', // 'deadline' of 'age'
     
     open() {
@@ -7431,11 +7457,13 @@ const morningWizard = {
                 contentEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Geen taken in deze categorie</div>';
             } else {
                 tasks.forEach(task => {
-                    const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+                    const isTaskSelected = this.selectedBigThree.some(t => t.type === 'task' && t.id === task.id);
+                    const isExpanded = this.expandedTasks.includes(task.id);
+                    const hasSubtasks = task._totalSubtasks > 0;
                     
                     // Build subtask badges
                     let subtaskInfo = '';
-                    if (task._totalSubtasks > 0) {
+                    if (hasSubtasks) {
                         subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
                             <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
                             ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
@@ -7444,35 +7472,182 @@ const morningWizard = {
                     }
                     
                     const card = document.createElement('div');
-                    card.className = `wizard-card ${isSelected ? 'selected' : ''}`;
                     card.style.margin = '8px';
-                    card.style.cursor = 'pointer';
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
-                            <div style="flex: 1;">
-                                <div class="wizard-card-title">${task.name}</div>
-                                <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
-                                ${subtaskInfo}
+                    
+                    // Main task card
+                    const mainCard = document.createElement('div');
+                    mainCard.className = `wizard-card ${isTaskSelected ? 'selected' : ''}`;
+                    mainCard.style.cursor = 'pointer';
+                    mainCard.innerHTML = `
+                        <div style="display: flex; align-items: start; gap: 8px;">
+                            ${hasSubtasks ? `<span class="task-expand-toggle" style="cursor: pointer; font-size: 14px; color: var(--text-muted); user-select: none;">${isExpanded ? '▼' : '▶'}</span>` : '<span style="width: 14px;"></span>'}
+                            <div style="flex: 1; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                                <div style="flex: 1;">
+                                    <div class="wizard-card-title">📄 ${task.name}</div>
+                                    <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                                    ${subtaskInfo}
+                                </div>
+                                ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
+                                    ${task._dueBadge}
+                                </div>` : ''}
                             </div>
-                            ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
-                                ${task._dueBadge}
-                            </div>` : ''}
                         </div>
                     `;
                     
-                    card.onclick = () => {
-                        if (isSelected) {
-                            this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
+                    // Click handlers
+                    const toggleEl = mainCard.querySelector('.task-expand-toggle');
+                    if (toggleEl) {
+                        toggleEl.onclick = (e) => {
+                            e.stopPropagation();
+                            this.toggleTaskExpand(task.id);
+                        };
+                    }
+                    
+                    mainCard.onclick = (e) => {
+                        // Don't trigger if clicking on toggle
+                        if (e.target.classList.contains('task-expand-toggle')) return;
+                        
+                        if (isTaskSelected) {
+                            this.selectedBigThree = this.selectedBigThree.filter(t => !(t.type === 'task' && t.id === task.id));
                         } else {
                             if (this.selectedBigThree.length < 3) {
-                                this.selectedBigThree.push(task);
+                                this.selectedBigThree.push({
+                                    type: 'task',
+                                    id: task.id,
+                                    name: task.name,
+                                    _cat: task._cat,
+                                    _proj: task._proj,
+                                    _catId: task._catId,
+                                    _projId: task._projId,
+                                    _urgency: task._urgency,
+                                    _rawItem: task
+                                });
                             } else {
-                                card.style.animation = 'shake 0.3s';
-                                setTimeout(() => card.style.animation = '', 300);
+                                mainCard.style.animation = 'shake 0.3s';
+                                setTimeout(() => mainCard.style.animation = '', 300);
                             }
                         }
                         this.renderStep();
                     };
+                    
+                    card.appendChild(mainCard);
+                    
+                    // Expanded subtasks/checklist area
+                    if (isExpanded && hasSubtasks) {
+                        const expandedArea = document.createElement('div');
+                        expandedArea.style.cssText = 'margin-left: 22px; margin-top: 8px; padding: 8px; background: var(--bg-base); border-radius: 4px; border-left: 3px solid var(--border-color);';
+                        
+                        // Get actual subtasks from database
+                        const actualTask = state.db.categories
+                            .find(c => c.id === task._catId)?.projects
+                            ?.find(p => p.id === task._projId)?.tasks
+                            ?.find(t => t.id === task.id);
+                        
+                        if (actualTask && actualTask.subtasks) {
+                            actualTask.subtasks.forEach(sub => {
+                                if (!sub.done) {
+                                    const isSubSelected = this.selectedBigThree.some(t => t.type === 'subtask' && t.id === sub.id);
+                                    
+                                    const subCard = document.createElement('div');
+                                    subCard.className = `wizard-card-sub ${isSubSelected ? 'selected' : ''}`;
+                                    subCard.style.cssText = 'padding: 6px 8px; margin: 4px 0; font-size: 13px; cursor: pointer; border-radius: 4px; background: var(--bg-panel);';
+                                    subCard.innerHTML = `
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="font-size: 12px;">✓</span>
+                                            <span style="flex: 1;">${sub.name}</span>
+                                        </div>
+                                    `;
+                                    
+                                    subCard.onclick = (e) => {
+                                        e.stopPropagation();
+                                        
+                                        if (isSubSelected) {
+                                            this.selectedBigThree = this.selectedBigThree.filter(t => !(t.type === 'subtask' && t.id === sub.id));
+                                        } else {
+                                            if (this.selectedBigThree.length < 3) {
+                                                this.selectedBigThree.push({
+                                                    type: 'subtask',
+                                                    id: sub.id,
+                                                    name: sub.name,
+                                                    _cat: task._cat,
+                                                    _proj: task._proj,
+                                                    _task: task.name,
+                                                    _catId: task._catId,
+                                                    _projId: task._projId,
+                                                    _taskId: task.id,
+                                                    _subtaskId: sub.id,
+                                                    _rawItem: sub
+                                                });
+                                            } else {
+                                                subCard.style.animation = 'shake 0.3s';
+                                                setTimeout(() => subCard.style.animation = '', 300);
+                                            }
+                                        }
+                                        this.renderStep();
+                                    };
+                                    
+                                    expandedArea.appendChild(subCard);
+                                    
+                                    // Checklist items onder subtask
+                                    if (sub.checklist && sub.checklist.length > 0) {
+                                        sub.checklist.forEach((checkItem, idx) => {
+                                            if (!checkItem.done) {
+                                                const isCheckSelected = this.selectedBigThree.some(t => 
+                                                    t.type === 'checklist' && t._subtaskId === sub.id && t._checklistIndex === idx
+                                                );
+                                                
+                                                const checkCard = document.createElement('div');
+                                                checkCard.className = `wizard-card-check ${isCheckSelected ? 'selected' : ''}`;
+                                                checkCard.style.cssText = 'padding: 4px 8px; margin: 2px 0 2px 20px; font-size: 12px; cursor: pointer; border-radius: 4px; background: var(--bg-base);';
+                                                checkCard.innerHTML = `
+                                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                                        <span style="font-size: 11px;">□</span>
+                                                        <span style="flex: 1;">${checkItem.text}</span>
+                                                    </div>
+                                                `;
+                                                
+                                                checkCard.onclick = (e) => {
+                                                    e.stopPropagation();
+                                                    
+                                                    if (isCheckSelected) {
+                                                        this.selectedBigThree = this.selectedBigThree.filter(t => 
+                                                            !(t.type === 'checklist' && t._subtaskId === sub.id && t._checklistIndex === idx)
+                                                        );
+                                                    } else {
+                                                        if (this.selectedBigThree.length < 3) {
+                                                            this.selectedBigThree.push({
+                                                                type: 'checklist',
+                                                                id: `${sub.id}-check-${idx}`,
+                                                                name: checkItem.text,
+                                                                _cat: task._cat,
+                                                                _proj: task._proj,
+                                                                _task: task.name,
+                                                                _subtask: sub.name,
+                                                                _catId: task._catId,
+                                                                _projId: task._projId,
+                                                                _taskId: task.id,
+                                                                _subtaskId: sub.id,
+                                                                _checklistIndex: idx,
+                                                                _rawItem: checkItem
+                                                            });
+                                                        } else {
+                                                            checkCard.style.animation = 'shake 0.3s';
+                                                            setTimeout(() => checkCard.style.animation = '', 300);
+                                                        }
+                                                    }
+                                                    this.renderStep();
+                                                };
+                                                
+                                                expandedArea.appendChild(checkCard);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        
+                        card.appendChild(expandedArea);
+                    }
                     
                     contentEl.appendChild(card);
                 });
@@ -7482,81 +7657,137 @@ const morningWizard = {
     
     renderByAge(content) {
         const today = new Date().setHours(0,0,0,0);
-        const availableTasks = [];
+        const allItems = [];
         
-        // Verzamel alle beschikbare taken MET leeftijd en subtask info
+        // Helper functie om age te berekenen
+        const calculateAge = (createdDate) => {
+            if (!createdDate) return { daysOld: 0, ageGroup: 'new', ageBadge: '🕐 Nieuw', ageColor: '#94a3b8' };
+            
+            const daysOld = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+            let ageGroup = 'new';
+            let ageBadge = '';
+            let ageColor = '#94a3b8';
+            
+            if (daysOld > 30) {
+                ageGroup = 'old';
+                const months = Math.floor(daysOld / 30);
+                ageBadge = `🕐 ${months} ${months === 1 ? 'maand' : 'maanden'} oud`;
+                ageColor = '#ef4444';
+            } else if (daysOld > 7) {
+                ageGroup = 'medium';
+                const weeks = Math.floor(daysOld / 7);
+                ageBadge = `🕐 ${weeks} ${weeks === 1 ? 'week' : 'weken'} oud`;
+                ageColor = '#f59e0b';
+            } else if (daysOld > 0) {
+                ageGroup = 'new';
+                ageBadge = `🕐 ${daysOld} ${daysOld === 1 ? 'dag' : 'dagen'} oud`;
+                ageColor = '#94a3b8';
+            }
+            
+            return { daysOld, ageGroup, ageBadge, ageColor };
+        };
+        
+        // Verzamel ALLE items (tasks, subtasks, checklist) in FLAT LIST
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
+                    // 1. TASKS
                     if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
-                        // Bereken leeftijd
-                        const createdDate = task.createdAt || today;
-                        const daysOld = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                        const age = calculateAge(task.createdAt);
                         
-                        // Bepaal leeftijd categorie
-                        let ageGroup = 'new';
-                        let ageBadge = '';
-                        let ageColor = '#94a3b8';
-                        
-                        if (daysOld > 30) {
-                            // Ouder dan 1 maand
-                            ageGroup = 'old';
-                            const months = Math.floor(daysOld / 30);
-                            ageBadge = `🕐 ${months} ${months === 1 ? 'maand' : 'maanden'} oud`;
-                            ageColor = '#ef4444';
-                        } else if (daysOld > 7) {
-                            // 1-4 weken oud
-                            ageGroup = 'medium';
-                            const weeks = Math.floor(daysOld / 7);
-                            ageBadge = `🕐 ${weeks} ${weeks === 1 ? 'week' : 'weken'} oud`;
-                            ageColor = '#f59e0b';
-                        } else if (daysOld > 0) {
-                            // Minder dan 1 week
-                            ageGroup = 'new';
-                            ageBadge = `🕐 ${daysOld} ${daysOld === 1 ? 'dag' : 'dagen'} oud`;
-                            ageColor = '#94a3b8';
-                        }
-                        
-                        // Tel subtasks
+                        // Tel subtasks voor deze task
                         const totalSubtasks = task.subtasks ? task.subtasks.length : 0;
                         const openSubtasks = task.subtasks ? task.subtasks.filter(s => !s.done).length : 0;
-                        const overdueSubtasks = task.subtasks ? task.subtasks.filter(s => 
-                            !s.done && s.dueDate && s.dueDate < today
-                        ).length : 0;
-                        const dueTodaySubtasks = task.subtasks ? task.subtasks.filter(s => 
-                            !s.done && s.dueDate && s.dueDate === today
-                        ).length : 0;
                         
-                        availableTasks.push({
-                            ...task,
+                        allItems.push({
+                            type: 'task',
+                            id: task.id,
+                            name: task.name,
                             _cat: cat.name,
                             _proj: proj.name,
                             _catId: cat.id,
                             _projId: proj.id,
-                            _ageGroup: ageGroup,
-                            _ageBadge: ageBadge,
-                            _ageColor: ageColor,
-                            _daysOld: daysOld,
+                            _taskId: task.id,
+                            _context: `${cat.name} → ${proj.name}`,
                             _totalSubtasks: totalSubtasks,
                             _openSubtasks: openSubtasks,
-                            _overdueSubtasks: overdueSubtasks,
-                            _dueTodaySubtasks: dueTodaySubtasks
+                            ...age,
+                            _rawItem: task
+                        });
+                    }
+                    
+                    // 2. SUBTASKS (onder tasks)
+                    if (task.subtasks) {
+                        task.subtasks.forEach(sub => {
+                            if (!sub.done && (!sub.scheduledDate || sub.scheduledDate === today)) {
+                                const age = calculateAge(sub.createdAt);
+                                
+                                // Tel checklist items voor deze subtask
+                                const totalChecklist = sub.checklist ? sub.checklist.length : 0;
+                                const openChecklist = sub.checklist ? sub.checklist.filter(c => !c.done).length : 0;
+                                
+                                allItems.push({
+                                    type: 'subtask',
+                                    id: sub.id,
+                                    name: sub.name,
+                                    _cat: cat.name,
+                                    _proj: proj.name,
+                                    _task: task.name,
+                                    _catId: cat.id,
+                                    _projId: proj.id,
+                                    _taskId: task.id,
+                                    _subtaskId: sub.id,
+                                    _context: `${cat.name} → ${proj.name} → ${task.name}`,
+                                    _totalChecklist: totalChecklist,
+                                    _openChecklist: openChecklist,
+                                    ...age,
+                                    _rawItem: sub
+                                });
+                            }
+                            
+                            // 3. CHECKLIST ITEMS (onder subtasks)
+                            if (sub.checklist) {
+                                sub.checklist.forEach((checkItem, idx) => {
+                                    if (!checkItem.done && (!checkItem.scheduledDate || checkItem.scheduledDate === today)) {
+                                        // Checklist heeft geen createdAt, gebruik subtask createdAt
+                                        const age = calculateAge(sub.createdAt);
+                                        
+                                        allItems.push({
+                                            type: 'checklist',
+                                            id: `${sub.id}-check-${idx}`,
+                                            name: checkItem.text,
+                                            _cat: cat.name,
+                                            _proj: proj.name,
+                                            _task: task.name,
+                                            _subtask: sub.name,
+                                            _catId: cat.id,
+                                            _projId: proj.id,
+                                            _taskId: task.id,
+                                            _subtaskId: sub.id,
+                                            _checklistIndex: idx,
+                                            _context: `${cat.name} → ${proj.name} → ${task.name} → ${sub.name}`,
+                                            ...age,
+                                            _rawItem: checkItem
+                                        });
+                                    }
+                                });
+                            }
                         });
                     }
                 });
             });
         });
         
-        // Groepeer taken op leeftijd
+        // Groepeer ALLE items op leeftijd
         const groups = {
-            old: availableTasks.filter(t => t._ageGroup === 'old'),
-            medium: availableTasks.filter(t => t._ageGroup === 'medium'),
-            new: availableTasks.filter(t => t._ageGroup === 'new')
+            old: allItems.filter(t => t.ageGroup === 'old'),
+            medium: allItems.filter(t => t.ageGroup === 'medium'),
+            new: allItems.filter(t => t.ageGroup === 'new')
         };
         
         // Update count display
-        const selectedOld = this.selectedBigThree.filter(t => t._ageGroup === 'old').length;
-        const selectedMedium = this.selectedBigThree.filter(t => t._ageGroup === 'medium').length;
+        const selectedOld = this.selectedBigThree.filter(t => t.ageGroup === 'old').length;
+        const selectedMedium = this.selectedBigThree.filter(t => t.ageGroup === 'medium').length;
         const selectedNew = this.selectedBigThree.length - selectedOld - selectedMedium;
         
         const countEl = content.querySelector('#selectedCount');
@@ -7603,17 +7834,29 @@ const morningWizard = {
             
             // Render taken MET SUBTASK INFO
             const contentEl = section.querySelector(`#content-bigthree-age-${group.key}`);
-            tasks.forEach(task => {
-                const isSelected = this.selectedBigThree.some(t => t.id === task.id);
+            items.forEach(item => {
+                const isSelected = this.selectedBigThree.some(t => t.id === item.id);
                 
-                // Build subtask badges
-                let subtaskInfo = '';
-                if (task._totalSubtasks > 0) {
-                    subtaskInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
-                        <span>🔢 ${task._openSubtasks}/${task._totalSubtasks} subtaken</span>
-                        ${task._overdueSubtasks > 0 ? `<span style="color: #ef4444; font-weight: 600;">⚠️ ${task._overdueSubtasks} overdue</span>` : ''}
-                        ${task._dueTodaySubtasks > 0 ? `<span style="color: #f59e0b; font-weight: 600;">📅 ${task._dueTodaySubtasks} vandaag</span>` : ''}
-                    </div>`;
+                // Type badge en extra info
+                let typeBadge = '';
+                let extraInfo = '';
+                
+                if (item.type === 'task') {
+                    typeBadge = '📄';
+                    if (item._totalSubtasks > 0) {
+                        extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                            🔢 ${item._openSubtasks}/${item._totalSubtasks} subtaken open
+                        </div>`;
+                    }
+                } else if (item.type === 'subtask') {
+                    typeBadge = '✓';
+                    if (item._totalChecklist > 0) {
+                        extraInfo = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                            □ ${item._openChecklist}/${item._totalChecklist} checklist items
+                        </div>`;
+                    }
+                } else if (item.type === 'checklist') {
+                    typeBadge = '□';
                 }
                 
                 const card = document.createElement('div');
@@ -7623,22 +7866,25 @@ const morningWizard = {
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
                         <div style="flex: 1;">
-                            <div class="wizard-card-title">${task.name}</div>
-                            <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
-                            ${subtaskInfo}
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <span style="font-size: 14px;">${typeBadge}</span>
+                                <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
+                            </div>
+                            <div class="wizard-card-meta">${item._context}</div>
+                            ${extraInfo}
                         </div>
-                        ${task._ageBadge ? `<div style="font-size: 11px; color: ${task._ageColor}; white-space: nowrap; font-weight: 600; background: ${task._ageColor}15; padding: 4px 8px; border-radius: 4px;">
-                            ${task._ageBadge}
+                        ${item.ageBadge ? `<div style="font-size: 11px; color: ${item.ageColor}; white-space: nowrap; font-weight: 600; background: ${item.ageColor}15; padding: 4px 8px; border-radius: 4px;">
+                            ${item.ageBadge}
                         </div>` : ''}
                     </div>
                 `;
                 
                 card.onclick = () => {
                     if (isSelected) {
-                        this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== task.id);
+                        this.selectedBigThree = this.selectedBigThree.filter(t => t.id !== item.id);
                     } else {
                         if (this.selectedBigThree.length < 3) {
-                            this.selectedBigThree.push(task);
+                            this.selectedBigThree.push(item);
                         } else {
                             card.style.animation = 'shake 0.3s';
                             setTimeout(() => card.style.animation = '', 300);
@@ -7664,6 +7910,16 @@ const morningWizard = {
         }
     },
     
+    toggleTaskExpand(taskId) {
+        const index = this.expandedTasks.indexOf(taskId);
+        if (index > -1) {
+            this.expandedTasks.splice(index, 1);
+        } else {
+            this.expandedTasks.push(taskId);
+        }
+        this.renderStep();
+    },
+    
     renderStep3(content) {
         document.getElementById('wizardTitle').textContent = 'Volgorde 📋';
         document.getElementById('wizardSubtitle').textContent = 'Waar begin je mee?';
@@ -7676,7 +7932,22 @@ const morningWizard = {
         `;
         
         const cardsContainer = content.querySelector('#orderCards');
-        this.selectedBigThree.forEach((task, idx) => {
+        this.selectedBigThree.forEach((item, idx) => {
+            // Type badge
+            let typeBadge = '';
+            let context = '';
+            
+            if (item.type === 'task') {
+                typeBadge = '📄';
+                context = `${item._cat} / ${item._proj}`;
+            } else if (item.type === 'subtask') {
+                typeBadge = '✓';
+                context = `${item._cat} / ${item._proj} / ${item._task}`;
+            } else if (item.type === 'checklist') {
+                typeBadge = '□';
+                context = `${item._cat} / ${item._proj} / ${item._task} / ${item._subtask}`;
+            }
+            
             const card = document.createElement('div');
             card.className = 'wizard-card';
             card.draggable = true;
@@ -7684,8 +7955,11 @@ const morningWizard = {
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="font-size: 24px; font-weight: 700; color: var(--text-muted);">${idx + 1}</div>
                     <div style="flex: 1;">
-                        <div class="wizard-card-title">${task.name}</div>
-                        <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                            <span style="font-size: 14px;">${typeBadge}</span>
+                            <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
+                        </div>
+                        <div class="wizard-card-meta">${context}</div>
                     </div>
                 </div>
             `;
@@ -7759,16 +8033,45 @@ const morningWizard = {
     },
     
     finish() {
-        // Plan de Big Three voor vandaag met volgorde
+        // Plan de Big Three voor vandaag met volgorde (kan mixed zijn: tasks, subtasks, checklist)
         const today = new Date().setHours(0,0,0,0);
         
-        this.selectedBigThree.forEach((task, index) => {
+        this.selectedBigThree.forEach((item, index) => {
             state.db.categories.forEach(cat => {
+                if (cat.id !== item._catId) return;
+                
                 cat.projects?.forEach(proj => {
-                    const realTask = proj.tasks?.find(t => t.id === task.id);
-                    if (realTask) {
-                        realTask.scheduledDate = today;
-                        realTask.todayPriority = index; // Implementeer volgorde uit wizard!
+                    if (proj.id !== item._projId) return;
+                    
+                    if (item.type === 'task') {
+                        // Hele task selecteren
+                        const realTask = proj.tasks?.find(t => t.id === item.id);
+                        if (realTask) {
+                            realTask.scheduledDate = today;
+                            realTask.todayPriority = index;
+                        }
+                    } else if (item.type === 'subtask') {
+                        // Individuele subtask selecteren
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
+                            if (realSub) {
+                                realSub.scheduledDate = today;
+                                realSub.todayPriority = index;
+                            }
+                        });
+                    } else if (item.type === 'checklist') {
+                        // Individueel checklist item selecteren
+                        proj.tasks?.forEach(task => {
+                            if (task.id !== item._taskId) return;
+                            task.subtasks?.forEach(sub => {
+                                if (sub.id !== item._subtaskId) return;
+                                if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                    sub.checklist[item._checklistIndex].scheduledDate = today;
+                                    sub.checklist[item._checklistIndex].todayPriority = index;
+                                }
+                            });
+                        });
                     }
                 });
             });
