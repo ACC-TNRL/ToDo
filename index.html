@@ -7794,21 +7794,25 @@ const morningWizard = {
         const checkbox = cardElement.querySelector('.task-select-checkbox');
         if (!checkbox) return;
         
-        // Use the actual checkbox state, not just toggle
-        const shouldSelect = checkbox.checked;
-        
-        // Check if already in array
-        const currentlyInArray = this.selectedBigThree.some(t => {
+        // Check if currently in array (source of truth)
+        const indexInArray = this.selectedBigThree.findIndex(t => {
             if (type === 'checklist') {
                 return t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex;
             }
             return t.type === type && t.id === id;
         });
         
-        if (shouldSelect && !currentlyInArray) {
-            // Want to select but not in array yet
+        const isInArray = indexInArray !== -1;
+        
+        if (isInArray) {
+            // Already in array → remove
+            this.selectedBigThree.splice(indexInArray, 1);
+            checkbox.checked = false;
+        } else {
+            // Not in array → add (if space available)
             if (this.selectedBigThree.length < 3) {
                 this.selectedBigThree.push(itemData);
+                checkbox.checked = true;
             } else {
                 // Max reached - prevent and shake
                 checkbox.checked = false;
@@ -7816,14 +7820,6 @@ const morningWizard = {
                 setTimeout(() => cardElement.style.animation = '', 300);
                 return;
             }
-        } else if (!shouldSelect && currentlyInArray) {
-            // Want to deselect and currently in array
-            this.selectedBigThree = this.selectedBigThree.filter(t => {
-                if (type === 'checklist') {
-                    return !(t.type === 'checklist' && t._subtaskId === itemData._subtaskId && t._checklistIndex === itemData._checklistIndex);
-                }
-                return !(t.type === type && t.id === id);
-            });
         }
         
         // Update UI
@@ -10655,7 +10651,7 @@ app.init();
             <div id="feedbackScreenshotPreview"></div>
             
             <div class="feedback-info">
-                ℹ️ Bedankt voor je hulp! 🙏
+                ℹ️ Bedankt voor je hulp! 🙏
             </div>
             
             <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
