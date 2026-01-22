@@ -687,6 +687,18 @@
             width: 14px;
             height: 14px;
         }
+        
+        .task-select-checkbox {
+            appearance: auto;
+            -webkit-appearance: checkbox;
+            -moz-appearance: checkbox;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+        
+        .task-select-checkbox:checked {
+            background-color: var(--primary);
+        }
 
         .status-badge.status-done {
             background: #f1f5f9;
@@ -8035,9 +8047,9 @@ const morningWizard = {
             
             container.appendChild(section);
             
-            // Render taken MET SUBTASK INFO
+            // Render items in this age group
             const contentEl = section.querySelector(`#content-bigthree-age-${group.key}`);
-            items.forEach(item => {
+            tasks.forEach(item => {
                 this.renderFlatItemCard(item, contentEl);
             });
         });
