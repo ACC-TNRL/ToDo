@@ -3096,9 +3096,24 @@
         <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
             ⌨️  Shortcuts
         </button>
-        <button id="settingsBtn" class="btn btn-secondary" onclick="app.showSettings()" title="Instellingen" aria-label="Instellingen">
-            &#9881;
-        </button>
+        <div class="btn-dropdown-wrapper">
+            <button class="btn btn-secondary btn-with-dropdown" style="display: flex; align-items: center;">
+                <span class="btn-main" onclick="app.showSettings()" title="Instellingen" aria-label="Instellingen">
+                    &#9881;
+                </span>
+                <span class="btn-dropdown-toggle" onclick="app.toggleSettingsDropdown(event)" title="Meer opties">
+                    &#9662;
+                </span>
+            </button>
+            <div id="settingsDropdown" class="dropdown-menu">
+                <div class="dropdown-menu-item" onclick="morningWizard.open(); document.getElementById('settingsDropdown').classList.remove('show');">
+                    &#9749; Dagstart
+                </div>
+                <div class="dropdown-menu-item" onclick="app.changeView('week'); document.getElementById('settingsDropdown').classList.remove('show');">
+                    &#127774; Weekstart
+                </div>
+            </div>
+        </div>
         
     </div>
 </header>
@@ -4233,6 +4248,25 @@ const app = {
             modal.style.display = 'none';
         }, 200);
     },
+
+    toggleSettingsDropdown(event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById('settingsDropdown');
+        if (!dropdown) return;
+        
+        dropdown.classList.toggle('show');
+        
+        // Close dropdown when clicking outside
+        if (dropdown.classList.contains('show')) {
+            const closeDropdown = (e) => {
+                if (!dropdown.contains(e.target) && !e.target.closest('.btn-dropdown-toggle')) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeDropdown), 0);
+        }
+    },
     
     toggleReminders() {
         const checked = document.getElementById('remindersEnabledCheck').checked;
@@ -4392,6 +4426,9 @@ const app = {
                 console.log('⚠️ Not logged in - changes stored in memory only');
                 this.setStatus("Niet ingelogd", "");
             }
+            
+            // Check voor nieuwe dag bij activiteit
+            reminders.checkOnActivity();
         } catch (error) {
             this.setStatus("Fout bij opslaan", "error");
             errorHandler.log(error, 'save');
@@ -5612,7 +5649,7 @@ const todayView = {
                             catId: cat.id,
                             projId: proj.id,
                             context: `${cat.name} → ${proj.name}`,
-                            priority: task.todayPriority || 999,
+                            priority: task.todayPriority !== undefined ? task.todayPriority : 999,
                             done: task.done || false
                         });
                     }
@@ -5629,7 +5666,7 @@ const todayView = {
                                     projId: proj.id,
                                     taskId: task.id,
                                     context: `${cat.name} → ${proj.name} → ${task.name}`,
-                                    priority: sub.todayPriority || 999,
+                                    priority: sub.todayPriority !== undefined ? sub.todayPriority : 999,
                                     done: sub.done || false
                                 });
                             }
@@ -5648,7 +5685,7 @@ const todayView = {
                                             subtaskId: sub.id,
                                             checklistIndex: idx,
                                             context: `${cat.name} → ${proj.name} → ${task.name} → ${sub.name}`,
-                                            priority: checkItem.todayPriority || 999,
+                                            priority: checkItem.todayPriority !== undefined ? checkItem.todayPriority : 999,
                                             done: checkItem.done || false
                                         });
                                     }
@@ -6572,9 +6609,6 @@ const reminders = {
         };
         
         modal.classList.add('show');
-        
-        // Auto-dismiss after 15 seconds
-        setTimeout(() => this.dismiss(), 15000);
     },
     
     showDailyReminder() {
@@ -6592,9 +6626,6 @@ const reminders = {
         };
         
         modal.classList.add('show');
-        
-        // Auto-dismiss after 15 seconds
-        setTimeout(() => this.dismiss(), 15000);
     },
     
     accept() {
@@ -6618,6 +6649,33 @@ const reminders = {
         // Reset last check so it shows today
         localStorage.removeItem('lastReminderCheck');
         app.setStatus('Herinneringen ingeschakeld', 'success');
+    },
+
+    checkOnActivity() {
+        // Deze functie wordt aangeroepen bij user activiteit (zoals saven)
+        // Check if reminders are enabled
+        const enabled = localStorage.getItem('remindersEnabled') !== 'false';
+        if (!enabled) return;
+        
+        const now = new Date();
+        const today = now.setHours(0, 0, 0, 0);
+        const lastCheck = localStorage.getItem('lastReminderCheck');
+        const lastCheckDate = lastCheck ? parseInt(lastCheck) : null;
+        
+        // Als het een nieuwe dag is EN we hebben vandaag nog geen reminder getoond
+        if (!lastCheckDate || lastCheckDate !== today) {
+            const dayOfWeek = now.getDay();
+            
+            if (dayOfWeek === 1) {
+                // Monday - Week planning reminder
+                this.showWeekReminder();
+            } else {
+                // Other days - Daily reminder
+                this.showDailyReminder();
+            }
+            
+            localStorage.setItem('lastReminderCheck', today.toString());
+        }
     }
 };
 
@@ -6783,6 +6841,7 @@ const morningWizard = {
     renderStep1(content) {
         document.getElementById('wizardTitle').textContent = 'Opruimen ✨';
         document.getElementById('wizardSubtitle').textContent = 'Wat doe je met gisteren\'s taken?';
+        document.getElementById('wizardNext').textContent = 'Volgende';
         
         if (this.yesterdayTasks.length === 0) {
             content.innerHTML = `
@@ -6861,6 +6920,7 @@ const morningWizard = {
     renderStep2(content) {
         document.getElementById('wizardTitle').textContent = 'De Big Three 🎯';
         document.getElementById('wizardSubtitle').textContent = 'Kies max. 3 prioriteiten voor vandaag';
+        document.getElementById('wizardNext').textContent = 'Volgende';
         
         const today = new Date().setHours(0,0,0,0);
         const availableTasks = [];
