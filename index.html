@@ -7397,7 +7397,7 @@ const morningWizard = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
+                    if (!task.done && !task.scheduledDate) {
                         // Tel subtasks
                         const totalSubtasks = task.subtasks ? task.subtasks.length : 0;
                         const openSubtasks = task.subtasks ? task.subtasks.filter(s => !s.done).length : 0;
@@ -7910,7 +7910,7 @@ const morningWizard = {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
                     // 1. TASKS
-                    if (!task.done && (!task.scheduledDate || task.scheduledDate === today)) {
+                    if (!task.done && !task.scheduledDate) {
                         const age = calculateAge(task.createdAt);
                         
                         // Tel subtasks voor deze task
@@ -7937,7 +7937,7 @@ const morningWizard = {
                     // 2. SUBTASKS (onder tasks)
                     if (task.subtasks) {
                         task.subtasks.forEach(sub => {
-                            if (!sub.done && (!sub.scheduledDate || sub.scheduledDate === today)) {
+                            if (!sub.done && !sub.scheduledDate) {
                                 const age = calculateAge(sub.createdAt);
                                 
                                 // Tel checklist items voor deze subtask
@@ -7966,7 +7966,7 @@ const morningWizard = {
                             // 3. CHECKLIST ITEMS (onder subtasks)
                             if (sub.checklist) {
                                 sub.checklist.forEach((checkItem, idx) => {
-                                    if (!checkItem.done && (!checkItem.scheduledDate || checkItem.scheduledDate === today)) {
+                                    if (!checkItem.done && !checkItem.scheduledDate) {
                                         // Checklist heeft geen createdAt, gebruik subtask createdAt
                                         const age = calculateAge(sub.createdAt);
                                         
