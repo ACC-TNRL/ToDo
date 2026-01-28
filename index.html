@@ -2055,6 +2055,45 @@
             background: #16a34a;
         }
         
+        .custom-dialog-remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        
+        .custom-dialog-remember input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        
+        .custom-dialog-remember:hover {
+            color: var(--text-main);
+        }
+        
+        .custom-dialog-list {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            margin: 8px 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .custom-dialog-list-item {
+            padding: 4px 0;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+        
         .today-header {
             display: flex;
             justify-content: space-between;
@@ -4315,27 +4354,18 @@ const undoRedo = {
         if (state.undoHistory.length === 0) return;
         
         try {
-            // Save current state to redo
             const currentState = JSON.stringify(state.db);
             state.redoHistory.push(currentState);
             
-            // Restore previous state
             const previousState = state.undoHistory.pop();
             state.db = JSON.parse(previousState);
             
             app.save();
             
-            // Render based on current view
-            if (state.currentView === 'today') {
-                todayView.render();
-            } else if (state.currentView === 'week') {
-                weekView.render();
-            } else {
-                app.render();
-            }
+            // Use app.changeView to properly handle all view states including column visibility
+            app.changeView(state.currentView);
             
             this.updateButtons();
-            
             toastNotifications.show('info', 'Ongedaan gemaakt', '', 2000);
         } catch (error) {
             errorHandler.log(error, 'undo');
@@ -4346,27 +4376,18 @@ const undoRedo = {
         if (state.redoHistory.length === 0) return;
         
         try {
-            // Save current state to undo
             const currentState = JSON.stringify(state.db);
             state.undoHistory.push(currentState);
             
-            // Restore redo state
             const redoState = state.redoHistory.pop();
             state.db = JSON.parse(redoState);
             
             app.save();
             
-            // Render based on current view
-            if (state.currentView === 'today') {
-                todayView.render();
-            } else if (state.currentView === 'week') {
-                weekView.render();
-            } else {
-                app.render();
-            }
+            // Use app.changeView to properly handle all view states including column visibility
+            app.changeView(state.currentView);
             
             this.updateButtons();
-            
             toastNotifications.show('info', 'Opnieuw gedaan', '', 2000);
         } catch (error) {
             errorHandler.log(error, 'redo');
@@ -4736,6 +4757,11 @@ const app = {
         const checkbox = document.getElementById('remindersEnabledCheck');
         if (checkbox) checkbox.checked = remindersEnabled;
         
+        // Load subtask completion setting (default: task-only)
+        const subtaskSetting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+        const select = document.getElementById('subtaskCompletionSetting');
+        if (select) select.value = subtaskSetting;
+        
         modal.style.display = 'flex';
         requestAnimationFrame(() => modal.classList.add('show'));
     },
@@ -4748,6 +4774,19 @@ const app = {
         setTimeout(() => {
             modal.style.display = 'none';
         }, 200);
+    },
+    
+    saveSubtaskSetting() {
+        const select = document.getElementById('subtaskCompletionSetting');
+        if (select) {
+            localStorage.setItem('subtaskCompletionSetting', select.value);
+            const labels = {
+                'task-only': 'Alleen opdracht voltooien',
+                'complete-all': 'Alles voltooien',
+                'ask': 'Altijd vragen'
+            };
+            toastNotifications.show('success', 'Instelling opgeslagen', labels[select.value], 2000);
+        }
     },
 
     toggleSettingsDropdown(event) {
@@ -5572,6 +5611,60 @@ const renderer = {
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
                 const wasNotDone = !item.done;
+                const wantsToComplete = e.target.checked;
+                
+                // Check for open subtasks when completing a task
+                if (type === 'task' && wantsToComplete && wasNotDone) {
+                    const openSubtasks = item.subtasks?.filter(sub => !sub.done) || [];
+                    
+                    if (openSubtasks.length > 0) {
+                        const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+                        
+                        if (setting === 'ask') {
+                            // Reset checkbox while dialog is open
+                            e.target.checked = false;
+                            
+                            const result = await customDialog.choice(
+                                'Open subtaken gevonden',
+                                `De opdracht "<strong>${item.name}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
+                                `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
+                                `Wat wil je doen?`,
+                                [
+                                    { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                                    { text: 'Alleen opdracht', class: 'primary', value: 'task-only' },
+                                    { text: 'Alles voltooien', class: 'success', value: 'complete-all' }
+                                ],
+                                true // showRemember
+                            );
+                            
+                            if (result.value === 'cancel') {
+                                return;
+                            }
+                            
+                            // Save setting if remember was checked
+                            if (result.remember && result.value !== 'cancel') {
+                                localStorage.setItem('subtaskCompletionSetting', result.value);
+                                toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                            }
+                            
+                            if (result.value === 'complete-all') {
+                                openSubtasks.forEach(sub => {
+                                    sub.done = true;
+                                    sub.completedAt = Date.now();
+                                });
+                            }
+                            e.target.checked = true;
+                        } else if (setting === 'complete-all') {
+                            // Auto-complete all subtasks
+                            openSubtasks.forEach(sub => {
+                                sub.done = true;
+                                sub.completedAt = Date.now();
+                            });
+                        }
+                        // 'task-only' does nothing extra
+                    }
+                }
+                
                 item.done = e.target.checked;
                 if (item.done) {
                     item.completedAt = Date.now();
@@ -5812,24 +5905,44 @@ const customDialog = {
         
         icon.innerHTML = options.icon || '&#10067;';
         title.textContent = options.title || 'Bevestigen';
-        body.innerHTML = options.message || '';
+        
+        // Build body with optional remember checkbox
+        let bodyHtml = options.message || '';
+        if (options.showRemember) {
+            bodyHtml += `
+                <label class="custom-dialog-remember">
+                    <input type="checkbox" id="customDialogRemember">
+                    <span>Onthoud mijn keuze</span>
+                </label>
+            `;
+        }
+        body.innerHTML = bodyHtml;
         footer.innerHTML = '';
         
+        const self = this;
         options.buttons.forEach(btn => {
             const button = document.createElement('button');
             button.className = `custom-dialog-btn ${btn.class || 'secondary'}`;
             button.textContent = btn.text;
             button.onclick = () => {
-                this.hide();
-                if (this.resolve) this.resolve(btn.value);
+                const rememberCheckbox = document.getElementById('customDialogRemember');
+                const remember = rememberCheckbox ? rememberCheckbox.checked : false;
+                self.hide();
+                if (self.resolve) {
+                    if (options.showRemember) {
+                        self.resolve({ value: btn.value, remember: remember });
+                    } else {
+                        self.resolve(btn.value);
+                    }
+                }
             };
             footer.appendChild(button);
         });
         
         overlay.classList.add('show');
         
-        // Focus first primary button or last button
-        const primaryBtn = footer.querySelector('.primary') || footer.lastChild;
+        // Focus first primary/success button or last button
+        const primaryBtn = footer.querySelector('.success') || footer.querySelector('.primary') || footer.lastChild;
         if (primaryBtn) primaryBtn.focus();
     },
     
@@ -5867,7 +5980,7 @@ const customDialog = {
         });
     },
     
-    choice(title, message, choices) {
+    choice(title, message, choices, showRemember = false) {
         return new Promise(resolve => {
             this.resolve = resolve;
             const buttons = choices.map(c => ({
@@ -5879,7 +5992,8 @@ const customDialog = {
                 icon: '&#10067;',
                 title: title,
                 message: message,
-                buttons: buttons
+                buttons: buttons,
+                showRemember: showRemember
             });
         });
     }
@@ -6810,63 +6924,105 @@ const todayView = {
     },
     
     async toggleDone(id, type, event) {
+        const today = new Date().setHours(0,0,0,0);
+        
+        // First, find the target item
+        let targetTask = null;
+        let targetItem = null;
+        
+        outer:
+        for (const cat of state.db.categories) {
+            for (const proj of cat.projects || []) {
+                for (const task of proj.tasks || []) {
+                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                        targetTask = task;
+                        targetItem = task;
+                        break outer;
+                    }
+                    
+                    for (const sub of task.subtasks || []) {
+                        if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                            targetItem = sub;
+                            break outer;
+                        }
+                        
+                        if (sub.checklist && type === 'checklist') {
+                            for (let idx = 0; idx < sub.checklist.length; idx++) {
+                                const checkItem = sub.checklist[idx];
+                                if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                    targetItem = checkItem;
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!targetItem) return;
+        
+        // Check for open subtasks when completing a task
+        if (type === 'task' && !targetTask.done) {
+            const openSubtasks = targetTask.subtasks?.filter(sub => !sub.done) || [];
+            
+            if (openSubtasks.length > 0) {
+                const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+                
+                if (setting === 'ask') {
+                    const result = await customDialog.choice(
+                        'Open subtaken gevonden',
+                        `De opdracht "<strong>${targetTask.name}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
+                        `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
+                        `Wat wil je doen?`,
+                        [
+                            { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                            { text: 'Alleen opdracht', class: 'primary', value: 'task-only' },
+                            { text: 'Alles voltooien', class: 'success', value: 'complete-all' }
+                        ],
+                        true // showRemember
+                    );
+                    
+                    if (result.value === 'cancel') {
+                        return;
+                    }
+                    
+                    // Save setting if remember was checked
+                    if (result.remember && result.value !== 'cancel') {
+                        localStorage.setItem('subtaskCompletionSetting', result.value);
+                        toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                    }
+                    
+                    if (result.value === 'complete-all') {
+                        openSubtasks.forEach(sub => {
+                            sub.done = true;
+                            sub.completedAt = Date.now();
+                        });
+                    }
+                } else if (setting === 'complete-all') {
+                    openSubtasks.forEach(sub => {
+                        sub.done = true;
+                        sub.completedAt = Date.now();
+                    });
+                }
+                // 'task-only' does nothing extra
+            }
+        }
+        
         // Save undo state before making changes
         undoRedo.saveState();
         
-        const today = new Date().setHours(0,0,0,0);
-        let itemFound = false;
-        
-        state.db.categories.forEach(cat => {
-            cat.projects?.forEach(proj => {
-                proj.tasks?.forEach(task => {
-                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
-                        task.done = !task.done;
-                        if (task.done) {
-                            task.completedAt = Date.now();
-                            celebration.show(task.name);
-                        } else {
-                            delete task.completedAt;
-                        }
-                        itemFound = true;
-                    }
-                    
-                    if (task.subtasks) {
-                        task.subtasks.forEach(sub => {
-                            if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
-                                sub.done = !sub.done;
-                                if (sub.done) {
-                                    sub.completedAt = Date.now();
-                                    celebration.show(sub.name);
-                                } else {
-                                    delete sub.completedAt;
-                                }
-                                itemFound = true;
-                            }
-                            
-                            if (sub.checklist && type === 'checklist') {
-                                sub.checklist.forEach((checkItem, idx) => {
-                                    if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
-                                        checkItem.done = !checkItem.done;
-                                        if (checkItem.done) {
-                                            checkItem.completedAt = Date.now();
-                                            celebration.show(checkItem.text);
-                                        } else {
-                                            delete checkItem.completedAt;
-                                        }
-                                        itemFound = true;
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-        
-        if (itemFound) {
-            await app.save();
-            this.render();
+        // Toggle the item
+        targetItem.done = !targetItem.done;
+        if (targetItem.done) {
+            targetItem.completedAt = Date.now();
+            celebration.show(targetItem.name || targetItem.text);
+        } else {
+            delete targetItem.completedAt;
         }
+        
+        await app.save();
+        this.render();
     },
     
     async removeFromToday(id, type) {
@@ -11745,6 +11901,18 @@ app.init();
                 </label>
                 <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
                     Krijg een vriendelijke herinnering op maandagochtend om je week te plannen, en op andere dagen om je dag in te delen.
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 24px;">
+                <label class="form-label">Bij voltooien opdracht met open subtaken</label>
+                <select id="subtaskCompletionSetting" onchange="app.saveSubtaskSetting()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); font-size: 14px;">
+                    <option value="task-only">Alleen de opdracht voltooien (subtaken blijven open)</option>
+                    <option value="complete-all">Opdracht en alle subtaken voltooien</option>
+                    <option value="ask">Altijd vragen wat te doen</option>
+                </select>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    Bepaalt wat er gebeurt als je een opdracht voltooit die nog open subtaken heeft. Je kunt dit ook aanpassen via "Onthoud mijn keuze" in de popup.
                 </div>
             </div>
         </div>
