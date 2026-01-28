@@ -1701,6 +1701,359 @@
         .today-priority-container.active {
             display: block;
         }
+
+        /* ===== ARCHIVE VIEW STYLES ===== */
+        .archive-container {
+            display: none;
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .archive-container.active {
+            display: block;
+        }
+        
+        .archive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .archive-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .archive-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .archive-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        
+        .archive-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .archive-category {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .archive-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--primary-light);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        
+        .archive-category-header:hover {
+            background: var(--primary-border);
+        }
+        
+        .archive-category-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .archive-category-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-panel);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .archive-category-content {
+            padding: 16px;
+        }
+        
+        .archive-category-content.collapsed {
+            display: none;
+        }
+        
+        .archive-project {
+            background: var(--bg-app);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        
+        .archive-project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+        }
+        
+        .archive-project-header:hover {
+            background: var(--primary-light);
+        }
+        
+        .archive-project-title {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .archive-project-content {
+            padding: 0 16px 16px;
+        }
+        
+        .archive-project-content.collapsed {
+            display: none;
+        }
+        
+        .archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+        }
+        
+        .archive-item:hover {
+            border-color: var(--primary);
+        }
+        
+        .archive-item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .archive-item-type {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--text-light);
+            color: white;
+        }
+        
+        .archive-item-type.task {
+            background: #3b82f6;
+        }
+        
+        .archive-item-type.subtask {
+            background: #8b5cf6;
+        }
+        
+        .archive-item-name {
+            color: var(--text-main);
+            text-decoration: line-through;
+            opacity: 0.8;
+        }
+        
+        .archive-item-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .archive-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .archive-unarchive-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .archive-unarchive-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .archive-empty {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-muted);
+        }
+        
+        .archive-empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* ===== CUSTOM DIALOG STYLES ===== */
+        .custom-dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .custom-dialog-overlay.show {
+            display: flex;
+        }
+        
+        .custom-dialog {
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 450px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        
+        .custom-dialog-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .custom-dialog-icon {
+            font-size: 24px;
+        }
+        
+        .custom-dialog-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .custom-dialog-body {
+            padding: 20px;
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .custom-dialog-body pre {
+            background: var(--bg-app);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            margin: 12px 0;
+            white-space: pre-wrap;
+        }
+        
+        .custom-dialog-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            margin-top: 12px;
+            background: var(--bg-app);
+            color: var(--text-main);
+        }
+        
+        .custom-dialog-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .custom-dialog-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .custom-dialog-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .custom-dialog-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .custom-dialog-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .custom-dialog-btn.secondary {
+            background: var(--bg-app);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        
+        .custom-dialog-btn.secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .custom-dialog-btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .custom-dialog-btn.danger:hover {
+            background: #dc2626;
+        }
+        
+        .custom-dialog-btn.success {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .custom-dialog-btn.success:hover {
+            background: #16a34a;
+        }
         
         .today-header {
             display: flex;
@@ -3140,6 +3493,7 @@
             <option value="today">📅 Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
             <option value="week">📅 Week</option>
+            <option value="archive">&#128451; Archief</option>
             <option value="search" style="display:none;">🔍 Zoekresultaten</option>
         </select>
         </button>
@@ -3302,6 +3656,41 @@
     </div>
     
     <div class="today-list" id="todayList">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+
+<!-- Archive View -->
+<div class="archive-container" id="archiveContainer">
+    <div class="archive-header">
+        <div class="archive-title">
+            &#128451; Archief
+        </div>
+        <div class="archive-stats">
+            <div class="archive-stat">
+                <span>&#128194;</span>
+                <span id="archiveCategoryCount">0</span>
+                <span>Categorieen</span>
+            </div>
+            <div class="archive-stat">
+                <span>&#128203;</span>
+                <span id="archiveProjectCount">0</span>
+                <span>Projecten</span>
+            </div>
+            <div class="archive-stat">
+                <span>&#128196;</span>
+                <span id="archiveTaskCount">0</span>
+                <span>Opdrachten</span>
+            </div>
+            <div class="archive-stat">
+                <span>&#10003;</span>
+                <span id="archiveSubtaskCount">0</span>
+                <span>Subtaken</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="archive-list" id="archiveList">
         <!-- Will be populated by JavaScript -->
     </div>
 </div>
@@ -3628,6 +4017,10 @@ const firebaseAuth = {
                 const data = doc.data();
                 if (data.database) {
                     state.db = data.database;
+                    // Ensure archive array exists for backwards compatibility
+                    if (!state.db.archive) {
+                        state.db.archive = [];
+                    }
                     app.render();
                     toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
                 }
@@ -3657,7 +4050,7 @@ const firebaseAuth = {
     },
     
     onUserLogout() {
-        state.db = { categories: [], pomodoroSessions: [] };
+        state.db = { categories: [], pomodoroSessions: [], archive: [] };
         state.sel = { cat: null, proj: null, task: null };
         app.render();
         this.updateUI();
@@ -4400,10 +4793,12 @@ const app = {
         
         const weekContainer = document.getElementById('weekPlannerContainer');
         const todayContainer = document.getElementById('todayPriorityContainer');
+        const archiveContainer = document.getElementById('archiveContainer');
         
         // Hide all special containers first
         if (weekContainer) weekContainer.classList.remove('active');
         if (todayContainer) todayContainer.classList.remove('active');
+        if (archiveContainer) archiveContainer.classList.remove('active');
         
         if (view === 'week') {
             // Week view
@@ -4422,6 +4817,15 @@ const app = {
             if (todayContainer) {
                 todayContainer.classList.add('active');
                 todayView.render();
+            }
+        } else if (view === 'archive') {
+            // Archive view
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'none';
+            });
+            if (archiveContainer) {
+                archiveContainer.classList.add('active');
+                archiveView.render();
             }
         } else {
             // Normal views (all, overdue, search)
@@ -4824,9 +5228,13 @@ const renderer = {
         container.innerHTML = ''; 
 
         if (!items) {
-            if (type !== 'cat') container.innerHTML = `<div class="empty-state">Selecteer item links</div>`;
-            countEl.textContent = '0';
-            return;
+            if (type !== 'cat') {
+                container.innerHTML = `<div class="empty-state">Selecteer item links</div>`;
+                countEl.textContent = '0';
+                return;
+            }
+            // For categories, use empty array so footer still renders
+            items = [];
         }
 
         let visibleItems = items;
@@ -5065,7 +5473,24 @@ const renderer = {
             actionButtons = timerBtn + todayBtn + pomodoroBtn;
         }
         if (type === 'proj') {
-            actionButtons = `<button class="action-btn archive" data-action="archive" title="Archiveer">&#128230;</button>`;
+            // Count completed items for cleanup button
+            let completedCount = 0;
+            item.tasks?.forEach(task => {
+                if (task.done) completedCount++;
+                task.subtasks?.forEach(sub => {
+                    if (sub.done) completedCount++;
+                });
+            });
+            
+            // Cleanup button (only completed items) - bezem icoon
+            const cleanupBtn = completedCount > 0 
+                ? `<button class="action-btn" data-action="cleanup" title="Opschonen: ${completedCount} voltooide items">&#129529; ${completedCount}</button>`
+                : '';
+            
+            // Archive button (entire project)
+            const archiveBtn = `<button class="action-btn archive" data-action="archive" title="Archiveer heel project">&#128230;</button>`;
+            
+            actionButtons = cleanupBtn + archiveBtn;
         }
         if (type === 'sub') {
             const today = new Date().setHours(0,0,0,0);
@@ -5169,6 +5594,7 @@ const renderer = {
                 if (action === 'delete') crud.deleteItem(type, item.id);
                 if (action === 'edit') modal.open(type, item); 
                 if (action === 'archive') crud.archiveProject(item.id);
+                if (action === 'cleanup') crud.cleanupProject(item.id);
                 if (action === 'timer-start') timer.start(item.id);
                 if (action === 'timer-stop') timer.stop(item.id);
                 if (action === 'set-today') crud.setToday(item.id);
@@ -5373,10 +5799,99 @@ const renderer = {
     }
 };
 
+// ===== CUSTOM DIALOG SYSTEM =====
+const customDialog = {
+    resolve: null,
+    
+    show(options) {
+        const overlay = document.getElementById('customDialogOverlay');
+        const icon = document.getElementById('customDialogIcon');
+        const title = document.getElementById('customDialogTitle');
+        const body = document.getElementById('customDialogBody');
+        const footer = document.getElementById('customDialogFooter');
+        
+        icon.innerHTML = options.icon || '&#10067;';
+        title.textContent = options.title || 'Bevestigen';
+        body.innerHTML = options.message || '';
+        footer.innerHTML = '';
+        
+        options.buttons.forEach(btn => {
+            const button = document.createElement('button');
+            button.className = `custom-dialog-btn ${btn.class || 'secondary'}`;
+            button.textContent = btn.text;
+            button.onclick = () => {
+                this.hide();
+                if (this.resolve) this.resolve(btn.value);
+            };
+            footer.appendChild(button);
+        });
+        
+        overlay.classList.add('show');
+        
+        // Focus first primary button or last button
+        const primaryBtn = footer.querySelector('.primary') || footer.lastChild;
+        if (primaryBtn) primaryBtn.focus();
+    },
+    
+    hide() {
+        document.getElementById('customDialogOverlay').classList.remove('show');
+    },
+    
+    confirm(title, message, icon = '&#10067;') {
+        return new Promise(resolve => {
+            this.resolve = resolve;
+            this.show({
+                icon: icon,
+                title: title,
+                message: message,
+                buttons: [
+                    { text: 'Annuleren', class: 'secondary', value: false },
+                    { text: 'OK', class: 'primary', value: true }
+                ]
+            });
+        });
+    },
+    
+    confirmDanger(title, message) {
+        return new Promise(resolve => {
+            this.resolve = resolve;
+            this.show({
+                icon: '&#9888;',
+                title: title,
+                message: message,
+                buttons: [
+                    { text: 'Annuleren', class: 'secondary', value: false },
+                    { text: 'Verwijderen', class: 'danger', value: true }
+                ]
+            });
+        });
+    },
+    
+    choice(title, message, choices) {
+        return new Promise(resolve => {
+            this.resolve = resolve;
+            const buttons = choices.map(c => ({
+                text: c.text,
+                class: c.class || 'secondary',
+                value: c.value
+            }));
+            this.show({
+                icon: '&#10067;',
+                title: title,
+                message: message,
+                buttons: buttons
+            });
+        });
+    }
+};
+
 const crud = {
     async deleteItem(type, id) {
-        if (!confirm("Weet je het zeker? Dit item wordt verwijderd.")) return;
-        
+        const confirmed = await customDialog.confirmDanger(
+            'Item verwijderen',
+            'Weet je het zeker? Dit item wordt verwijderd.'
+        );
+        if (!confirmed) return;
         
         // Save undo state
         undoRedo.saveState();
@@ -5393,26 +5908,237 @@ const crud = {
     },
 
     async archiveProject(id) {
-        if (!confirm("Project naar archief verplaatsen?")) return;
+        const sourceCat = helpers.find('cat', state.sel.cat);
+        if (!sourceCat) return;
+        
+        const proj = sourceCat.projects.find(p => p.id === id);
+        if (!proj) return;
+        
+        // Count all items
+        let taskCount = proj.tasks?.length || 0;
+        let subtaskCount = 0;
+        proj.tasks?.forEach(task => {
+            subtaskCount += task.subtasks?.length || 0;
+        });
+        
+        const confirmed = await customDialog.confirm(
+            'Project archiveren',
+            `Wil je het hele project "<strong>${proj.name}</strong>" archiveren?<br><br>` +
+            `<strong>${taskCount}</strong> opdracht(en) en <strong>${subtaskCount}</strong> subtaken worden gearchiveerd.`,
+            '&#128230;'
+        );
+        if (!confirmed) return;
+        
         undoRedo.saveState();
         
-        let archCat = state.db.categories.find(c => c.name.includes("Archief"));
-        if (!archCat) {
-            archCat = helpers.createItem("\u{1F4C2} 99. Archief", 'cat');
-            archCat.icon = "\u{1F4C1}";
-            state.db.categories.push(archCat);
+        if (!state.db.archive) {
+            state.db.archive = [];
         }
-
-        const sourceCat = helpers.find('cat', state.sel.cat);
+        
+        const now = Date.now();
+        
+        // Archive ALL subtasks first
+        proj.tasks?.forEach(task => {
+            task.subtasks?.forEach(sub => {
+                state.db.archive.push({
+                    id: sub.id,
+                    name: sub.name,
+                    type: 'subtask',
+                    done: sub.done,
+                    archivedAt: now,
+                    completedAt: sub.completedAt || (sub.done ? now : null),
+                    originalCategoryId: sourceCat.id,
+                    originalCategoryName: sourceCat.name,
+                    originalCategoryIcon: sourceCat.icon || '&#128194;',
+                    originalProjectId: proj.id,
+                    originalProjectName: proj.name,
+                    originalProjectIcon: proj.icon || '&#128203;',
+                    originalTaskId: task.id,
+                    originalTaskName: task.name,
+                    notes: sub.notes,
+                    dueDate: sub.dueDate,
+                    priority: sub.priority,
+                    checklist: sub.checklist
+                });
+            });
+        });
+        
+        // Archive ALL tasks
+        proj.tasks?.forEach(task => {
+            state.db.archive.push({
+                id: task.id,
+                name: task.name,
+                type: 'task',
+                done: task.done,
+                archivedAt: now,
+                completedAt: task.completedAt || (task.done ? now : null),
+                originalCategoryId: sourceCat.id,
+                originalCategoryName: sourceCat.name,
+                originalCategoryIcon: sourceCat.icon || '&#128194;',
+                originalProjectId: proj.id,
+                originalProjectName: proj.name,
+                originalProjectIcon: proj.icon || '&#128203;',
+                notes: task.notes,
+                dueDate: task.dueDate,
+                priority: task.priority,
+                timeEstimate: task.timeEstimate,
+                timeSpent: task.timeSpent
+            });
+        });
+        
+        // Remove project from category
         const pIdx = sourceCat.projects.findIndex(p => p.id === id);
         if (pIdx > -1) {
-            const [proj] = sourceCat.projects.splice(pIdx, 1);
-            proj.status = 'done';
-            archCat.projects.push(proj);
-            state.sel.proj = null;
-            await app.save();
-            app.render();
+            sourceCat.projects.splice(pIdx, 1);
         }
+        
+        state.sel.proj = null;
+        await app.save();
+        app.render();
+        toastNotifications.show('success', 'Gearchiveerd', `Project "${proj.name}" is gearchiveerd.`);
+    },
+
+    async cleanupProject(projectId) {
+        const sourceCat = helpers.find('cat', state.sel.cat);
+        if (!sourceCat) return;
+        
+        const proj = sourceCat.projects.find(p => p.id === projectId);
+        if (!proj) return;
+        
+        // Count completed items
+        let completedTaskCount = 0;
+        let completedSubtaskCount = 0;
+        let tasksWithOpenSubtasks = [];
+        
+        proj.tasks?.forEach(task => {
+            if (task.done) {
+                completedTaskCount++;
+                const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
+                if (openSubs.length > 0) {
+                    tasksWithOpenSubtasks.push({ task, openSubtasks: openSubs });
+                }
+            }
+            task.subtasks?.forEach(sub => {
+                if (sub.done) completedSubtaskCount++;
+            });
+        });
+        
+        const totalCompleted = completedTaskCount + completedSubtaskCount;
+        
+        if (totalCompleted === 0) {
+            toastNotifications.show('info', 'Geen voltooide items', 'Er zijn geen voltooide items om op te schonen.');
+            return;
+        }
+        
+        const confirmed = await customDialog.confirm(
+            'Project opschonen',
+            `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${proj.name}</strong>"?<br><br>` +
+            `<strong>${completedTaskCount}</strong> opdracht(en) en <strong>${completedSubtaskCount}</strong> subtaken worden gearchiveerd.`,
+            '&#129529;'
+        );
+        if (!confirmed) return;
+        
+        // Handle tasks with open subtasks
+        for (const item of tasksWithOpenSubtasks) {
+            const openCount = item.openSubtasks.length;
+            const subtaskList = item.openSubtasks.map(s => `&#8226; ${s.name}`).join('<br>');
+            
+            const result = await customDialog.choice(
+                'Open subtaken gevonden',
+                `De opdracht "<strong>${item.task.name}</strong>" is voltooid maar heeft nog <strong>${openCount}</strong> open subtaken:<br><br>` +
+                `<pre>${item.openSubtasks.map(s => s.name).join('\n')}</pre>` +
+                `Wat wil je met deze subtaken doen?`,
+                [
+                    { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                    { text: 'Verwijderen', class: 'danger', value: 'delete' },
+                    { text: 'Voltooien', class: 'success', value: 'complete' }
+                ]
+            );
+            
+            if (result === 'cancel') {
+                toastNotifications.show('info', 'Geannuleerd', 'Opschonen geannuleerd.');
+                return;
+            }
+            
+            if (result === 'complete') {
+                item.openSubtasks.forEach(sub => {
+                    sub.done = true;
+                    sub.completedAt = Date.now();
+                });
+            } else if (result === 'delete') {
+                item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
+            }
+        }
+        
+        undoRedo.saveState();
+        
+        if (!state.db.archive) {
+            state.db.archive = [];
+        }
+        
+        const now = Date.now();
+        
+        // Archive completed subtasks
+        proj.tasks?.forEach(task => {
+            if (task.subtasks) {
+                const completedSubs = task.subtasks.filter(sub => sub.done);
+                completedSubs.forEach(sub => {
+                    state.db.archive.push({
+                        id: sub.id,
+                        name: sub.name,
+                        type: 'subtask',
+                        done: true,
+                        archivedAt: now,
+                        completedAt: sub.completedAt || now,
+                        originalCategoryId: sourceCat.id,
+                        originalCategoryName: sourceCat.name,
+                        originalCategoryIcon: sourceCat.icon || '&#128194;',
+                        originalProjectId: proj.id,
+                        originalProjectName: proj.name,
+                        originalProjectIcon: proj.icon || '&#128203;',
+                        originalTaskId: task.id,
+                        originalTaskName: task.name,
+                        notes: sub.notes,
+                        dueDate: sub.dueDate,
+                        priority: sub.priority,
+                        checklist: sub.checklist
+                    });
+                });
+                task.subtasks = task.subtasks.filter(sub => !sub.done);
+            }
+        });
+        
+        // Archive completed tasks
+        const completedTasks = proj.tasks?.filter(task => task.done) || [];
+        completedTasks.forEach(task => {
+            state.db.archive.push({
+                id: task.id,
+                name: task.name,
+                type: 'task',
+                done: true,
+                archivedAt: now,
+                completedAt: task.completedAt || now,
+                originalCategoryId: sourceCat.id,
+                originalCategoryName: sourceCat.name,
+                originalCategoryIcon: sourceCat.icon || '&#128194;',
+                originalProjectId: proj.id,
+                originalProjectName: proj.name,
+                originalProjectIcon: proj.icon || '&#128203;',
+                notes: task.notes,
+                dueDate: task.dueDate,
+                priority: task.priority,
+                timeEstimate: task.timeEstimate,
+                timeSpent: task.timeSpent
+            });
+        });
+        
+        if (proj.tasks) {
+            proj.tasks = proj.tasks.filter(task => !task.done);
+        }
+        
+        await app.save();
+        app.render();
+        toastNotifications.show('success', 'Opgeschoond', `${totalCompleted} item(s) gearchiveerd.`);
     },
 
     async cycleStatus(item) {
@@ -6224,6 +6950,320 @@ const todayView = {
             const itemType = type === 'task' ? 'task' : (type === 'subtask' ? 'sub' : 'checklist');
             crud.manageItemSessions(item, itemType);
         }
+    }
+};
+
+// ===== ARCHIVE VIEW =====
+const archiveView = {
+    collapsedCategories: new Set(),
+    collapsedProjects: new Set(),
+    
+    render() {
+        const list = document.getElementById('archiveList');
+        if (!list) return;
+        
+        list.innerHTML = '';
+        
+        // Ensure archive array exists
+        if (!state.db.archive) {
+            state.db.archive = [];
+        }
+        
+        // Count stats
+        let categoryCount = 0;
+        let projectCount = 0;
+        let taskCount = 0;
+        let subtaskCount = 0;
+        
+        // Group archived items by original category
+        const groupedArchive = {};
+        
+        state.db.archive.forEach(item => {
+            const catName = item.originalCategoryName || 'Onbekend';
+            if (!groupedArchive[catName]) {
+                groupedArchive[catName] = {
+                    categoryId: item.originalCategoryId,
+                    categoryName: catName,
+                    categoryIcon: item.originalCategoryIcon || '&#128194;',
+                    projects: {}
+                };
+                categoryCount++;
+            }
+            
+            const projName = item.originalProjectName || 'Onbekend Project';
+            if (!groupedArchive[catName].projects[projName]) {
+                groupedArchive[catName].projects[projName] = {
+                    projectId: item.originalProjectId,
+                    projectName: projName,
+                    projectIcon: item.originalProjectIcon || '&#128203;',
+                    items: []
+                };
+                projectCount++;
+            }
+            
+            groupedArchive[catName].projects[projName].items.push(item);
+            
+            if (item.type === 'task') taskCount++;
+            if (item.type === 'subtask') subtaskCount++;
+        });
+        
+        // Update stats
+        document.getElementById('archiveCategoryCount').textContent = categoryCount;
+        document.getElementById('archiveProjectCount').textContent = projectCount;
+        document.getElementById('archiveTaskCount').textContent = taskCount;
+        document.getElementById('archiveSubtaskCount').textContent = subtaskCount;
+        
+        // Show empty state if no archived items
+        if (Object.keys(groupedArchive).length === 0) {
+            list.innerHTML = `
+                <div class="archive-empty">
+                    <div class="archive-empty-icon">&#128451;</div>
+                    <div style="font-size: 18px; margin-bottom: 8px;">Geen gearchiveerde items</div>
+                    <div style="font-size: 14px;">Voltooide items die je archiveert verschijnen hier.</div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render grouped archive
+        Object.values(groupedArchive).forEach(catGroup => {
+            const catEl = document.createElement('div');
+            catEl.className = 'archive-category';
+            
+            const isCollapsed = this.collapsedCategories.has(catGroup.categoryId);
+            
+            catEl.innerHTML = `
+                <div class="archive-category-header" onclick="archiveView.toggleCategory('${catGroup.categoryId}')">
+                    <div class="archive-category-title">
+                        <span>${catGroup.categoryIcon}</span>
+                        <span>${catGroup.categoryName}</span>
+                    </div>
+                    <span class="archive-category-count">${Object.values(catGroup.projects).reduce((sum, p) => sum + p.items.length, 0)} items</span>
+                </div>
+                <div class="archive-category-content ${isCollapsed ? 'collapsed' : ''}" id="archive-cat-${catGroup.categoryId}">
+                </div>
+            `;
+            
+            const content = catEl.querySelector('.archive-category-content');
+            
+            Object.values(catGroup.projects).forEach(projGroup => {
+                const projEl = document.createElement('div');
+                projEl.className = 'archive-project';
+                
+                const isProjCollapsed = this.collapsedProjects.has(projGroup.projectId);
+                
+                projEl.innerHTML = `
+                    <div class="archive-project-header" onclick="archiveView.toggleProject('${projGroup.projectId}')">
+                        <div class="archive-project-title">
+                            <span>${projGroup.projectIcon}</span>
+                            <span>${projGroup.projectName}</span>
+                            <span style="color: var(--text-muted); font-size: 12px;">(${projGroup.items.length})</span>
+                        </div>
+                    </div>
+                    <div class="archive-project-content ${isProjCollapsed ? 'collapsed' : ''}" id="archive-proj-${projGroup.projectId}">
+                    </div>
+                `;
+                
+                const projContent = projEl.querySelector('.archive-project-content');
+                
+                // Sort items: tasks first, then subtasks
+                projGroup.items.sort((a, b) => {
+                    if (a.type === 'task' && b.type === 'subtask') return -1;
+                    if (a.type === 'subtask' && b.type === 'task') return 1;
+                    return (b.archivedAt || 0) - (a.archivedAt || 0);
+                });
+                
+                projGroup.items.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'archive-item';
+                    
+                    const archivedDate = item.archivedAt ? new Date(item.archivedAt).toLocaleDateString('nl-NL') : '';
+                    
+                    itemEl.innerHTML = `
+                        <div class="archive-item-info">
+                            <span class="archive-item-type ${item.type}">${item.type === 'task' ? 'Opdracht' : 'Subtaak'}</span>
+                            <span class="archive-item-name">${item.name}</span>
+                            ${item.originalTaskName && item.type === 'subtask' ? `<span style="font-size: 10px; color: var(--text-muted);">(in: ${item.originalTaskName})</span>` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="archive-item-date">&#128197; ${archivedDate}</span>
+                            <button class="archive-unarchive-btn" onclick="archiveView.unarchiveItem('${item.id}')">
+                                &#8630; Terughalen
+                            </button>
+                        </div>
+                    `;
+                    
+                    projContent.appendChild(itemEl);
+                });
+                
+                content.appendChild(projEl);
+            });
+            
+            list.appendChild(catEl);
+        });
+    },
+    
+    toggleCategory(catId) {
+        if (this.collapsedCategories.has(catId)) {
+            this.collapsedCategories.delete(catId);
+        } else {
+            this.collapsedCategories.add(catId);
+        }
+        this.render();
+    },
+    
+    toggleProject(projId) {
+        if (this.collapsedProjects.has(projId)) {
+            this.collapsedProjects.delete(projId);
+        } else {
+            this.collapsedProjects.add(projId);
+        }
+        this.render();
+    },
+    
+    async unarchiveItem(itemId) {
+        const item = state.db.archive.find(i => i.id === itemId);
+        if (!item) return;
+        
+        // Find original location
+        const cat = state.db.categories.find(c => c.id === item.originalCategoryId);
+        if (!cat) {
+            toastNotifications.show('error', 'Fout', 'Originele categorie niet gevonden');
+            return;
+        }
+        
+        const proj = cat.projects?.find(p => p.id === item.originalProjectId);
+        if (!proj) {
+            toastNotifications.show('error', 'Fout', 'Origineel project niet gevonden');
+            return;
+        }
+        
+        // For subtasks, check if the parent task is also archived
+        if (item.type === 'subtask') {
+            const task = proj.tasks?.find(t => t.id === item.originalTaskId);
+            
+            if (!task) {
+                // Task doesn't exist - check if it's in the archive
+                const archivedTask = state.db.archive.find(a => a.id === item.originalTaskId && a.type === 'task');
+                
+                if (archivedTask) {
+                    const confirmed = await customDialog.confirm(
+                        'Opdracht ook terughalen?',
+                        `De opdracht "<strong>${archivedTask.name}</strong>" is ook gearchiveerd.<br><br>` +
+                        `Wil je de opdracht ook terughalen?`,
+                        '&#8630;'
+                    );
+                    if (!confirmed) return;
+                    
+                    undoRedo.saveState();
+                    
+                    // Restore the parent task first
+                    const restoredTask = {
+                        id: archivedTask.id,
+                        name: archivedTask.name,
+                        done: false,
+                        status: 'planned',
+                        subtasks: [],
+                        notes: archivedTask.notes || '',
+                        dueDate: archivedTask.dueDate,
+                        priority: archivedTask.priority || 'none',
+                        timeEstimate: archivedTask.timeEstimate,
+                        timeSpent: archivedTask.timeSpent
+                    };
+                    
+                    if (!proj.tasks) proj.tasks = [];
+                    proj.tasks.push(restoredTask);
+                    
+                    // Remove task from archive
+                    state.db.archive = state.db.archive.filter(i => i.id !== archivedTask.id);
+                    
+                    // Now restore the subtask
+                    const restoredSubtask = {
+                        id: item.id,
+                        name: item.name,
+                        done: false,
+                        notes: item.notes || '',
+                        dueDate: item.dueDate,
+                        priority: item.priority || 'none',
+                        checklist: item.checklist || []
+                    };
+                    
+                    restoredTask.subtasks.push(restoredSubtask);
+                    state.db.archive = state.db.archive.filter(i => i.id !== itemId);
+                    
+                    await app.save();
+                    this.render();
+                    toastNotifications.show('success', 'Teruggehaald', `Opdracht en subtaak zijn teruggehaald.`);
+                    return;
+                } else {
+                    toastNotifications.show('error', 'Fout', 'Originele opdracht niet gevonden');
+                    return;
+                }
+            }
+            
+            // Task exists - confirm and restore subtask
+            const confirmed = await customDialog.confirm(
+                'Subtaak terughalen',
+                `Wil je de subtaak "<strong>${item.name}</strong>" terughalen uit het archief?`,
+                '&#8630;'
+            );
+            if (!confirmed) return;
+            
+            undoRedo.saveState();
+            
+            const restoredSubtask = {
+                id: item.id,
+                name: item.name,
+                done: false,
+                notes: item.notes || '',
+                dueDate: item.dueDate,
+                priority: item.priority || 'none',
+                checklist: item.checklist || []
+            };
+            
+            if (!task.subtasks) task.subtasks = [];
+            task.subtasks.push(restoredSubtask);
+            
+            state.db.archive = state.db.archive.filter(i => i.id !== itemId);
+            
+            await app.save();
+            this.render();
+            toastNotifications.show('success', 'Teruggehaald', `"${item.name}" is teruggehaald`);
+            return;
+        }
+        
+        // For tasks
+        const confirmed = await customDialog.confirm(
+            'Opdracht terughalen',
+            `Wil je de opdracht "<strong>${item.name}</strong>" terughalen uit het archief?<br><br>` +
+            `Onderliggende subtaken die gearchiveerd zijn blijven in het archief.`,
+            '&#8630;'
+        );
+        if (!confirmed) return;
+        
+        undoRedo.saveState();
+        
+        const restoredTask = {
+            id: item.id,
+            name: item.name,
+            done: false,
+            status: 'planned',
+            subtasks: [],
+            notes: item.notes || '',
+            dueDate: item.dueDate,
+            priority: item.priority || 'none',
+            timeEstimate: item.timeEstimate,
+            timeSpent: item.timeSpent
+        };
+        
+        if (!proj.tasks) proj.tasks = [];
+        proj.tasks.push(restoredTask);
+        
+        state.db.archive = state.db.archive.filter(i => i.id !== itemId);
+        
+        await app.save();
+        this.render();
+        toastNotifications.show('success', 'Teruggehaald', `"${item.name}" is teruggehaald`);
     }
 };
 
@@ -9112,7 +10152,11 @@ const sessions = {
     },
 
     async delete(sessionId) {
-        if (!confirm(`Sessie verwijderen? Items blijven behouden.`)) return false;
+        const confirmed = await customDialog.confirmDanger(
+            'Sessie verwijderen',
+            'Wil je deze sessie verwijderen?<br><br>Items die aan deze sessie gekoppeld zijn blijven behouden.'
+        );
+        if (!confirmed) return false;
         
         const idx = state.db.pomodoroSessions.findIndex(s => s.id === sessionId);
         if (idx === -1) return false;
@@ -10669,6 +11713,21 @@ app.init();
 </div>
 
 </body>
+
+<!-- Custom Dialog -->
+<div class="custom-dialog-overlay" id="customDialogOverlay">
+    <div class="custom-dialog">
+        <div class="custom-dialog-header">
+            <span class="custom-dialog-icon" id="customDialogIcon">&#10067;</span>
+            <span class="custom-dialog-title" id="customDialogTitle">Bevestigen</span>
+        </div>
+        <div class="custom-dialog-body" id="customDialogBody">
+        </div>
+        <div class="custom-dialog-footer" id="customDialogFooter">
+        </div>
+    </div>
+</div>
+
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settingsModalOverlay">
     <div class="modal">
