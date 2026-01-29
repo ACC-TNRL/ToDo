@@ -2983,7 +2983,7 @@
             border: 2px dashed var(--border-color);
             border-radius: var(--radius-lg);
             padding: 16px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         
@@ -2994,7 +2994,133 @@
             letter-spacing: 0.05em;
             color: var(--text-muted);
             margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        
+        .unscheduled-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .unscheduled-header-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-app);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        
+        .unscheduled-header-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .browse-group {
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .browse-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-app);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .browse-group-header:hover {
+            background: var(--bg-hover);
+        }
+        
+        .browse-group-toggle {
+            color: var(--text-muted);
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .browse-group-count {
+            margin-left: auto;
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .browse-group-content {
+            display: none;
+            padding: 8px;
+            background: var(--bg-panel);
+        }
+        
+        .browse-group-content.expanded {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .browse-project-group {
+            margin: 4px;
+            padding: 6px;
+            background: var(--bg-app);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+        
+        .browse-project-header {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .browse-project-tasks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .browse-task-pill {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            cursor: move;
+            font-size: 11px;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        body.dark-mode .browse-task-pill {
+            background: #1e293b;
+            border-color: #475569;
+        }
+        
+        .browse-task-pill:hover {
+            border-color: var(--primary);
+        }
+        
+        .browse-task-pill.type-task { border-left: 2px solid #3b82f6; }
+        .browse-task-pill.type-subtask { border-left: 2px solid #22c55e; }
+        .browse-task-pill.type-checklist { border-left: 2px solid #f59e0b; }
         
         .unscheduled-tasks {
             display: flex;
@@ -7820,22 +7946,22 @@ const archiveView = {
     },
     
     initializeCollapsed() {
-        // Start with everything collapsed for a clean overview
+        // Start with categories EXPANDED but projects/subtasks COLLAPSED
+        // This gives overview without overwhelming detail
         if (!state.db.archive) return;
         
-        const catIds = new Set();
         const projIds = new Set();
         const subIds = new Set();
         
         state.db.archive.forEach(item => {
-            if (item.originalCategoryId) catIds.add(item.originalCategoryId);
+            // Categories NOT added - they stay expanded
             if (item.originalProjectId) projIds.add(item.originalProjectId);
             if (item.type === 'subtask' && item.id) subIds.add(item.id);
         });
         
-        this.collapsedCategories = catIds;
-        this.collapsedProjects = projIds;
-        this.collapsedSubtasks = subIds;
+        this.collapsedCategories = new Set(); // Categories expanded
+        this.collapsedProjects = projIds;      // Projects collapsed
+        this.collapsedSubtasks = subIds;       // Subtasks collapsed
     },
     
     expandAll() {
@@ -7998,6 +8124,7 @@ const archiveView = {
 
 const weekView = {
     currentWeekStart: null,
+    collapsedCategories: new Set(),
     
     init() {
         this.currentWeekStart = this.getWeekStart(new Date());
@@ -8209,18 +8336,135 @@ const weekView = {
             
             <div class="unscheduled-section">
                 <div class="unscheduled-header">
-                    &#128270; Bladeren & Inplannen (${unscheduledTasks.length} taken)
+                    <span>&#128270; Bladeren & Inplannen (${unscheduledTasks.length} taken)</span>
+                    <div class="unscheduled-header-actions">
+                        <button class="unscheduled-header-btn" onclick="weekView.expandAllBrowse()">Alles uitklappen</button>
+                        <button class="unscheduled-header-btn" onclick="weekView.collapseAllBrowse()">Alles inklappen</button>
+                    </div>
                 </div>
-                <div class="unscheduled-tasks">
-                    ${unscheduledTasks.length > 0 
-                        ? unscheduledTasks.map(task => this.renderUnscheduledTask(task)).join('')
-                        : '<div style="color: var(--text-muted); padding: 20px; text-align: center;">Alle taken zijn ingepland! &#127881;</div>'
-                    }
+                <div class="unscheduled-tasks-grouped">
+                    ${this.renderGroupedTasks(unscheduledTasks)}
                 </div>
             </div>
         `;
         
         this.attachDragListeners();
+    },
+    
+    renderGroupedTasks(tasks) {
+        if (tasks.length === 0) {
+            return '<div style="color: var(--text-muted); padding: 20px; text-align: center;">Alle taken zijn ingepland! &#127881;</div>';
+        }
+        
+        // Groepeer per categorie, dan per project
+        const grouped = {};
+        tasks.forEach(task => {
+            const catKey = task._catId;
+            const projKey = task._projId;
+            
+            if (!grouped[catKey]) {
+                grouped[catKey] = {
+                    name: task._cat,
+                    id: catKey,
+                    projects: {}
+                };
+            }
+            
+            if (!grouped[catKey].projects[projKey]) {
+                grouped[catKey].projects[projKey] = {
+                    name: task._proj,
+                    id: projKey,
+                    tasks: []
+                };
+            }
+            
+            grouped[catKey].projects[projKey].tasks.push(task);
+        });
+        
+        // Render gegroepeerd
+        let html = '';
+        Object.values(grouped).forEach(cat => {
+            const taskCount = Object.values(cat.projects).reduce((sum, p) => sum + p.tasks.length, 0);
+            const isExpanded = !this.collapsedCategories.has(cat.id);
+            
+            html += `
+                <div class="browse-group">
+                    <div class="browse-group-header" onclick="weekView.toggleBrowseCategory('${cat.id}')">
+                        <span class="browse-group-toggle">${isExpanded ? '▼' : '▶'}</span>
+                        <span>&#128193; ${cat.name}</span>
+                        <span class="browse-group-count">${taskCount}</span>
+                    </div>
+                    <div class="browse-group-content ${isExpanded ? 'expanded' : ''}" id="browse-cat-${cat.id}">
+                        ${Object.values(cat.projects).map(proj => `
+                            <div class="browse-project-group">
+                                <div class="browse-project-header">
+                                    &#128194; ${proj.name} (${proj.tasks.length})
+                                </div>
+                                <div class="browse-project-tasks">
+                                    ${proj.tasks.map(task => this.renderBrowseTaskPill(task)).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        
+        return html;
+    },
+    
+    renderBrowseTaskPill(item) {
+        const priorityIcon = item.priority === 'high' ? '&#128308;' : item.priority === 'medium' ? '&#128993;' : '';
+        let typeBadge = '';
+        let typeClass = '';
+        
+        if (item._type === 'task') {
+            typeBadge = '&#128196;';
+            typeClass = 'type-task';
+        } else if (item._type === 'subtask') {
+            typeBadge = '&#10003;';
+            typeClass = 'type-subtask';
+        } else if (item._type === 'checklist') {
+            typeBadge = '&#9633;';
+            typeClass = 'type-checklist';
+        }
+        
+        return `
+            <div class="browse-task-pill ${typeClass}" 
+                 draggable="true"
+                 data-task-id="${item.id}"
+                 data-cat-id="${item._catId}"
+                 data-proj-id="${item._projId}"
+                 data-task-parent-id="${item._taskId || ''}"
+                 data-subtask-id="${item._subtaskId || ''}"
+                 data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
+                 data-item-type="${item._type || 'task'}"
+                 title="${item._type === 'task' ? item._proj : item._type === 'subtask' ? item._task : item._subtask}">
+                ${typeBadge} ${priorityIcon} ${item.name || item.text}
+            </div>
+        `;
+    },
+    
+    toggleBrowseCategory(catId) {
+        if (this.collapsedCategories.has(catId)) {
+            this.collapsedCategories.delete(catId);
+        } else {
+            this.collapsedCategories.add(catId);
+        }
+        this.render();
+    },
+    
+    expandAllBrowse() {
+        this.collapsedCategories.clear();
+        this.render();
+    },
+    
+    collapseAllBrowse() {
+        // Verzamel alle categorie IDs
+        state.db.categories.forEach(cat => {
+            this.collapsedCategories.add(cat.id);
+        });
+        this.render();
     },
     
     renderDay(dayTimestamp, isToday) {
