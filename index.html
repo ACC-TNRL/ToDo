@@ -5497,6 +5497,23 @@ const renderer = {
         }
 
         let actionButtons = '';
+        if (type === 'cat') {
+            // Count completed items in category for cleanup button
+            let completedCount = 0;
+            item.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (task.done) completedCount++;
+                    task.subtasks?.forEach(sub => {
+                        if (sub.done) completedCount++;
+                    });
+                });
+            });
+            
+            // Cleanup button for category (all projects)
+            if (completedCount > 0) {
+                actionButtons = `<button class="action-btn" data-action="cleanup-cat" title="Opschonen: ${completedCount} voltooide items in alle projecten">&#129529; ${completedCount}</button>`;
+            }
+        }
         if (type === 'task') {
             const timerBtn = item.timerRunning 
                 ? `<button class="action-btn" data-action="timer-stop" title="Stop timer">&#9209;</button>`
@@ -5688,6 +5705,7 @@ const renderer = {
                 if (action === 'edit') modal.open(type, item); 
                 if (action === 'archive') crud.archiveProject(item.id);
                 if (action === 'cleanup') crud.cleanupProject(item.id);
+                if (action === 'cleanup-cat') crud.cleanupCategory(item.id);
                 if (action === 'timer-start') timer.start(item.id);
                 if (action === 'timer-stop') timer.stop(item.id);
                 if (action === 'set-today') crud.setToday(item.id);
@@ -6253,6 +6271,156 @@ const crud = {
         await app.save();
         app.render();
         toastNotifications.show('success', 'Opgeschoond', `${totalCompleted} item(s) gearchiveerd.`);
+    },
+
+    async cleanupCategory(categoryId) {
+        const cat = state.db.categories.find(c => c.id === categoryId);
+        if (!cat) return;
+        
+        // Count completed items across all projects
+        let completedTaskCount = 0;
+        let completedSubtaskCount = 0;
+        let tasksWithOpenSubtasks = [];
+        
+        cat.projects?.forEach(proj => {
+            proj.tasks?.forEach(task => {
+                if (task.done) {
+                    completedTaskCount++;
+                    const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
+                    if (openSubs.length > 0) {
+                        tasksWithOpenSubtasks.push({ 
+                            task, 
+                            openSubtasks: openSubs,
+                            projectName: proj.name,
+                            project: proj
+                        });
+                    }
+                }
+                task.subtasks?.forEach(sub => {
+                    if (sub.done) completedSubtaskCount++;
+                });
+            });
+        });
+        
+        const totalCompleted = completedTaskCount + completedSubtaskCount;
+        
+        if (totalCompleted === 0) {
+            toastNotifications.show('info', 'Geen voltooide items', 'Er zijn geen voltooide items om op te schonen.');
+            return;
+        }
+        
+        const confirmed = await customDialog.confirm(
+            'Categorie opschonen',
+            `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${cat.name}</strong>"?<br><br>` +
+            `<strong>${completedTaskCount}</strong> opdracht(en) en <strong>${completedSubtaskCount}</strong> subtaken worden gearchiveerd.`,
+            '&#129529;'
+        );
+        if (!confirmed) return;
+        
+        // Handle tasks with open subtasks - 1 by 1
+        for (const item of tasksWithOpenSubtasks) {
+            const openCount = item.openSubtasks.length;
+            
+            const result = await customDialog.choice(
+                'Open subtaken gevonden',
+                `<strong>Project:</strong> ${item.projectName}<br><br>` +
+                `De opdracht "<strong>${item.task.name}</strong>" is voltooid maar heeft nog <strong>${openCount}</strong> open subtaken:<br><br>` +
+                `<div class="custom-dialog-list">${item.openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
+                `Wat wil je met deze subtaken doen?`,
+                [
+                    { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                    { text: 'Verwijderen', class: 'danger', value: 'delete' },
+                    { text: 'Voltooien', class: 'success', value: 'complete' }
+                ]
+            );
+            
+            if (result === 'cancel') {
+                toastNotifications.show('info', 'Geannuleerd', 'Opschonen geannuleerd.');
+                return;
+            }
+            
+            if (result === 'complete') {
+                item.openSubtasks.forEach(sub => {
+                    sub.done = true;
+                    sub.completedAt = Date.now();
+                });
+            } else if (result === 'delete') {
+                item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
+            }
+        }
+        
+        undoRedo.saveState();
+        
+        if (!state.db.archive) {
+            state.db.archive = [];
+        }
+        
+        const now = Date.now();
+        
+        // Archive completed items from ALL projects in category
+        cat.projects?.forEach(proj => {
+            // Archive completed subtasks
+            proj.tasks?.forEach(task => {
+                if (task.subtasks) {
+                    const completedSubs = task.subtasks.filter(sub => sub.done);
+                    completedSubs.forEach(sub => {
+                        state.db.archive.push({
+                            id: sub.id,
+                            name: sub.name,
+                            type: 'subtask',
+                            done: true,
+                            archivedAt: now,
+                            completedAt: sub.completedAt || now,
+                            originalCategoryId: cat.id,
+                            originalCategoryName: cat.name,
+                            originalCategoryIcon: cat.icon || '&#128194;',
+                            originalProjectId: proj.id,
+                            originalProjectName: proj.name,
+                            originalProjectIcon: proj.icon || '&#128203;',
+                            originalTaskId: task.id,
+                            originalTaskName: task.name,
+                            notes: sub.notes,
+                            dueDate: sub.dueDate,
+                            priority: sub.priority,
+                            checklist: sub.checklist
+                        });
+                    });
+                    task.subtasks = task.subtasks.filter(sub => !sub.done);
+                }
+            });
+            
+            // Archive completed tasks
+            const completedTasks = proj.tasks?.filter(task => task.done) || [];
+            completedTasks.forEach(task => {
+                state.db.archive.push({
+                    id: task.id,
+                    name: task.name,
+                    type: 'task',
+                    done: true,
+                    archivedAt: now,
+                    completedAt: task.completedAt || now,
+                    originalCategoryId: cat.id,
+                    originalCategoryName: cat.name,
+                    originalCategoryIcon: cat.icon || '&#128194;',
+                    originalProjectId: proj.id,
+                    originalProjectName: proj.name,
+                    originalProjectIcon: proj.icon || '&#128203;',
+                    notes: task.notes,
+                    dueDate: task.dueDate,
+                    priority: task.priority,
+                    timeEstimate: task.timeEstimate,
+                    timeSpent: task.timeSpent
+                });
+            });
+            
+            if (proj.tasks) {
+                proj.tasks = proj.tasks.filter(task => !task.done);
+            }
+        });
+        
+        await app.save();
+        app.render();
+        toastNotifications.show('success', 'Opgeschoond', `${totalCompleted} item(s) gearchiveerd uit categorie.`);
     },
 
     async cycleStatus(item) {
