@@ -1887,6 +1887,56 @@
             color: var(--text-muted);
         }
         
+        .archive-checklist-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        
+        .archive-checklist-badge:hover {
+            background: var(--primary-border);
+        }
+        
+        .archive-checklist {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--primary-light);
+        }
+        
+        .archive-checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 12px;
+        }
+        
+        .archive-checklist-item.done {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+        
+        .archive-checklist-item.open {
+            color: var(--warning);
+        }
+        
+        .archive-checklist-check {
+            font-size: 14px;
+        }
+        
+        .archive-checklist-status {
+            font-size: 10px;
+            color: var(--warning);
+            font-style: italic;
+        }
+        
         .archive-item-actions {
             display: flex;
             gap: 8px;
@@ -4781,7 +4831,7 @@ const app = {
         if (select) {
             localStorage.setItem('subtaskCompletionSetting', select.value);
             const labels = {
-                'task-only': 'Alleen opdracht voltooien',
+                'task-only': 'Alleen dit item',
                 'complete-all': 'Alles voltooien',
                 'ask': 'Altijd vragen'
             };
@@ -5668,17 +5718,71 @@ const renderer = {
                                 openSubtasks.forEach(sub => {
                                     sub.done = true;
                                     sub.completedAt = Date.now();
+                                    // CASCADE: ook checklist items voltooien
+                                    sub.checklist?.forEach(c => { c.done = true; });
                                 });
                             }
                             e.target.checked = true;
                         } else if (setting === 'complete-all') {
-                            // Auto-complete all subtasks
+                            // Auto-complete all subtasks AND their checklist items
                             openSubtasks.forEach(sub => {
                                 sub.done = true;
                                 sub.completedAt = Date.now();
+                                // CASCADE: ook checklist items voltooien
+                                sub.checklist?.forEach(c => { c.done = true; });
                             });
                         }
                         // 'task-only' does nothing extra
+                    }
+                }
+                
+                // Check for open checklist items when completing a subtask
+                if (type === 'sub' && wantsToComplete && wasNotDone) {
+                    const openChecklist = item.checklist?.filter(c => !c.done) || [];
+                    
+                    if (openChecklist.length > 0) {
+                        const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+                        
+                        if (setting === 'ask') {
+                            // Reset checkbox while dialog is open
+                            e.target.checked = false;
+                            
+                            const result = await customDialog.choice(
+                                'Open checklist items gevonden',
+                                `De subtaak "<strong>${item.name}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
+                                `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${c.name}</div>`).join('')}</div>` +
+                                `Wat wil je doen?`,
+                                [
+                                    { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                                    { text: 'Alleen subtaak', class: 'primary', value: 'task-only' },
+                                    { text: 'Alles voltooien', class: 'success', value: 'complete-all' }
+                                ],
+                                true // showRemember
+                            );
+                            
+                            if (result.value === 'cancel') {
+                                return;
+                            }
+                            
+                            // Save setting if remember was checked
+                            if (result.remember && result.value !== 'cancel') {
+                                localStorage.setItem('subtaskCompletionSetting', result.value);
+                                toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                            }
+                            
+                            if (result.value === 'complete-all') {
+                                openChecklist.forEach(c => {
+                                    c.done = true;
+                                });
+                            }
+                            e.target.checked = true;
+                        } else if (setting === 'complete-all') {
+                            // Auto-complete all checklist items
+                            openChecklist.forEach(c => {
+                                c.done = true;
+                            });
+                        }
+                        // 'task-only' does nothing extra - checklist items remain open
                     }
                 }
                 
@@ -6137,17 +6241,27 @@ const crud = {
         const proj = sourceCat.projects.find(p => p.id === projectId);
         if (!proj) return;
         
+        // Get the subtask completion setting
+        const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+        
         // Count completed items
         let completedTaskCount = 0;
         let completedSubtaskCount = 0;
         let tasksWithOpenSubtasks = [];
+        let skippedTasks = 0;
         
         proj.tasks?.forEach(task => {
             if (task.done) {
-                completedTaskCount++;
                 const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
                 if (openSubs.length > 0) {
                     tasksWithOpenSubtasks.push({ task, openSubtasks: openSubs });
+                    if (setting === 'task-only') {
+                        skippedTasks++;
+                    } else {
+                        completedTaskCount++;
+                    }
+                } else {
+                    completedTaskCount++;
                 }
             }
             task.subtasks?.forEach(sub => {
@@ -6155,52 +6269,109 @@ const crud = {
             });
         });
         
-        const totalCompleted = completedTaskCount + completedSubtaskCount;
+        // For 'complete-all', count the open subtasks that will be completed
+        let subtasksToComplete = 0;
+        if (setting === 'complete-all') {
+            tasksWithOpenSubtasks.forEach(item => {
+                subtasksToComplete += item.openSubtasks.length;
+            });
+        }
         
-        if (totalCompleted === 0) {
+        const totalCompleted = completedTaskCount + completedSubtaskCount + subtasksToComplete;
+        
+        if (totalCompleted === 0 && skippedTasks === 0) {
             toastNotifications.show('info', 'Geen voltooide items', 'Er zijn geen voltooide items om op te schonen.');
             return;
         }
         
+        if (totalCompleted === 0 && skippedTasks > 0) {
+            toastNotifications.show('info', 'Taken overgeslagen', `${skippedTasks} voltooide taak/taken met open subtaken overgeslagen. Pas je instelling aan om deze mee te nemen.`);
+            return;
+        }
+        
+        // Build confirmation message based on setting
+        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${proj.name}</strong>"?`;
+        if (skippedTasks > 0) {
+            confirmMsg += `<br><br><em>${skippedTasks} taak/taken met open subtaken worden overgeslagen.</em>`;
+        }
+        if (subtasksToComplete > 0) {
+            confirmMsg += `<br><br><em>${subtasksToComplete} open subtaken worden automatisch voltooid.</em>`;
+        }
+        
         const confirmed = await customDialog.confirm(
             'Project opschonen',
-            `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${proj.name}</strong>"?<br><br>` +
-            `<strong>${completedTaskCount}</strong> opdracht(en) en <strong>${completedSubtaskCount}</strong> subtaken worden gearchiveerd.`,
+            confirmMsg,
             '&#129529;'
         );
         if (!confirmed) return;
         
-        // Handle tasks with open subtasks
-        for (const item of tasksWithOpenSubtasks) {
-            const openCount = item.openSubtasks.length;
-            const subtaskList = item.openSubtasks.map(s => `&#8226; ${s.name}`).join('<br>');
+        // Handle tasks with open subtasks based on setting
+        if (setting === 'ask' && tasksWithOpenSubtasks.length > 0) {
+            // Show ONE summary dialog for ALL tasks with open subtasks
+            const totalOpenSubs = tasksWithOpenSubtasks.reduce((sum, item) => sum + item.openSubtasks.length, 0);
+            const taskNames = tasksWithOpenSubtasks.map(item => item.task.name).join('", "');
             
             const result = await customDialog.choice(
                 'Open subtaken gevonden',
-                `De opdracht "<strong>${item.task.name}</strong>" is voltooid maar heeft nog <strong>${openCount}</strong> open subtaken:<br><br>` +
-                `<pre>${item.openSubtasks.map(s => s.name).join('\n')}</pre>` +
-                `Wat wil je met deze subtaken doen?`,
+                `<strong>${tasksWithOpenSubtasks.length}</strong> voltooide taak/taken hebben samen <strong>${totalOpenSubs}</strong> open subtaken:<br><br>` +
+                `<div class="custom-dialog-list">${tasksWithOpenSubtasks.map(item => 
+                    `<div class="custom-dialog-list-item"><strong>${item.task.name}</strong> (${item.openSubtasks.length} open)</div>`
+                ).join('')}</div>` +
+                `Wat wil je met alle open subtaken doen?`,
                 [
                     { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                    { text: 'Overslaan', class: 'primary', value: 'skip' },
                     { text: 'Verwijderen', class: 'danger', value: 'delete' },
                     { text: 'Voltooien', class: 'success', value: 'complete' }
-                ]
+                ],
+                true // showRemember
             );
             
-            if (result === 'cancel') {
+            if (result.value === 'cancel') {
                 toastNotifications.show('info', 'Geannuleerd', 'Opschonen geannuleerd.');
                 return;
             }
             
-            if (result === 'complete') {
+            // Save setting if remember was checked
+            if (result.remember && result.value !== 'cancel') {
+                const settingMap = { 'skip': 'task-only', 'complete': 'complete-all', 'delete': 'complete-all' };
+                if (settingMap[result.value]) {
+                    localStorage.setItem('subtaskCompletionSetting', settingMap[result.value]);
+                    toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                }
+            }
+            
+            if (result.value === 'skip') {
+                // Remove these tasks from cleanup - they'll be skipped
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.skip = true;
+                });
+            } else if (result.value === 'complete') {
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.openSubtasks.forEach(sub => {
+                        sub.done = true;
+                        sub.completedAt = Date.now();
+                        // CASCADE: ook checklist items voltooien
+                        sub.checklist?.forEach(c => { c.done = true; });
+                    });
+                });
+            } else if (result.value === 'delete') {
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
+                });
+            }
+        } else if (setting === 'complete-all') {
+            // Auto-complete all open subtasks AND their checklist items
+            tasksWithOpenSubtasks.forEach(item => {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
+                    // CASCADE: ook checklist items voltooien
+                    sub.checklist?.forEach(c => { c.done = true; });
                 });
-            } else if (result === 'delete') {
-                item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
-            }
+            });
         }
+        // 'task-only' does nothing - tasks with open subtasks are simply not archived
         
         undoRedo.saveState();
         
@@ -6209,6 +6380,7 @@ const crud = {
         }
         
         const now = Date.now();
+        let archivedCount = 0;
         
         // Archive completed subtasks
         proj.tasks?.forEach(task => {
@@ -6235,14 +6407,27 @@ const crud = {
                         priority: sub.priority,
                         checklist: sub.checklist
                     });
+                    archivedCount++;
                 });
                 task.subtasks = task.subtasks.filter(sub => !sub.done);
             }
         });
         
-        // Archive completed tasks
-        const completedTasks = proj.tasks?.filter(task => task.done) || [];
-        completedTasks.forEach(task => {
+        // Determine which tasks to archive (skip those with open subtasks if setting is 'task-only' or user chose 'skip')
+        const tasksToArchive = proj.tasks?.filter(task => {
+            if (!task.done) return false;
+            const hasOpenSubs = task.subtasks?.some(sub => !sub.done);
+            if (hasOpenSubs) {
+                // Check if this task was marked to skip
+                const wasSkipped = tasksWithOpenSubtasks.find(item => item.task.id === task.id)?.skip;
+                if (setting === 'task-only' || wasSkipped) {
+                    return false; // Don't archive
+                }
+            }
+            return true;
+        }) || [];
+        
+        tasksToArchive.forEach(task => {
             state.db.archive.push({
                 id: task.id,
                 name: task.name,
@@ -6262,30 +6447,41 @@ const crud = {
                 timeEstimate: task.timeEstimate,
                 timeSpent: task.timeSpent
             });
+            archivedCount++;
         });
         
+        // Remove archived tasks
+        const archivedTaskIds = tasksToArchive.map(t => t.id);
         if (proj.tasks) {
-            proj.tasks = proj.tasks.filter(task => !task.done);
+            proj.tasks = proj.tasks.filter(task => !archivedTaskIds.includes(task.id));
         }
         
         await app.save();
         app.render();
-        toastNotifications.show('success', 'Opgeschoond', `${totalCompleted} item(s) gearchiveerd.`);
+        
+        let toastMsg = `${archivedCount} item(s) gearchiveerd.`;
+        if (setting === 'task-only' && skippedTasks > 0) {
+            toastMsg += ` ${skippedTasks} taak/taken overgeslagen.`;
+        }
+        toastNotifications.show('success', 'Opgeschoond', toastMsg);
     },
 
     async cleanupCategory(categoryId) {
         const cat = state.db.categories.find(c => c.id === categoryId);
         if (!cat) return;
         
+        // Get the subtask completion setting
+        const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+        
         // Count completed items across all projects
         let completedTaskCount = 0;
         let completedSubtaskCount = 0;
         let tasksWithOpenSubtasks = [];
+        let skippedTasks = 0;
         
         cat.projects?.forEach(proj => {
             proj.tasks?.forEach(task => {
                 if (task.done) {
-                    completedTaskCount++;
                     const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
                     if (openSubs.length > 0) {
                         tasksWithOpenSubtasks.push({ 
@@ -6294,6 +6490,13 @@ const crud = {
                             projectName: proj.name,
                             project: proj
                         });
+                        if (setting === 'task-only') {
+                            skippedTasks++;
+                        } else {
+                            completedTaskCount++;
+                        }
+                    } else {
+                        completedTaskCount++;
                     }
                 }
                 task.subtasks?.forEach(sub => {
@@ -6302,52 +6505,107 @@ const crud = {
             });
         });
         
-        const totalCompleted = completedTaskCount + completedSubtaskCount;
+        // For 'complete-all', count the open subtasks that will be completed
+        let subtasksToComplete = 0;
+        if (setting === 'complete-all') {
+            tasksWithOpenSubtasks.forEach(item => {
+                subtasksToComplete += item.openSubtasks.length;
+            });
+        }
         
-        if (totalCompleted === 0) {
+        const totalCompleted = completedTaskCount + completedSubtaskCount + subtasksToComplete;
+        
+        if (totalCompleted === 0 && skippedTasks === 0) {
             toastNotifications.show('info', 'Geen voltooide items', 'Er zijn geen voltooide items om op te schonen.');
             return;
         }
         
+        if (totalCompleted === 0 && skippedTasks > 0) {
+            toastNotifications.show('info', 'Taken overgeslagen', `${skippedTasks} voltooide taak/taken met open subtaken overgeslagen. Pas je instelling aan om deze mee te nemen.`);
+            return;
+        }
+        
+        // Build confirmation message based on setting
+        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${cat.name}</strong>"?`;
+        if (skippedTasks > 0) {
+            confirmMsg += `<br><br><em>${skippedTasks} taak/taken met open subtaken worden overgeslagen.</em>`;
+        }
+        if (subtasksToComplete > 0) {
+            confirmMsg += `<br><br><em>${subtasksToComplete} open subtaken worden automatisch voltooid.</em>`;
+        }
+        
         const confirmed = await customDialog.confirm(
             'Categorie opschonen',
-            `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${cat.name}</strong>"?<br><br>` +
-            `<strong>${completedTaskCount}</strong> opdracht(en) en <strong>${completedSubtaskCount}</strong> subtaken worden gearchiveerd.`,
+            confirmMsg,
             '&#129529;'
         );
         if (!confirmed) return;
         
-        // Handle tasks with open subtasks - 1 by 1
-        for (const item of tasksWithOpenSubtasks) {
-            const openCount = item.openSubtasks.length;
+        // Handle tasks with open subtasks based on setting
+        if (setting === 'ask' && tasksWithOpenSubtasks.length > 0) {
+            // Show ONE summary dialog for ALL tasks with open subtasks
+            const totalOpenSubs = tasksWithOpenSubtasks.reduce((sum, item) => sum + item.openSubtasks.length, 0);
             
             const result = await customDialog.choice(
                 'Open subtaken gevonden',
-                `<strong>Project:</strong> ${item.projectName}<br><br>` +
-                `De opdracht "<strong>${item.task.name}</strong>" is voltooid maar heeft nog <strong>${openCount}</strong> open subtaken:<br><br>` +
-                `<div class="custom-dialog-list">${item.openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
-                `Wat wil je met deze subtaken doen?`,
+                `<strong>${tasksWithOpenSubtasks.length}</strong> voltooide taak/taken hebben samen <strong>${totalOpenSubs}</strong> open subtaken:<br><br>` +
+                `<div class="custom-dialog-list">${tasksWithOpenSubtasks.map(item => 
+                    `<div class="custom-dialog-list-item"><strong>${item.task.name}</strong> <span style="color:var(--text-muted)">(${item.projectName})</span> - ${item.openSubtasks.length} open</div>`
+                ).join('')}</div>` +
+                `Wat wil je met alle open subtaken doen?`,
                 [
                     { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                    { text: 'Overslaan', class: 'primary', value: 'skip' },
                     { text: 'Verwijderen', class: 'danger', value: 'delete' },
                     { text: 'Voltooien', class: 'success', value: 'complete' }
-                ]
+                ],
+                true // showRemember
             );
             
-            if (result === 'cancel') {
+            if (result.value === 'cancel') {
                 toastNotifications.show('info', 'Geannuleerd', 'Opschonen geannuleerd.');
                 return;
             }
             
-            if (result === 'complete') {
+            // Save setting if remember was checked
+            if (result.remember && result.value !== 'cancel') {
+                const settingMap = { 'skip': 'task-only', 'complete': 'complete-all', 'delete': 'complete-all' };
+                if (settingMap[result.value]) {
+                    localStorage.setItem('subtaskCompletionSetting', settingMap[result.value]);
+                    toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                }
+            }
+            
+            if (result.value === 'skip') {
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.skip = true;
+                });
+            } else if (result.value === 'complete') {
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.openSubtasks.forEach(sub => {
+                        sub.done = true;
+                        sub.completedAt = Date.now();
+                        // CASCADE: ook checklist items voltooien
+                        sub.checklist?.forEach(c => { c.done = true; });
+                    });
+                });
+            } else if (result.value === 'delete') {
+                tasksWithOpenSubtasks.forEach(item => {
+                    item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
+                });
+            }
+        } else if (setting === 'complete-all') {
+            // Auto-complete all open subtasks AND their checklist items
+            tasksWithOpenSubtasks.forEach(item => {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
+                    // CASCADE: ook checklist items voltooien
+                    sub.checklist?.forEach(c => { c.done = true; });
                 });
-            } else if (result === 'delete') {
-                item.task.subtasks = item.task.subtasks.filter(sub => sub.done);
-            }
+            });
         }
+        // 'task-only' does nothing - tasks with open subtasks are simply not archived
         
         undoRedo.saveState();
         
@@ -6356,6 +6614,7 @@ const crud = {
         }
         
         const now = Date.now();
+        let archivedCount = 0;
         
         // Archive completed items from ALL projects in category
         cat.projects?.forEach(proj => {
@@ -6384,14 +6643,26 @@ const crud = {
                             priority: sub.priority,
                             checklist: sub.checklist
                         });
+                        archivedCount++;
                     });
                     task.subtasks = task.subtasks.filter(sub => !sub.done);
                 }
             });
             
-            // Archive completed tasks
-            const completedTasks = proj.tasks?.filter(task => task.done) || [];
-            completedTasks.forEach(task => {
+            // Determine which tasks to archive
+            const tasksToArchive = proj.tasks?.filter(task => {
+                if (!task.done) return false;
+                const hasOpenSubs = task.subtasks?.some(sub => !sub.done);
+                if (hasOpenSubs) {
+                    const wasSkipped = tasksWithOpenSubtasks.find(item => item.task.id === task.id)?.skip;
+                    if (setting === 'task-only' || wasSkipped) {
+                        return false;
+                    }
+                }
+                return true;
+            }) || [];
+            
+            tasksToArchive.forEach(task => {
                 state.db.archive.push({
                     id: task.id,
                     name: task.name,
@@ -6411,16 +6682,24 @@ const crud = {
                     timeEstimate: task.timeEstimate,
                     timeSpent: task.timeSpent
                 });
+                archivedCount++;
             });
             
+            // Remove archived tasks
+            const archivedTaskIds = tasksToArchive.map(t => t.id);
             if (proj.tasks) {
-                proj.tasks = proj.tasks.filter(task => !task.done);
+                proj.tasks = proj.tasks.filter(task => !archivedTaskIds.includes(task.id));
             }
         });
         
         await app.save();
         app.render();
-        toastNotifications.show('success', 'Opgeschoond', `${totalCompleted} item(s) gearchiveerd uit categorie.`);
+        
+        let toastMsg = `${archivedCount} item(s) gearchiveerd uit categorie.`;
+        if (setting === 'task-only' && skippedTasks > 0) {
+            toastMsg += ` ${skippedTasks} taak/taken overgeslagen.`;
+        }
+        toastNotifications.show('success', 'Opgeschoond', toastMsg);
     },
 
     async cycleStatus(item) {
@@ -7165,15 +7444,64 @@ const todayView = {
                         openSubtasks.forEach(sub => {
                             sub.done = true;
                             sub.completedAt = Date.now();
+                            // CASCADE: ook checklist items voltooien
+                            sub.checklist?.forEach(c => { c.done = true; });
                         });
                     }
                 } else if (setting === 'complete-all') {
                     openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
+                        // CASCADE: ook checklist items voltooien
+                        sub.checklist?.forEach(c => { c.done = true; });
                     });
                 }
                 // 'task-only' does nothing extra
+            }
+        }
+        
+        // Check for open checklist items when completing a subtask
+        if (type === 'subtask' && !targetItem.done) {
+            const openChecklist = targetItem.checklist?.filter(c => !c.done) || [];
+            
+            if (openChecklist.length > 0) {
+                const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
+                
+                if (setting === 'ask') {
+                    const result = await customDialog.choice(
+                        'Open checklist items gevonden',
+                        `De subtaak "<strong>${targetItem.name}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
+                        `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${c.name}</div>`).join('')}</div>` +
+                        `Wat wil je doen?`,
+                        [
+                            { text: 'Annuleren', class: 'secondary', value: 'cancel' },
+                            { text: 'Alleen subtaak', class: 'primary', value: 'task-only' },
+                            { text: 'Alles voltooien', class: 'success', value: 'complete-all' }
+                        ],
+                        true // showRemember
+                    );
+                    
+                    if (result.value === 'cancel') {
+                        return;
+                    }
+                    
+                    // Save setting if remember was checked
+                    if (result.remember && result.value !== 'cancel') {
+                        localStorage.setItem('subtaskCompletionSetting', result.value);
+                        toastNotifications.show('info', 'Instelling opgeslagen', 'Je keuze is onthouden', 2000);
+                    }
+                    
+                    if (result.value === 'complete-all') {
+                        openChecklist.forEach(c => {
+                            c.done = true;
+                        });
+                    }
+                } else if (setting === 'complete-all') {
+                    openChecklist.forEach(c => {
+                        c.done = true;
+                    });
+                }
+                // 'task-only' does nothing extra - checklist items remain open
             }
         }
         
@@ -7281,6 +7609,8 @@ const todayView = {
 const archiveView = {
     collapsedCategories: new Set(),
     collapsedProjects: new Set(),
+    collapsedSubtasks: new Set(),
+    initialized: false,
     
     render() {
         const list = document.getElementById('archiveList');
@@ -7291,6 +7621,12 @@ const archiveView = {
         // Ensure archive array exists
         if (!state.db.archive) {
             state.db.archive = [];
+        }
+        
+        // Initialize all as collapsed on first render
+        if (!this.initialized && state.db.archive.length > 0) {
+            this.initializeCollapsed();
+            this.initialized = true;
         }
         
         // Count stats
@@ -7354,7 +7690,7 @@ const archiveView = {
             const catEl = document.createElement('div');
             catEl.className = 'archive-category';
             
-            const isCollapsed = this.collapsedCategories.has(catGroup.categoryId);
+            const isCollapsed = !this.initialized || this.collapsedCategories.has(catGroup.categoryId);
             
             catEl.innerHTML = `
                 <div class="archive-category-header" onclick="archiveView.toggleCategory('${catGroup.categoryId}')">
@@ -7374,7 +7710,7 @@ const archiveView = {
                 const projEl = document.createElement('div');
                 projEl.className = 'archive-project';
                 
-                const isProjCollapsed = this.collapsedProjects.has(projGroup.projectId);
+                const isProjCollapsed = !this.initialized || this.collapsedProjects.has(projGroup.projectId);
                 
                 projEl.innerHTML = `
                     <div class="archive-project-header" onclick="archiveView.toggleProject('${projGroup.projectId}')">
@@ -7403,10 +7739,38 @@ const archiveView = {
                     
                     const archivedDate = item.archivedAt ? new Date(item.archivedAt).toLocaleDateString('nl-NL') : '';
                     
+                    // Check for checklist items (only for subtasks)
+                    const hasChecklist = item.type === 'subtask' && item.checklist && item.checklist.length > 0;
+                    const checklistDone = hasChecklist ? item.checklist.filter(c => c.done).length : 0;
+                    const checklistTotal = hasChecklist ? item.checklist.length : 0;
+                    const isSubCollapsed = this.collapsedSubtasks.has(item.id);
+                    
+                    let checklistBadge = '';
+                    let checklistHtml = '';
+                    
+                    if (hasChecklist) {
+                        checklistBadge = `<span class="archive-checklist-badge" onclick="event.stopPropagation(); archiveView.toggleSubtask('${item.id}')" title="Klik om checklist te ${isSubCollapsed ? 'tonen' : 'verbergen'}">✓${checklistDone}/${checklistTotal} ${isSubCollapsed ? '▶' : '▼'}</span>`;
+                        
+                        if (!isSubCollapsed) {
+                            checklistHtml = `
+                                <div class="archive-checklist">
+                                    ${item.checklist.map(c => `
+                                        <div class="archive-checklist-item ${c.done ? 'done' : 'open'}">
+                                            <span class="archive-checklist-check">${c.done ? '☑' : '☐'}</span>
+                                            <span class="archive-checklist-name">${c.name}</span>
+                                            ${!c.done ? '<span class="archive-checklist-status">(open)</span>' : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        }
+                    }
+                    
                     itemEl.innerHTML = `
                         <div class="archive-item-info">
                             <span class="archive-item-type ${item.type}">${item.type === 'task' ? 'Opdracht' : 'Subtaak'}</span>
                             <span class="archive-item-name">${item.name}</span>
+                            ${checklistBadge}
                             ${item.originalTaskName && item.type === 'subtask' ? `<span style="font-size: 10px; color: var(--text-muted);">(in: ${item.originalTaskName})</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -7415,6 +7779,7 @@ const archiveView = {
                                 &#8630; Terughalen
                             </button>
                         </div>
+                        ${checklistHtml}
                     `;
                     
                     projContent.appendChild(itemEl);
@@ -7442,6 +7807,46 @@ const archiveView = {
         } else {
             this.collapsedProjects.add(projId);
         }
+        this.render();
+    },
+    
+    toggleSubtask(subtaskId) {
+        if (this.collapsedSubtasks.has(subtaskId)) {
+            this.collapsedSubtasks.delete(subtaskId);
+        } else {
+            this.collapsedSubtasks.add(subtaskId);
+        }
+        this.render();
+    },
+    
+    initializeCollapsed() {
+        // Start with everything collapsed for a clean overview
+        if (!state.db.archive) return;
+        
+        const catIds = new Set();
+        const projIds = new Set();
+        const subIds = new Set();
+        
+        state.db.archive.forEach(item => {
+            if (item.originalCategoryId) catIds.add(item.originalCategoryId);
+            if (item.originalProjectId) projIds.add(item.originalProjectId);
+            if (item.type === 'subtask' && item.id) subIds.add(item.id);
+        });
+        
+        this.collapsedCategories = catIds;
+        this.collapsedProjects = projIds;
+        this.collapsedSubtasks = subIds;
+    },
+    
+    expandAll() {
+        this.collapsedCategories.clear();
+        this.collapsedProjects.clear();
+        this.collapsedSubtasks.clear();
+        this.render();
+    },
+    
+    collapseAll() {
+        this.initializeCollapsed();
         this.render();
     },
     
@@ -12073,14 +12478,14 @@ app.init();
             </div>
             
             <div class="form-group" style="margin-top: 24px;">
-                <label class="form-label">Bij voltooien opdracht met open subtaken</label>
+                <label class="form-label">Voltooien met open items</label>
                 <select id="subtaskCompletionSetting" onchange="app.saveSubtaskSetting()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); font-size: 14px;">
-                    <option value="task-only">Alleen de opdracht voltooien (subtaken blijven open)</option>
-                    <option value="complete-all">Opdracht en alle subtaken voltooien</option>
+                    <option value="task-only">Alleen dit item (onderliggende items blijven open)</option>
+                    <option value="complete-all">Alles voltooien (inclusief subtaken en checklist)</option>
                     <option value="ask">Altijd vragen wat te doen</option>
                 </select>
                 <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
-                    Bepaalt wat er gebeurt als je een opdracht voltooit die nog open subtaken heeft. Je kunt dit ook aanpassen via "Onthoud mijn keuze" in de popup.
+                    Bepaalt wat er gebeurt als je een item voltooit dat nog open subtaken of checklist items heeft. Je kunt dit ook aanpassen via "Onthoud mijn keuze" in de popup.
                 </div>
             </div>
         </div>
