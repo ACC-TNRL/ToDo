@@ -5633,7 +5633,8 @@ const renderer = {
             if (type === 'task' && item.subtasks && item.subtasks.length > 0) {
                 const doneCount = item.subtasks.filter(s => s.done).length;
                 const openCount = item.subtasks.length - doneCount;
-                metaParts.push(`<span class="subtask-count" title="Subtaken">${openCount}/${item.subtasks.length} sub open</span>`);
+                const pct = Math.round((doneCount / item.subtasks.length) * 100);
+                metaParts.push(`<span class="subtask-count" style="background: linear-gradient(to right, #a5b4fc ${pct}%, #e0e7ff ${pct}%);" title="Subtaken">${openCount}/${item.subtasks.length} sub open</span>`);
             }
 
             // Pomodoro sessions badges voor tasks
