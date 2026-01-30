@@ -5586,7 +5586,7 @@ const renderer = {
                         <div class="category-stats-fill" style="width: ${percentage}%"></div>
                     </div>
                     <div class="category-stats-text">
-                        <span>${totalProjects} proj | ${totalTasks - doneTasks} opdr open | ${totalSubtasks - doneSubtasks} sub open</span>
+                        <span>${totalProjects} proj | &#10003;${doneTasks}/${totalTasks} opdr | &#10003;${doneSubtasks}/${totalSubtasks} sub</span>
                     </div>
                 </div>
             `;
@@ -5634,7 +5634,7 @@ const renderer = {
                 const doneCount = item.subtasks.filter(s => s.done).length;
                 const openCount = item.subtasks.length - doneCount;
                 const pct = Math.round((doneCount / item.subtasks.length) * 100);
-                metaParts.push(`<span class="subtask-count" style="background: linear-gradient(to right, #a5b4fc ${pct}%, #e0e7ff ${pct}%);" title="Subtaken">${openCount}/${item.subtasks.length} sub open</span>`);
+                metaParts.push(`<span class="subtask-count" style="background: linear-gradient(to right, #a5b4fc ${pct}%, #e0e7ff ${pct}%);" title="Subtaken">&#10003;${doneCount}/${item.subtasks.length} sub</span>`);
             }
 
             // Pomodoro sessions badges voor tasks
@@ -5653,7 +5653,7 @@ const renderer = {
                 const doneChecklist = item.checklist.filter(c => c.done).length;
                 const openChecklist = item.checklist.length - doneChecklist;
                 const pct = Math.round((doneChecklist / item.checklist.length) * 100);
-                metaParts.push(`<span class="checklist-badge" style="background: linear-gradient(to right, #fda4af ${pct}%, #fce7f3 ${pct}%);" data-action="toggle-checklist" title="Checklist">${openChecklist}/${item.checklist.length} items open</span>`);
+                metaParts.push(`<span class="checklist-badge" style="background: linear-gradient(to right, #fda4af ${pct}%, #fce7f3 ${pct}%);" data-action="toggle-checklist" title="Checklist">&#10003;${doneChecklist}/${item.checklist.length} items</span>`);
             }
 
             // Pomodoro sessions badges voor subtaken
@@ -5713,7 +5713,7 @@ const renderer = {
                         <div class="category-stats-fill" style="width: ${Math.round(pct)}%"></div>
                     </div>
                     <div class="category-stats-text">
-                        <span>${totalTasks - doneTasks} opdr open | ${totalSubtasks - doneSubtasks} sub open</span>
+                        <span>&#10003;${doneTasks}/${totalTasks} opdr | &#10003;${doneSubtasks}/${totalSubtasks} sub</span>
                     </div>
                 </div>
             `;
