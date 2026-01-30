@@ -175,9 +175,12 @@
         }
         .category-stats-bar {
             height: 4px;
-            background: var(--border-color);
+            background: #c0c4c7;
             border-radius: 2px;
             overflow: hidden;
+        }
+        body.dark-mode .category-stats-bar {
+            background: #455872;
         }
         .category-stats-fill {
             height: 100%;
@@ -700,14 +703,11 @@
 
         .progress-bar {
             height: 4px;
-            background: #e2e8f0;
+            background: var(--border-color);
             border-radius: 2px;
             margin-top: 6px;
             width: 100%;
             overflow: hidden;
-        }
-        body.dark-mode .progress-bar {
-            background: #475569;
         }
         .progress-fill {
             height: 100%;
@@ -5563,25 +5563,25 @@ const renderer = {
             let totalProjects = item.projects?.length || 0;
             let totalTasks = 0;
             let totalSubtasks = 0;
-            let doneTasks = 0;
+            let doneProjects = 0;
             
             item.projects?.forEach(proj => {
+                if (proj.status === 'done') doneProjects++;
                 proj.tasks?.forEach(task => {
                     totalTasks++;
-                    if (task.done) doneTasks++;
                     totalSubtasks += task.subtasks?.length || 0;
                 });
             });
             
-            const percentage = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+            const percentage = totalProjects > 0 ? Math.round((doneProjects / totalProjects) * 100) : 0;
             metaHtml = `
                 <div class="category-stats">
                     <div class="category-stats-bar">
                         <div class="category-stats-fill" style="width: ${percentage}%"></div>
                     </div>
                     <div class="category-stats-text">
-                        <span>${totalProjects} proj | ${totalTasks} taken | ${totalSubtasks} sub</span>
-                        <span>${doneTasks}/${totalTasks} voltooid</span>
+                        <span>${totalProjects} proj | ${totalTasks} opdr | ${totalSubtasks} sub</span>
+                        <span>${doneProjects}/${totalProjects} voltooid</span>
                     </div>
                 </div>
             `;
@@ -5693,8 +5693,15 @@ const renderer = {
             
             const pct = totalTasks === 0 ? 0 : (doneTasks / totalTasks) * 100;
             metaHtml = `
-                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-                <div class="item-meta">${doneTasks}/${totalTasks} taken | ${totalSubtasks} subtaken</div>
+                <div class="category-stats">
+                    <div class="category-stats-bar">
+                        <div class="category-stats-fill" style="width: ${Math.round(pct)}%"></div>
+                    </div>
+                    <div class="category-stats-text">
+                        <span>${totalTasks} opdr | ${totalSubtasks} sub</span>
+                        <span>${doneTasks}/${totalTasks} voltooid</span>
+                    </div>
+                </div>
             `;
         }
 
