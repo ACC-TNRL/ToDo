@@ -175,7 +175,7 @@
         }
         .category-stats-bar {
             height: 4px;
-            background: #b3bdc4;
+            background: #bfc9cf;
             border-radius: 2px;
             overflow: hidden;
         }
@@ -5586,8 +5586,7 @@ const renderer = {
                         <div class="category-stats-fill" style="width: ${percentage}%"></div>
                     </div>
                     <div class="category-stats-text">
-                        <span>${totalProjects} proj | ${totalTasks} opdr | ${totalSubtasks} sub</span>
-                        <span>${doneItems}/${totalItems} voltooid</span>
+                        <span>${totalProjects} proj | ${totalTasks - doneTasks} opdr open | ${totalSubtasks - doneSubtasks} sub open</span>
                     </div>
                 </div>
             `;
@@ -5710,8 +5709,7 @@ const renderer = {
                         <div class="category-stats-fill" style="width: ${Math.round(pct)}%"></div>
                     </div>
                     <div class="category-stats-text">
-                        <span>${totalTasks} opdr | ${totalSubtasks} sub</span>
-                        <span>${doneItems}/${totalItems} voltooid</span>
+                        <span>${totalTasks - doneTasks} opdr open | ${totalSubtasks - doneSubtasks} sub open</span>
                     </div>
                 </div>
             `;
