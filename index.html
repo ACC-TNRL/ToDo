@@ -5136,9 +5136,19 @@ const app = {
         if (changed) await this.save();
     },
 
-    async save() {
+    async save(immediate = false) {
         
-        // Debounce saves
+        // Voor kritieke operaties: direct opslaan zonder debounce
+        if (immediate) {
+            if (state.saveTimeout) {
+                clearTimeout(state.saveTimeout);
+                state.saveTimeout = null;
+            }
+            await this.performSave();
+            return;
+        }
+        
+        // Debounce saves voor normale operaties
         if (state.saveTimeout) {
             clearTimeout(state.saveTimeout);
         }
@@ -6589,7 +6599,7 @@ const crud = {
             proj.tasks = proj.tasks.filter(task => !archivedTaskIds.includes(task.id));
         }
         
-        await app.save();
+        await app.save(true); // immediate save voor archief operaties
         app.render();
         
         let toastMsg = `${archivedCount} item(s) gearchiveerd.`;
@@ -6825,7 +6835,7 @@ const crud = {
             }
         });
         
-        await app.save();
+        await app.save(true); // immediate save voor archief operaties
         app.render();
         
         let toastMsg = `${archivedCount} item(s) gearchiveerd uit categorie.`;
@@ -8053,7 +8063,7 @@ const archiveView = {
                     restoredTask.subtasks.push(restoredSubtask);
                     state.db.archive = state.db.archive.filter(i => i.id !== itemId);
                     
-                    await app.save();
+                    await app.save(true);
                     this.render();
                     toastNotifications.show('success', 'Teruggehaald', `Opdracht en subtaak zijn teruggehaald.`);
                     return;
@@ -8088,7 +8098,7 @@ const archiveView = {
             
             state.db.archive = state.db.archive.filter(i => i.id !== itemId);
             
-            await app.save();
+            await app.save(true);
             this.render();
             toastNotifications.show('success', 'Teruggehaald', `"${item.name}" is teruggehaald`);
             return;
@@ -8123,7 +8133,7 @@ const archiveView = {
         
         state.db.archive = state.db.archive.filter(i => i.id !== itemId);
         
-        await app.save();
+        await app.save(true);
         this.render();
         toastNotifications.show('success', 'Teruggehaald', `"${item.name}" is teruggehaald`);
     }
