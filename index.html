@@ -4230,14 +4230,32 @@ const firebaseAuth = {
             
             if (doc.exists) {
                 const data = doc.data();
+                console.log('📥 Data loaded from Firebase:', {
+                    hasDatabase: !!data.database,
+                    categories: data.database?.categories?.length || 0,
+                    archive: data.database?.archive?.length || 0,
+                    pomodoro: data.database?.pomodoroSessions?.length || 0
+                });
+                
                 if (data.database) {
                     state.db = data.database;
                     // Ensure archive array exists for backwards compatibility
                     if (!state.db.archive) {
                         state.db.archive = [];
                     }
+                    // Ensure pomodoroSessions array exists
+                    if (!state.db.pomodoroSessions) {
+                        state.db.pomodoroSessions = [];
+                    }
+                    
+                    console.log('📥 State.db after load:', {
+                        categories: state.db.categories?.length,
+                        archive: state.db.archive?.length,
+                        archiveItems: state.db.archive?.map(a => a.name)
+                    });
+                    
                     app.render();
-                    toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
+                    toastNotifications.show('success', 'Data Geladen', `${state.db.archive?.length || 0} items in archief`);
                 }
             } else {
                 await docRef.set({
@@ -4290,13 +4308,21 @@ const firebaseAuth = {
                 pomodoro: state.db.pomodoroSessions?.length || 0
             });
             
+            // DEBUG: Log volledige archive voor debugging
+            if (state.db.archive?.length > 0) {
+                console.log('📦 Archive items being saved:', state.db.archive.map(a => ({id: a.id, name: a.name, type: a.type})));
+            }
+            
             const docRef = db.collection('users').doc(this.currentUser.uid);
+            
+            // BELANGRIJK: Gebruik set met volledige data, niet merge
             await docRef.set({
+                email: this.currentUser.email,
                 database: state.db,
                 lastSync: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            });
             
-            console.log('✓ Data synced to cloud');
+            console.log('✓ Data synced to cloud - archive items:', state.db.archive?.length || 0);
             // Don't show toast for every sync - too noisy
         } catch (error) {
             // Check if it's the "database doesn't exist" error
@@ -6600,6 +6626,14 @@ const crud = {
         }
         
         await app.save(true); // immediate save voor archief operaties
+        
+        // DEBUG: Verifieer dat data correct is na save
+        console.log('🔍 DEBUG cleanupProject:', {
+            archivedCount,
+            archiveLength: state.db.archive?.length,
+            remainingTasks: proj.tasks?.length
+        });
+        
         app.render();
         
         let toastMsg = `${archivedCount} item(s) gearchiveerd.`;
