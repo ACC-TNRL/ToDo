@@ -4284,11 +4284,18 @@ const firebaseAuth = {
         }
         
         try {
+            console.log('📤 Syncing to cloud...', {
+                categories: state.db.categories?.length || 0,
+                archive: state.db.archive?.length || 0,
+                pomodoro: state.db.pomodoroSessions?.length || 0
+            });
+            
             const docRef = db.collection('users').doc(this.currentUser.uid);
-            await docRef.update({
+            await docRef.set({
                 database: state.db,
                 lastSync: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            }, { merge: true });
+            
             console.log('✓ Data synced to cloud');
             // Don't show toast for every sync - too noisy
         } catch (error) {
