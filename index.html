@@ -851,6 +851,205 @@
             font-size: 10px;
             color: var(--primary);
             cursor: help;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .recurring-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            color: var(--primary);
+        }
+        
+        .recurring-badge .streak {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        
+        .recurring-badge .count {
+            color: #6366f1;
+        }
+        
+        /* Segmented Control */
+        .recurring-segmented {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+        }
+        
+        .recurring-segmented .seg-btn {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .recurring-segmented .seg-btn:hover {
+            background: rgba(255,255,255,0.7);
+            color: #334155;
+        }
+        
+        .recurring-segmented .seg-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        
+        .recurring-options {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding: 16px;
+            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .recurring-options.visible {
+            display: flex;
+        }
+        
+        .recurring-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .recurring-row label {
+            font-size: 13px;
+            color: #475569;
+            min-width: 65px;
+            font-weight: 500;
+        }
+        
+        .recurring-row input[type="number"],
+        .recurring-row select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+            color: #334155;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        
+        .recurring-row input[type="date"] {
+            width: 140px;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            background: white;
+            color: var(--text);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        
+        .recurring-row input[type="number"]:focus,
+        .recurring-row input[type="date"]:focus,
+        .recurring-row select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .recurring-row input[type="number"] {
+            width: 60px;
+        }
+        
+        .recurring-row span {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .recurring-days {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .recurring-day {
+            width: 36px;
+            height: 36px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: white;
+            color: #64748b;
+        }
+        
+        .recurring-day:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+            color: var(--primary);
+        }
+        
+        .recurring-day.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+        }
+        
+        .recurring-more-toggle {
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px 0;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
+            padding-top: 12px;
+        }
+        
+        .recurring-more-toggle:hover {
+            color: var(--primary);
+        }
+        
+        .recurring-more-toggle .toggle-icon {
+            transition: transform 0.2s;
+        }
+        
+        .recurring-more-toggle.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .recurring-extra {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-top: 12px;
+            animation: slideDown 0.2s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .modal-overlay {
@@ -4028,12 +4227,112 @@
 
             <div class="form-group">
                 <label class="form-label">&#128258; Terugkerende Taak</label>
-                <select id="modalRecurring" class="form-input">
-                    <option value="">Geen herhaling</option>
-                    <option value="daily">Dagelijks</option>
-                    <option value="weekly">Wekelijks</option>
-                    <option value="monthly">Maandelijks</option>
-                </select>
+                
+                <!-- Segmented Control -->
+                <div class="recurring-segmented" id="recurringSegmented">
+                    <button type="button" class="seg-btn active" data-value="" onclick="modal.setRecurringType('')">Uit</button>
+                    <button type="button" class="seg-btn" data-value="daily" onclick="modal.setRecurringType('daily')">Dagelijks</button>
+                    <button type="button" class="seg-btn" data-value="weekdays" onclick="modal.setRecurringType('weekdays')">Werkdagen</button>
+                    <button type="button" class="seg-btn" data-value="weekly" onclick="modal.setRecurringType('weekly')">Wekelijks</button>
+                    <button type="button" class="seg-btn" data-value="monthly" onclick="modal.setRecurringType('monthly')">Maandelijks</button>
+                </div>
+                
+                <!-- Hidden input to store value -->
+                <input type="hidden" id="modalRecurring" value="">
+                
+                <!-- Advanced Options (collapsed by default) -->
+                <div id="recurringOptions" class="recurring-options">
+                    
+                    <!-- Dagelijks - dagen selectie (multi) -->
+                    <div id="recurringDailyDaysRow" class="recurring-row" style="display: none;">
+                        <label>Op dagen</label>
+                        <div class="recurring-days">
+                            <div class="recurring-day" data-day="1" onclick="modal.toggleRecurringDay(1)">Ma</div>
+                            <div class="recurring-day" data-day="2" onclick="modal.toggleRecurringDay(2)">Di</div>
+                            <div class="recurring-day" data-day="3" onclick="modal.toggleRecurringDay(3)">Wo</div>
+                            <div class="recurring-day" data-day="4" onclick="modal.toggleRecurringDay(4)">Do</div>
+                            <div class="recurring-day" data-day="5" onclick="modal.toggleRecurringDay(5)">Vr</div>
+                            <div class="recurring-day" data-day="6" onclick="modal.toggleRecurringDay(6)">Za</div>
+                            <div class="recurring-day" data-day="0" onclick="modal.toggleRecurringDay(0)">Zo</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Wekelijks - dag selectie (single) -->
+                    <div id="recurringDaysRow" class="recurring-row" style="display: none;">
+                        <label>Op dag</label>
+                        <div class="recurring-days" id="recurringDaysContainer">
+                            <div class="recurring-day" data-day="1" onclick="modal.selectRecurringDay(1)">Ma</div>
+                            <div class="recurring-day" data-day="2" onclick="modal.selectRecurringDay(2)">Di</div>
+                            <div class="recurring-day" data-day="3" onclick="modal.selectRecurringDay(3)">Wo</div>
+                            <div class="recurring-day" data-day="4" onclick="modal.selectRecurringDay(4)">Do</div>
+                            <div class="recurring-day" data-day="5" onclick="modal.selectRecurringDay(5)">Vr</div>
+                            <div class="recurring-day" data-day="6" onclick="modal.selectRecurringDay(6)">Za</div>
+                            <div class="recurring-day" data-day="0" onclick="modal.selectRecurringDay(0)">Zo</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Werkdagen/Custom - dagen selectie (multi) -->
+                    <div id="recurringDaysMultiRow" class="recurring-row" style="display: none;">
+                        <label>Op dagen</label>
+                        <div class="recurring-days">
+                            <div class="recurring-day" data-day="1" onclick="modal.toggleRecurringDay(1)">Ma</div>
+                            <div class="recurring-day" data-day="2" onclick="modal.toggleRecurringDay(2)">Di</div>
+                            <div class="recurring-day" data-day="3" onclick="modal.toggleRecurringDay(3)">Wo</div>
+                            <div class="recurring-day" data-day="4" onclick="modal.toggleRecurringDay(4)">Do</div>
+                            <div class="recurring-day" data-day="5" onclick="modal.toggleRecurringDay(5)">Vr</div>
+                            <div class="recurring-day" data-day="6" onclick="modal.toggleRecurringDay(6)">Za</div>
+                            <div class="recurring-day" data-day="0" onclick="modal.toggleRecurringDay(0)">Zo</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Maanddag selectie met eerste/laatste optie -->
+                    <div id="recurringMonthDayRow" class="recurring-row" style="display: none;">
+                        <label>Op de</label>
+                        <select id="recurringMonthDayType" onchange="modal.toggleMonthDayInput()">
+                            <option value="specific">dag</option>
+                            <option value="first">eerste dag</option>
+                            <option value="last">laatste dag</option>
+                        </select>
+                        <input type="number" id="recurringMonthDay" value="1" min="1" max="31">
+                        <span id="recurringMonthDayLabel">van de maand</span>
+                    </div>
+                    
+                    <!-- Interval (alleen voor custom) -->
+                    <div id="recurringIntervalRow" class="recurring-row" style="display: none;">
+                        <label>Elke</label>
+                        <input type="number" id="recurringInterval" value="1" min="1" max="99">
+                        <span id="recurringIntervalUnit">week/weken</span>
+                    </div>
+                    
+                    <!-- Meer opties toggle -->
+                    <div id="recurringMoreToggle" class="recurring-more-toggle" onclick="modal.toggleMoreOptions()">
+                        <span class="toggle-icon">&#9660;</span>
+                        <span class="toggle-text">Meer opties</span>
+                    </div>
+                    
+                    <!-- Extra opties (hidden by default) -->
+                    <div id="recurringExtraOptions" class="recurring-extra" style="display: none;">
+                        <div class="recurring-row">
+                            <label>Eindigt</label>
+                            <select id="recurringEndType" onchange="modal.toggleRecurringEnd()">
+                                <option value="never">Nooit</option>
+                                <option value="date">Op datum</option>
+                                <option value="count">Na X keer</option>
+                            </select>
+                        </div>
+                        
+                        <div id="recurringEndDateRow" class="recurring-row" style="display: none;">
+                            <label>Einddatum</label>
+                            <input type="date" id="recurringEndDate">
+                        </div>
+                        
+                        <div id="recurringEndCountRow" class="recurring-row" style="display: none;">
+                            <label>Aantal</label>
+                            <input type="number" id="recurringEndCount" value="10" min="1" max="999">
+                            <span>keer</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -4240,6 +4539,8 @@ const firebaseAuth = {
                     if (!state.db.pomodoroSessions) {
                         state.db.pomodoroSessions = [];
                     }
+                    // Process recurring tasks on data load
+                    await app.processRecurringTasks();
                     app.render();
                     toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
                 }
@@ -4746,6 +5047,11 @@ const app = {
                 reminders.check();
             }, 1000);
             
+            // Process recurring tasks on app init (for non-Firebase users)
+            setTimeout(() => {
+                this.processRecurringTasks();
+            }, 500);
+            
             console.log('✓ App initialized successfully');
         } catch (error) {
             errorHandler.log(error, 'app.init');
@@ -5114,25 +5420,118 @@ const app = {
     },
 
     async processRecurringTasks() {
-        const today = new Date().setHours(0,0,0,0);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const todayMs = today.getTime();
+        const todayDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, etc.
         let changed = false;
         
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
                     if (task.recurring?.enabled && task.done) {
-                        const nextDue = task.recurring.nextDue || task.dueDate || today;
-                        if (nextDue <= today) {
+                        const r = task.recurring;
+                        
+                        // Check end conditions
+                        if (r.endDate && todayMs > r.endDate) {
+                            // Past end date - disable recurring
+                            task.recurring.enabled = false;
+                            changed = true;
+                            return;
+                        }
+                        if (r.endCount && (r.completionCount || 0) >= r.endCount) {
+                            // Reached max completions - disable recurring
+                            task.recurring.enabled = false;
+                            changed = true;
+                            return;
+                        }
+                        
+                        const nextDue = r.nextDue || task.dueDate || todayMs;
+                        if (nextDue <= todayMs) {
+                            // For weekly with specific days, check if today is a valid day
+                            if (r.frequency === 'weekly' && r.days && r.days.length > 0) {
+                                if (!r.days.includes(todayDayOfWeek)) {
+                                    // Today is not a scheduled day, find next valid day
+                                    const next = new Date(todayMs);
+                                    for (let i = 1; i <= 7; i++) {
+                                        next.setDate(next.getDate() + 1);
+                                        if (r.days.includes(next.getDay())) {
+                                            task.recurring.nextDue = next.getTime();
+                                            changed = true;
+                                            break;
+                                        }
+                                    }
+                                    return; // Don't reset task yet
+                                }
+                            }
+                            
+                            // Update completion statistics before resetting
+                            task.recurring.completionCount = (task.recurring.completionCount || 0) + 1;
+                            task.recurring.lastCompleted = Date.now();
+                            
+                            // Calculate streak (consecutive completions)
+                            const daysSinceLastDue = Math.floor((todayMs - nextDue) / (1000 * 60 * 60 * 24));
+                            if (daysSinceLastDue <= 1) {
+                                task.recurring.streak = (task.recurring.streak || 0) + 1;
+                            } else {
+                                task.recurring.streak = 1; // Reset streak if missed days
+                            }
+                            
+                            // Reset task for next occurrence
                             task.done = false;
                             task.status = 'planned';
                             
+                            // Calculate next due date
                             const next = new Date(nextDue);
-                            if (task.recurring.frequency === 'daily') {
-                                next.setDate(next.getDate() + (task.recurring.interval || 1));
-                            } else if (task.recurring.frequency === 'weekly') {
-                                next.setDate(next.getDate() + (7 * (task.recurring.interval || 1)));
-                            } else if (task.recurring.frequency === 'monthly') {
-                                next.setMonth(next.getMonth() + (task.recurring.interval || 1));
+                            if (r.frequency === 'daily') {
+                                // Daily with specific days support
+                                if (r.days && r.days.length > 0 && r.days.length < 7) {
+                                    // Find next valid day
+                                    for (let i = 1; i <= 7; i++) {
+                                        next.setDate(next.getDate() + 1);
+                                        if (r.days.includes(next.getDay())) {
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    next.setDate(next.getDate() + (r.interval || 1));
+                                }
+                            } else if (r.frequency === 'weekly') {
+                                if (r.days && r.days.length > 0) {
+                                    // Find next occurrence based on selected days
+                                    let found = false;
+                                    for (let i = 1; i <= 14; i++) { // Check up to 2 weeks
+                                        next.setDate(next.getDate() + 1);
+                                        if (r.days.includes(next.getDay())) {
+                                            // Check interval (every N weeks)
+                                            const weeksDiff = Math.floor(i / 7);
+                                            if (weeksDiff === 0 || weeksDiff % (r.interval || 1) === 0) {
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (!found) {
+                                        // Fallback: add interval weeks
+                                        next.setDate(next.getDate() + (7 * (r.interval || 1)));
+                                    }
+                                } else {
+                                    next.setDate(next.getDate() + (7 * (r.interval || 1)));
+                                }
+                            } else if (r.frequency === 'monthly') {
+                                next.setMonth(next.getMonth() + (r.interval || 1));
+                                // Set day of month based on type
+                                if (r.monthDayType === 'first') {
+                                    next.setDate(1);
+                                } else if (r.monthDayType === 'last') {
+                                    // Last day of the month
+                                    const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+                                    next.setDate(lastDay);
+                                } else if (r.monthDay) {
+                                    // Specific day (legacy support + new specific type)
+                                    const maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+                                    next.setDate(Math.min(r.monthDay, maxDay));
+                                }
                             }
                             task.recurring.nextDue = next.getTime();
                             changed = true;
@@ -5622,7 +6021,25 @@ const renderer = {
             if (item.recurring?.enabled) {
                 const freq = item.recurring.frequency;
                 const icon = freq === 'daily' ? '\u{1F4C6}' : freq === 'weekly' ? '\u{1F4C5}' : '\u{1F5D3}';
-                metaParts.push(`<span class="recurring-indicator" title="Terugkerend: ${freq}">${icon}</span>`);
+                const count = item.recurring.completionCount || 0;
+                const streak = item.recurring.streak || 0;
+                
+                // Build frequency description
+                let freqDesc = freq === 'daily' ? 'Dagelijks' : freq === 'weekly' ? 'Wekelijks' : 'Maandelijks';
+                if (item.recurring.days && item.recurring.days.length > 0 && item.recurring.days.length < 7) {
+                    const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+                    freqDesc = item.recurring.days.map(d => dayNames[d]).join(', ');
+                }
+                
+                let badgeHtml = `<span class="recurring-indicator" title="${freqDesc}">${icon}`;
+                if (count > 0 || streak > 1) {
+                    badgeHtml += `<span class="recurring-badge">`;
+                    if (streak > 1) badgeHtml += `<span class="streak">\u{1F525}${streak}</span>`;
+                    if (count > 0) badgeHtml += `<span class="count">\u{00D7}${count}</span>`;
+                    badgeHtml += `</span>`;
+                }
+                badgeHtml += `</span>`;
+                metaParts.push(badgeHtml);
             }
 
             if (item.notes) {
@@ -6330,13 +6747,32 @@ const crud = {
             subtaskCount += task.subtasks?.length || 0;
         });
         
+        // Check for recurring tasks
+        let recurringCount = 0;
+        proj.tasks?.forEach(task => {
+            if (task.recurring?.enabled) recurringCount++;
+        });
+        
+        let confirmMsg = `Wil je het hele project "<strong>${proj.name}</strong>" archiveren?<br><br>` +
+            `<strong>${taskCount}</strong> opdracht(en) en <strong>${subtaskCount}</strong> subtaken worden gearchiveerd.`;
+        
+        if (recurringCount > 0) {
+            confirmMsg += `<br><br><span style="color: var(--warning-color);">&#9888; Let op: <strong>${recurringCount}</strong> terugkerende taak/taken zullen stoppen met herhalen!</span>`;
+        }
+        
         const confirmed = await customDialog.confirm(
             'Project archiveren',
-            `Wil je het hele project "<strong>${proj.name}</strong>" archiveren?<br><br>` +
-            `<strong>${taskCount}</strong> opdracht(en) en <strong>${subtaskCount}</strong> subtaken worden gearchiveerd.`,
+            confirmMsg,
             '&#128230;'
         );
         if (!confirmed) return;
+        
+        // Disable recurring on all tasks being archived
+        proj.tasks?.forEach(task => {
+            if (task.recurring?.enabled) {
+                task.recurring.enabled = false;
+            }
+        });
         
         undoRedo.saveState();
         
@@ -6417,13 +6853,20 @@ const crud = {
         // Get the subtask completion setting
         const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
         
-        // Count completed items
+        // Count completed items (excluding recurring tasks)
         let completedTaskCount = 0;
         let completedSubtaskCount = 0;
         let tasksWithOpenSubtasks = [];
         let skippedTasks = 0;
+        let skippedRecurring = 0;
         
         proj.tasks?.forEach(task => {
+            // Skip recurring tasks from cleanup
+            if (task.recurring?.enabled) {
+                if (task.done) skippedRecurring++;
+                return;
+            }
+            
             if (task.done) {
                 const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
                 if (openSubs.length > 0) {
@@ -6587,8 +7030,10 @@ const crud = {
         });
         
         // Determine which tasks to archive (skip those with open subtasks if setting is 'task-only' or user chose 'skip')
+        // Also skip recurring tasks - they should never be auto-archived
         const tasksToArchive = proj.tasks?.filter(task => {
             if (!task.done) return false;
+            if (task.recurring?.enabled) return false; // Never auto-archive recurring tasks
             const hasOpenSubs = task.subtasks?.some(sub => !sub.done);
             if (hasOpenSubs) {
                 // Check if this task was marked to skip
@@ -6636,6 +7081,9 @@ const crud = {
         if (setting === 'task-only' && skippedTasks > 0) {
             toastMsg += ` ${skippedTasks} taak/taken overgeslagen.`;
         }
+        if (skippedRecurring > 0) {
+            toastMsg += ` ${skippedRecurring} terugkerende taak/taken behouden.`;
+        }
         toastNotifications.show('success', 'Opgeschoond', toastMsg);
     },
 
@@ -6646,14 +7094,21 @@ const crud = {
         // Get the subtask completion setting
         const setting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
         
-        // Count completed items across all projects
+        // Count completed items across all projects (excluding recurring tasks)
         let completedTaskCount = 0;
         let completedSubtaskCount = 0;
         let tasksWithOpenSubtasks = [];
         let skippedTasks = 0;
+        let skippedRecurring = 0;
         
         cat.projects?.forEach(proj => {
             proj.tasks?.forEach(task => {
+                // Skip recurring tasks from cleanup
+                if (task.recurring?.enabled) {
+                    if (task.done) skippedRecurring++;
+                    return;
+                }
+                
                 if (task.done) {
                     const openSubs = task.subtasks?.filter(sub => !sub.done) || [];
                     if (openSubs.length > 0) {
@@ -6822,9 +7277,10 @@ const crud = {
                 }
             });
             
-            // Determine which tasks to archive
+            // Determine which tasks to archive (skip recurring tasks)
             const tasksToArchive = proj.tasks?.filter(task => {
                 if (!task.done) return false;
+                if (task.recurring?.enabled) return false; // Never auto-archive recurring tasks
                 const hasOpenSubs = task.subtasks?.some(sub => !sub.done);
                 if (hasOpenSubs) {
                     const wasSkipped = tasksWithOpenSubtasks.find(item => item.task.id === task.id)?.skip;
@@ -6871,6 +7327,9 @@ const crud = {
         let toastMsg = `${archivedCount} item(s) gearchiveerd uit categorie.`;
         if (setting === 'task-only' && skippedTasks > 0) {
             toastMsg += ` ${skippedTasks} taak/taken overgeslagen.`;
+        }
+        if (skippedRecurring > 0) {
+            toastMsg += ` ${skippedRecurring} terugkerende taak/taken behouden.`;
         }
         toastNotifications.show('success', 'Opgeschoond', toastMsg);
     },
@@ -10779,8 +11238,10 @@ const modal = {
             
             document.getElementById('modalTimeEstimate').value = item?.timeEstimate || '';
             document.getElementById('modalPriority').value = item?.priority || 'none';
-            document.getElementById('modalRecurring').value = item?.recurring?.frequency || '';
             document.getElementById('modalNotes').value = item?.notes || '';
+            
+            // Load recurring settings
+            this.loadRecurringSettings(item);
             
             // Show checklist section for subtasks
             if (type === 'sub') {
@@ -10967,6 +11428,295 @@ const modal = {
         };
     },
 
+    // Recurring task helper functions
+    selectedRecurringDays: [],
+    moreOptionsExpanded: false,
+    
+    loadRecurringSettings(item) {
+        // Reset all
+        this.selectedRecurringDays = [];
+        this.moreOptionsExpanded = false;
+        document.querySelectorAll('.recurring-day').forEach(d => d.classList.remove('selected'));
+        document.getElementById('recurringInterval').value = 1;
+        document.getElementById('recurringMonthDayType').value = 'specific';
+        document.getElementById('recurringMonthDay').value = new Date().getDate();
+        document.getElementById('recurringMonthDay').style.display = 'block';
+        document.getElementById('recurringEndType').value = 'never';
+        document.getElementById('recurringEndDateRow').style.display = 'none';
+        document.getElementById('recurringEndCountRow').style.display = 'none';
+        document.getElementById('recurringExtraOptions').style.display = 'none';
+        document.getElementById('recurringMoreToggle').classList.remove('expanded');
+        
+        let activeType = '';
+        
+        if (item?.recurring?.enabled) {
+            const r = item.recurring;
+            
+            // Determine which button to activate
+            if (r.frequency === 'daily') {
+                activeType = 'daily';
+            } else if (r.frequency === 'monthly') {
+                activeType = 'monthly';
+            } else if (r.frequency === 'weekly') {
+                // Check if it's weekdays pattern
+                if (r.days && r.days.length === 5 && [1,2,3,4,5].every(d => r.days.includes(d))) {
+                    activeType = 'weekdays';
+                } else if (r.days && r.days.length === 1) {
+                    activeType = 'weekly';
+                } else {
+                    activeType = 'custom';
+                }
+            } else {
+                activeType = 'daily';
+            }
+            
+            // Set interval
+            document.getElementById('recurringInterval').value = r.interval || 1;
+            
+            // Set days
+            if (r.days) {
+                this.selectedRecurringDays = [...r.days];
+                this.updateDaySelection();
+            } else if (activeType === 'daily') {
+                // Default alle dagen voor dagelijks
+                this.selectedRecurringDays = [0, 1, 2, 3, 4, 5, 6];
+                this.updateDaySelection();
+            }
+            
+            // Set month day type and value
+            if (r.monthDayType) {
+                document.getElementById('recurringMonthDayType').value = r.monthDayType;
+                if (r.monthDayType === 'specific' && r.monthDay) {
+                    document.getElementById('recurringMonthDay').value = r.monthDay;
+                    document.getElementById('recurringMonthDay').style.display = 'block';
+                } else {
+                    document.getElementById('recurringMonthDay').style.display = 'none';
+                }
+            } else if (r.monthDay) {
+                // Legacy support
+                document.getElementById('recurringMonthDayType').value = 'specific';
+                document.getElementById('recurringMonthDay').value = r.monthDay;
+            }
+            
+            // Set end conditions
+            if (r.endDate) {
+                document.getElementById('recurringEndType').value = 'date';
+                const d = new Date(r.endDate);
+                document.getElementById('recurringEndDate').value = d.toISOString().split('T')[0];
+                document.getElementById('recurringEndDateRow').style.display = 'flex';
+                this.moreOptionsExpanded = true;
+            } else if (r.endCount) {
+                document.getElementById('recurringEndType').value = 'count';
+                document.getElementById('recurringEndCount').value = r.endCount;
+                document.getElementById('recurringEndCountRow').style.display = 'flex';
+                this.moreOptionsExpanded = true;
+            }
+            
+            if (this.moreOptionsExpanded) {
+                document.getElementById('recurringExtraOptions').style.display = 'flex';
+                document.getElementById('recurringMoreToggle').classList.add('expanded');
+            }
+        }
+        
+        // Set hidden input and activate button
+        document.getElementById('modalRecurring').value = activeType;
+        this.updateSegmentedButtons(activeType);
+        this.updateRecurringOptionsVisibility(activeType);
+    },
+    
+    setRecurringType(type) {
+        document.getElementById('modalRecurring').value = type;
+        this.updateSegmentedButtons(type);
+        
+        // Set smart defaults based on type
+        if (type === 'daily') {
+            // Default: alle dagen geselecteerd
+            this.selectedRecurringDays = [0, 1, 2, 3, 4, 5, 6];
+            this.updateDaySelection();
+        } else if (type === 'weekdays') {
+            this.selectedRecurringDays = [1, 2, 3, 4, 5];
+            this.updateDaySelection();
+        } else if (type === 'weekly') {
+            this.selectedRecurringDays = [new Date().getDay()];
+            this.updateDaySelection();
+        } else if (type === 'monthly') {
+            document.getElementById('recurringMonthDay').value = new Date().getDate();
+            this.selectedRecurringDays = [];
+        } else if (type === 'custom') {
+            // Keep current selection or set today
+            if (this.selectedRecurringDays.length === 0) {
+                this.selectedRecurringDays = [new Date().getDay()];
+                this.updateDaySelection();
+            }
+        } else {
+            this.selectedRecurringDays = [];
+        }
+        
+        this.updateRecurringOptionsVisibility(type);
+    },
+    
+    updateSegmentedButtons(activeType) {
+        document.querySelectorAll('.recurring-segmented .seg-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === activeType);
+        });
+    },
+    
+    updateRecurringOptionsVisibility(type) {
+        const optionsDiv = document.getElementById('recurringOptions');
+        const dailyDaysRow = document.getElementById('recurringDailyDaysRow'); // Multi voor daily
+        const daysRow = document.getElementById('recurringDaysRow'); // Single select
+        const daysMultiRow = document.getElementById('recurringDaysMultiRow'); // Multi select
+        const monthDayRow = document.getElementById('recurringMonthDayRow');
+        const intervalRow = document.getElementById('recurringIntervalRow');
+        const moreToggle = document.getElementById('recurringMoreToggle');
+        const intervalUnit = document.getElementById('recurringIntervalUnit');
+        
+        if (!type) {
+            optionsDiv.classList.remove('visible');
+            return;
+        }
+        
+        optionsDiv.classList.add('visible');
+        
+        // Hide all first
+        dailyDaysRow.style.display = 'none';
+        daysRow.style.display = 'none';
+        daysMultiRow.style.display = 'none';
+        monthDayRow.style.display = 'none';
+        intervalRow.style.display = 'none';
+        moreToggle.style.display = 'none';
+        
+        // Show/hide based on type
+        if (type === 'daily') {
+            dailyDaysRow.style.display = 'flex';
+            moreToggle.style.display = 'flex';
+        } else if (type === 'custom' || type === 'weekdays') {
+            daysMultiRow.style.display = 'flex';
+            if (type === 'custom') {
+                intervalRow.style.display = 'flex';
+                intervalUnit.textContent = 'week/weken';
+            }
+            moreToggle.style.display = 'flex';
+        } else if (type === 'weekly') {
+            daysRow.style.display = 'flex';
+            moreToggle.style.display = 'flex';
+        } else if (type === 'monthly') {
+            monthDayRow.style.display = 'flex';
+            moreToggle.style.display = 'flex';
+        }
+    },
+    
+    // Single day select (for weekly)
+    selectRecurringDay(day) {
+        this.selectedRecurringDays = [day];
+        this.updateDaySelection();
+    },
+    
+    // Multi day toggle (for daily/custom/weekdays)
+    toggleRecurringDay(day) {
+        const idx = this.selectedRecurringDays.indexOf(day);
+        if (idx >= 0) {
+            this.selectedRecurringDays.splice(idx, 1);
+        } else {
+            this.selectedRecurringDays.push(day);
+        }
+        this.updateDaySelection();
+        
+        // Auto-switch to custom if modifying weekdays selection
+        const currentType = document.getElementById('modalRecurring').value;
+        if (currentType === 'weekdays') {
+            const isWeekdays = this.selectedRecurringDays.length === 5 && 
+                [1,2,3,4,5].every(d => this.selectedRecurringDays.includes(d));
+            if (!isWeekdays) {
+                document.getElementById('modalRecurring').value = 'custom';
+                this.updateSegmentedButtons('custom');
+                this.updateRecurringOptionsVisibility('custom');
+            }
+        }
+    },
+    
+    updateDaySelection() {
+        document.querySelectorAll('.recurring-day').forEach(el => {
+            const day = parseInt(el.dataset.day);
+            el.classList.toggle('selected', this.selectedRecurringDays.includes(day));
+        });
+    },
+    
+    toggleMonthDayInput() {
+        const type = document.getElementById('recurringMonthDayType').value;
+        const input = document.getElementById('recurringMonthDay');
+        const label = document.getElementById('recurringMonthDayLabel');
+        
+        if (type === 'specific') {
+            input.style.display = 'block';
+            label.textContent = 'van de maand';
+        } else {
+            input.style.display = 'none';
+            label.textContent = 'van de maand';
+        }
+    },
+    
+    toggleMoreOptions() {
+        this.moreOptionsExpanded = !this.moreOptionsExpanded;
+        const extra = document.getElementById('recurringExtraOptions');
+        const toggle = document.getElementById('recurringMoreToggle');
+        
+        extra.style.display = this.moreOptionsExpanded ? 'flex' : 'none';
+        toggle.classList.toggle('expanded', this.moreOptionsExpanded);
+        
+        const textSpan = toggle.querySelector('.toggle-text');
+        if (textSpan) {
+            textSpan.textContent = this.moreOptionsExpanded ? 'Minder opties' : 'Meer opties';
+        }
+    },
+    
+    toggleRecurringEnd() {
+        const endType = document.getElementById('recurringEndType').value;
+        document.getElementById('recurringEndDateRow').style.display = endType === 'date' ? 'flex' : 'none';
+        document.getElementById('recurringEndCountRow').style.display = endType === 'count' ? 'flex' : 'none';
+    },
+    
+    getRecurringSettings() {
+        const freq = document.getElementById('modalRecurring').value;
+        if (!freq) return null;
+        
+        const interval = parseInt(document.getElementById('recurringInterval').value) || 1;
+        const endType = document.getElementById('recurringEndType').value;
+        
+        const settings = {
+            enabled: true,
+            frequency: freq === 'weekdays' || freq === 'custom' ? 'weekly' : freq,
+            interval: interval,
+            nextDue: Date.now()
+        };
+        
+        // Add selected days for daily, weekly, weekdays, custom
+        if (freq === 'daily' || freq === 'weekly' || freq === 'weekdays' || freq === 'custom') {
+            settings.days = [...this.selectedRecurringDays].sort();
+        }
+        
+        // Add month day for monthly
+        if (freq === 'monthly') {
+            const monthDayType = document.getElementById('recurringMonthDayType').value;
+            settings.monthDayType = monthDayType; // 'specific', 'first', 'last'
+            if (monthDayType === 'specific') {
+                settings.monthDay = parseInt(document.getElementById('recurringMonthDay').value) || 1;
+            }
+        }
+        
+        // Add end conditions
+        if (endType === 'date') {
+            const endDateStr = document.getElementById('recurringEndDate').value;
+            if (endDateStr) {
+                settings.endDate = new Date(endDateStr).getTime();
+            }
+        } else if (endType === 'count') {
+            settings.endCount = parseInt(document.getElementById('recurringEndCount').value) || 10;
+        }
+        
+        return settings;
+    },
+
     close() {
         const overlay = document.getElementById('modalOverlay');
         overlay.classList.remove('show');
@@ -11051,13 +11801,16 @@ const modal = {
                 const rawNotes = document.getElementById('modalNotes').value;
                 item.notes = sanitizer.sanitize(rawNotes);
                 
-                const recurFreq = document.getElementById('modalRecurring').value;
-                if (recurFreq) {
+                // Get recurring settings using new helper
+                const recurringSettings = this.getRecurringSettings();
+                if (recurringSettings) {
+                    // Preserve existing stats
+                    const existingStats = item.recurring || {};
                     item.recurring = {
-                        enabled: true,
-                        frequency: recurFreq,
-                        interval: 1,
-                        nextDue: item.dueDate || Date.now()
+                        ...recurringSettings,
+                        completionCount: existingStats.completionCount || 0,
+                        streak: existingStats.streak || 0,
+                        lastCompleted: existingStats.lastCompleted || null
                     };
                 } else {
                     item.recurring = null;
