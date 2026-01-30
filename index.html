@@ -175,12 +175,12 @@
         }
         .category-stats-bar {
             height: 4px;
-            background: #c0c4c7;
+            background: #b3bdc4;
             border-radius: 2px;
             overflow: hidden;
         }
         body.dark-mode .category-stats-bar {
-            background: #455872;
+            background: #465974;
         }
         .category-stats-fill {
             height: 100%;
@@ -5562,18 +5562,24 @@ const renderer = {
         if (type === 'cat') {
             let totalProjects = item.projects?.length || 0;
             let totalTasks = 0;
+            let doneTasks = 0;
             let totalSubtasks = 0;
-            let doneProjects = 0;
+            let doneSubtasks = 0;
             
             item.projects?.forEach(proj => {
-                if (proj.status === 'done') doneProjects++;
                 proj.tasks?.forEach(task => {
                     totalTasks++;
-                    totalSubtasks += task.subtasks?.length || 0;
+                    if (task.done) doneTasks++;
+                    task.subtasks?.forEach(sub => {
+                        totalSubtasks++;
+                        if (sub.done) doneSubtasks++;
+                    });
                 });
             });
             
-            const percentage = totalProjects > 0 ? Math.round((doneProjects / totalProjects) * 100) : 0;
+            const totalItems = totalTasks + totalSubtasks;
+            const doneItems = doneTasks + doneSubtasks;
+            const percentage = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
             metaHtml = `
                 <div class="category-stats">
                     <div class="category-stats-bar">
@@ -5581,7 +5587,7 @@ const renderer = {
                     </div>
                     <div class="category-stats-text">
                         <span>${totalProjects} proj | ${totalTasks} opdr | ${totalSubtasks} sub</span>
-                        <span>${doneProjects}/${totalProjects} voltooid</span>
+                        <span>${doneItems}/${totalItems} voltooid</span>
                     </div>
                 </div>
             `;
@@ -5687,11 +5693,17 @@ const renderer = {
             const totalTasks = item.tasks ? item.tasks.length : 0;
             const doneTasks = item.tasks ? item.tasks.filter(t => t.done || t.status === 'done').length : 0;
             let totalSubtasks = 0;
+            let doneSubtasks = 0;
             item.tasks?.forEach(task => {
-                totalSubtasks += task.subtasks?.length || 0;
+                task.subtasks?.forEach(sub => {
+                    totalSubtasks++;
+                    if (sub.done) doneSubtasks++;
+                });
             });
             
-            const pct = totalTasks === 0 ? 0 : (doneTasks / totalTasks) * 100;
+            const totalItems = totalTasks + totalSubtasks;
+            const doneItems = doneTasks + doneSubtasks;
+            const pct = totalItems === 0 ? 0 : (doneItems / totalItems) * 100;
             metaHtml = `
                 <div class="category-stats">
                     <div class="category-stats-bar">
@@ -5699,7 +5711,7 @@ const renderer = {
                     </div>
                     <div class="category-stats-text">
                         <span>${totalTasks} opdr | ${totalSubtasks} sub</span>
-                        <span>${doneTasks}/${totalTasks} voltooid</span>
+                        <span>${doneItems}/${totalItems} voltooid</span>
                     </div>
                 </div>
             `;
