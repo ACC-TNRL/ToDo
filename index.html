@@ -685,6 +685,35 @@
             font-size: 12px;
             color: var(--text-muted);
         }
+        
+        .checklist-item.dragging {
+            opacity: 0.5;
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+        
+        .checklist-item .checklist-drag-handle {
+            cursor: grab;
+            color: #cbd5e1;
+            font-size: 10px;
+            padding: 2px;
+            user-select: none;
+        }
+        
+        .checklist-item .checklist-drag-handle:hover {
+            color: var(--text-muted);
+        }
+        
+        .checklist-item .checklist-drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .checklist-drop-indicator {
+            height: 2px;
+            background: var(--primary);
+            border-radius: 1px;
+            margin: 2px 0;
+        }
 
         .checklist-item input[type="checkbox"] {
             width: 14px;
@@ -1050,6 +1079,73 @@
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Dark mode voor recurring options */
+        body.dark-mode .recurring-segmented {
+            background: #334155;
+        }
+        
+        body.dark-mode .recurring-segmented .seg-btn {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .recurring-segmented .seg-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .recurring-segmented .seg-btn.active {
+            background: #475569;
+            color: #a5b4fc;
+        }
+        
+        body.dark-mode .recurring-options {
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            border-color: #334155;
+        }
+        
+        body.dark-mode .recurring-row label {
+            color: #cbd5e1;
+        }
+        
+        body.dark-mode .recurring-row input[type="number"],
+        body.dark-mode .recurring-row input[type="date"],
+        body.dark-mode .recurring-row select {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .recurring-row span {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .recurring-day {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .recurring-day:hover {
+            border-color: #6366f1;
+            background: #312e81;
+            color: #a5b4fc;
+        }
+        
+        body.dark-mode .recurring-day.selected {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+        
+        body.dark-mode .recurring-more-toggle {
+            color: #94a3b8;
+            border-top-color: #334155;
+        }
+        
+        body.dark-mode .recurring-more-toggle:hover {
+            color: #a5b4fc;
         }
 
         .modal-overlay {
@@ -4734,6 +4830,7 @@ const state = {
     db: { categories: [], pomodoroSessions: [] },
     sel: { cat: null, proj: null, task: null },
     drag: null,
+    checklistDrag: null,
     currentView: 'all',
     timerInterval: null,
     lastOpenDate: null,
@@ -6020,18 +6117,18 @@ const renderer = {
 
             if (item.recurring?.enabled) {
                 const freq = item.recurring.frequency;
-                const icon = freq === 'daily' ? '\u{1F4C6}' : freq === 'weekly' ? '\u{1F4C5}' : '\u{1F5D3}';
                 const count = item.recurring.completionCount || 0;
                 const streak = item.recurring.streak || 0;
                 
                 // Build frequency description
-                let freqDesc = freq === 'daily' ? 'Dagelijks' : freq === 'weekly' ? 'Wekelijks' : 'Maandelijks';
+                let freqText = freq === 'daily' ? 'Dagelijks' : freq === 'weekly' ? 'Wekelijks' : 'Maandelijks';
+                if (freq === 'workdays') freqText = 'Werkdagen';
                 if (item.recurring.days && item.recurring.days.length > 0 && item.recurring.days.length < 7) {
                     const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
-                    freqDesc = item.recurring.days.map(d => dayNames[d]).join(', ');
+                    freqText = item.recurring.days.map(d => dayNames[d]).join(', ');
                 }
                 
-                let badgeHtml = `<span class="recurring-indicator" title="${freqDesc}">${icon}`;
+                let badgeHtml = `<span class="recurring-indicator" title="Terugkerend: ${freqText}">\u{1F503} ${freqText}`;
                 if (count > 0 || streak > 1) {
                     badgeHtml += `<span class="recurring-badge">`;
                     if (streak > 1) badgeHtml += `<span class="streak">\u{1F525}${streak}</span>`;
@@ -6213,13 +6310,33 @@ const renderer = {
                     
                     const pomodoroBtn = `<button class="action-btn" data-action="add-checklist-pomodoro" data-index="${idx}" title="Toevoegen aan Pomodoro" style="width: 18px; height: 18px; font-size: 10px;">⏱</button>`;
                     
+                    // Check if this item is being edited
+                    const isEditing = item.editingChecklistIndex === idx;
+                    
+                    if (isEditing) {
+                        return `
+                            <div class="checklist-item" style="background: var(--primary-light); padding: 6px; border-radius: 4px;">
+                                <input type="text" class="checklist-edit-input" data-subtask-id="${item.id}" data-index="${idx}" 
+                                       value="${checkItem.text.replace(/"/g, '&quot;')}"
+                                       style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
+                                       autofocus>
+                                <button class="action-btn" data-action="save-checklist-edit" data-index="${idx}" title="Opslaan" 
+                                        style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">&#10003;</button>
+                                <button class="action-btn danger" data-action="cancel-checklist-edit" data-index="${idx}" title="Annuleren" 
+                                        style="width: 18px; height: 18px; font-size: 10px;">&#215;</button>
+                            </div>
+                        `;
+                    }
+                    
                     return `
-                        <div class="checklist-item">
+                        <div class="checklist-item" draggable="true" data-checklist-index="${idx}">
+                            <span class="checklist-drag-handle" title="Sleep om te sorteren">&#8942;</span>
                             <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
                             <span>${checkItem.text}</span>
                             ${todayBtn}
                             ${pomodoroBtn}
-                            <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: 4px;">×</button>
+                            <button class="action-btn" data-action="edit-checklist-item" data-index="${idx}" title="Bewerken" style="width: 18px; height: 18px; font-size: 10px;">&#9999;</button>
+                            <button class="action-btn danger" data-action="delete-checklist-item" data-index="${idx}" title="Verwijder" style="width: 18px; height: 18px; font-size: 10px; margin-left: 4px;">&#215;</button>
                         </div>
                     `;
                 }).join('');
@@ -6240,7 +6357,7 @@ const renderer = {
                 `;
             }
             
-            checklistHtml = `<div class="checklist-items">${checklistItems}</div>`;
+            checklistHtml = `<div class="checklist-items" data-subtask-id="${item.id}">${checklistItems}</div>`;
         }
 
         return `
@@ -6503,6 +6620,87 @@ const renderer = {
                 }
             };
         });
+        
+        // Checklist edit buttons
+        el.querySelectorAll('[data-action="edit-checklist-item"]').forEach(editBtn => {
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                const idx = parseInt(editBtn.dataset.index);
+                crud.editChecklistItem(item.id, idx);
+            };
+        });
+        
+        // Checklist edit input field
+        const checklistEditInput = el.querySelector('.checklist-edit-input');
+        if (checklistEditInput) {
+            checklistEditInput.onclick = (e) => e.stopPropagation();
+            checklistEditInput.onkeydown = async (e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                    e.stopPropagation();
+                    const idx = parseInt(checklistEditInput.dataset.index);
+                    await crud.saveChecklistItemEdit(checklistEditInput.dataset.subtaskId, idx, e.target.value);
+                } else if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    crud.cancelChecklistItemEdit(checklistEditInput.dataset.subtaskId);
+                }
+            };
+            setTimeout(() => {
+                checklistEditInput.focus();
+                checklistEditInput.select();
+            }, 50);
+        }
+        
+        // Checklist edit save button
+        el.querySelectorAll('[data-action="save-checklist-edit"]').forEach(saveBtn => {
+            saveBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const editInput = el.querySelector('.checklist-edit-input');
+                const idx = parseInt(saveBtn.dataset.index);
+                if (editInput && editInput.value.trim()) {
+                    await crud.saveChecklistItemEdit(item.id, idx, editInput.value);
+                }
+            };
+        });
+        
+        // Checklist edit cancel button
+        el.querySelectorAll('[data-action="cancel-checklist-edit"]').forEach(cancelBtn => {
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                crud.cancelChecklistItemEdit(item.id);
+            };
+        });
+        
+        // Checklist drag & drop
+        const checklistContainer = el.querySelector('.checklist-items');
+        if (checklistContainer && item.checklist && item.checklist.length > 1) {
+            const subtaskId = checklistContainer.dataset.subtaskId;
+            
+            checklistContainer.ondragover = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dnd.onChecklistDragOver(e, checklistContainer);
+            };
+            
+            checklistContainer.ondrop = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await dnd.onChecklistDrop(e, subtaskId, checklistContainer);
+            };
+            
+            el.querySelectorAll('.checklist-item[draggable="true"]').forEach(checklistItem => {
+                const idx = parseInt(checklistItem.dataset.checklistIndex);
+                
+                checklistItem.ondragstart = (e) => {
+                    e.stopPropagation();
+                    dnd.onChecklistDragStart(e, subtaskId, idx);
+                };
+                
+                checklistItem.ondragend = (e) => {
+                    e.stopPropagation();
+                    dnd.onChecklistDragEnd(e, checklistItem);
+                };
+            });
+        }
         
         // Checklist today buttons
         el.querySelectorAll('[data-action="set-checklist-today"]').forEach(todayBtn => {
@@ -7553,6 +7751,43 @@ const crud = {
         if (!subtask) return;
         
         subtask.addingChecklistItem = false;
+        app.render();
+    },
+    
+    editChecklistItem(subtaskId, index) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask) return;
+        
+        subtask.editingChecklistIndex = index;
+        app.render();
+    },
+    
+    async saveChecklistItemEdit(subtaskId, index, text) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask || !subtask.checklist || !subtask.checklist[index]) return;
+        
+        subtask.checklist[index].text = text.trim();
+        delete subtask.editingChecklistIndex;
+        
+        await app.save();
+        app.setStatus("Checklist item bijgewerkt", "success");
+        app.render();
+    },
+    
+    cancelChecklistItemEdit(subtaskId) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask) return;
+        
+        delete subtask.editingChecklistIndex;
         app.render();
     }
 };
@@ -11177,6 +11412,100 @@ const dnd = {
 
     getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+    
+    // Checklist item drag & drop
+    onChecklistDragStart(e, subtaskId, index) {
+        state.checklistDrag = { subtaskId, index };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index.toString());
+        setTimeout(() => e.target.classList.add('dragging'), 0);
+    },
+    
+    onChecklistDragEnd(e, el) {
+        el.classList.remove('dragging');
+        document.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
+        state.checklistDrag = null;
+    },
+    
+    onChecklistDragOver(e, container) {
+        if (!state.checklistDrag) return;
+        
+        const afterElement = this.getChecklistDragAfterElement(container, e.clientY);
+        container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'checklist-drop-indicator';
+        
+        if (afterElement) {
+            container.insertBefore(indicator, afterElement);
+        } else {
+            // Voeg toe na laatste draggable item (niet na input veld)
+            const lastDraggable = container.querySelector('.checklist-item[draggable="true"]:last-of-type');
+            if (lastDraggable && lastDraggable.nextSibling) {
+                container.insertBefore(indicator, lastDraggable.nextSibling);
+            } else if (lastDraggable) {
+                lastDraggable.after(indicator);
+            } else {
+                container.appendChild(indicator);
+            }
+        }
+    },
+    
+    async onChecklistDrop(e, subtaskId, container) {
+        if (!state.checklistDrag || state.checklistDrag.subtaskId !== subtaskId) {
+            state.checklistDrag = null;
+            return;
+        }
+        
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+        
+        const subtask = task.subtasks?.find(s => s.id === subtaskId);
+        if (!subtask || !subtask.checklist) return;
+        
+        const oldIndex = state.checklistDrag.index;
+        const afterElement = this.getChecklistDragAfterElement(container, e.clientY);
+        
+        let newIndex;
+        if (afterElement) {
+            newIndex = parseInt(afterElement.dataset.checklistIndex);
+            if (oldIndex < newIndex) newIndex--;
+        } else {
+            newIndex = subtask.checklist.length - 1;
+        }
+        
+        if (oldIndex === newIndex) {
+            state.checklistDrag = null;
+            container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
+            return;
+        }
+        
+        // Verplaats item
+        const [movedItem] = subtask.checklist.splice(oldIndex, 1);
+        subtask.checklist.splice(newIndex, 0, movedItem);
+        
+        state.checklistDrag = null;
+        container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
+        
+        await app.save();
+        app.setStatus("Checklist volgorde aangepast", "success");
+        app.render();
+    },
+    
+    getChecklistDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.checklist-item[draggable="true"]:not(.dragging)')];
         
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
