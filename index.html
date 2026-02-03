@@ -534,8 +534,17 @@
         }
         .action-btn:hover { background: #e2e8f0; color: var(--text-main); }
         body.dark-mode .action-btn:hover { background: #334155; color: var(--text-main); }
-        .action-btn.danger:hover { background: #fee2e2; color: #ef4444; }
+        .action-btn.danger:hover { background: #fecaca; color: #dc2626; }
+        body.dark-mode .action-btn.danger:hover { background: #991b1b; color: #fca5a5; }
         .action-btn.archive:hover { background: #dcfce7; color: #166534; }
+        .action-btn.success { background: #dcfce7; color: #166534; }
+        .action-btn.success:hover { background: #bbf7d0; color: #14532d; }
+        body.dark-mode .action-btn.success { background: #14532d; color: #86efac; }
+        body.dark-mode .action-btn.success:hover { background: #166534; color: #a7f3d0; }
+        .action-btn.cancel { background: #f1f5f9; color: #64748b; }
+        .action-btn.cancel:hover { background: #e2e8f0; color: #475569; }
+        body.dark-mode .action-btn.cancel { background: #334155; color: #94a3b8; }
+        body.dark-mode .action-btn.cancel:hover { background: #475569; color: #cbd5e1; }
 
         .status-dot {
             width: 14px;
@@ -1208,6 +1217,19 @@
         }
         body.dark-mode .form-input:focus {
             background: #0f172a;
+        }
+        body.dark-mode input[type="date"].form-input,
+        body.dark-mode input[type="number"].form-input {
+            background: #0f172a;
+            border-color: #475569;
+            color: var(--text-main);
+            color-scheme: dark;
+        }
+        body.dark-mode .checklist-input,
+        body.dark-mode #customMinutes {
+            background: #0f172a;
+            border-color: #475569;
+            color: var(--text-main);
         }
 
         .form-row {
@@ -1964,7 +1986,7 @@
         
         /* Undo/Redo Controls */
         .undo-redo-controls { display: flex; gap: 4px; }
-        .undo-redo-btn { width: 32px; height: 32px; border: 1px solid var(--border-color); background: var(--bg-panel); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; }
+        .undo-redo-btn { width: 32px; height: 32px; border: 1px solid var(--border-color); background: var(--bg-panel); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; color: var(--text-main); }
         .undo-redo-btn:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); }
         .undo-redo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -4000,7 +4022,7 @@
         
         <select id="viewSelector" class="btn btn-secondary" onchange="app.changeView(this.value)" style="padding: 6px 12px;">
             <option value="all">🏠 Alles</option>
-            <option value="today">📅 Vandaag</option>
+            <option value="today">&#9728;&#65039; Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
             <option value="week">📅 Week</option>
             <option value="archive">&#128451; Archief</option>
@@ -4038,7 +4060,7 @@
         </div>
         
         <label class="toggle-filter" title="Verberg/Toon voltooide taken">
-            <input type="checkbox" id="showDoneCheck" checked onchange="app.render()">
+            <input type="checkbox" id="showDoneCheck" checked onchange="localStorage.setItem('showCompleted', this.checked); app.render()">
             <span>Toon Voltooid</span>
         </label>
         
@@ -4137,7 +4159,7 @@
     <div class="today-header">
         <div>
             <div class="today-title">
-                📅 Vandaag
+                &#9728;&#65039; Vandaag
                 <span class="today-date" id="todayDate">Maandag 20 januari 2025</span>
             </div>
         </div>
@@ -4479,7 +4501,7 @@
             </div>
 
             <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center;">
-                <input type="number" id="customMinutes" placeholder="Aangepast" 
+                <input type="number" id="customMinutes" class="form-input" placeholder="Aangepast" 
                        style="width: 120px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 13px;" 
                        min="1" max="120">
                 <button class="preset-btn" onclick="pomodoro.setCustomDuration()">Set</button>
@@ -5124,6 +5146,7 @@ const app = {
     async init() {
         try {
             this.loadDarkMode();
+            this.loadShowCompleted();
             timer.startInterval();
             this.initKeyboardShortcuts();
             this.initGlobalHandlers();
@@ -5178,6 +5201,14 @@ const app = {
         if (darkMode) {
             document.body.classList.add('dark-mode');
             document.getElementById('darkModeToggle').innerHTML = '&#9790;'; // Moon
+        }
+    },
+
+    loadShowCompleted() {
+        const showCompleted = localStorage.getItem('showCompleted');
+        // Default to true (checked) if not set
+        if (showCompleted === 'false') {
+            document.getElementById('showDoneCheck').checked = false;
         }
     },
 
@@ -6075,7 +6106,7 @@ const renderer = {
             
             const totalItems = totalTasks + totalSubtasks;
             const doneItems = doneTasks + doneSubtasks;
-            const percentage = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+            const percentage = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 100;
             metaHtml = `
                 <div class="category-stats">
                     <div class="category-stats-bar">
@@ -6220,7 +6251,7 @@ const renderer = {
             
             const totalItems = totalTasks + totalSubtasks;
             const doneItems = doneTasks + doneSubtasks;
-            const pct = totalItems === 0 ? 0 : (doneItems / totalItems) * 100;
+            const pct = totalItems === 0 ? 100 : (doneItems / totalItems) * 100;
             metaHtml = `
                 <div class="category-stats">
                     <div class="category-stats-bar">
@@ -6258,8 +6289,8 @@ const renderer = {
             
             const today = new Date().setHours(0,0,0,0);
             const todayBtn = item.scheduledDate === today
-                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">📅&#10060;</button>`
-                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">📅</button>`;
+                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">&#9728;&#65039;&#10060;</button>`
+                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">&#9728;&#65039;</button>`;
             
             const pomodoroBtn = `<button class="action-btn" data-action="manage-task-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
             
@@ -6288,8 +6319,8 @@ const renderer = {
         if (type === 'sub') {
             const today = new Date().setHours(0,0,0,0);
             const todayBtn = item.scheduledDate === today
-                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">📅&#10060;</button>`
-                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">📅</button>`;
+                ? `<button class="action-btn" data-action="remove-today" title="Verwijder uit vandaag">&#9728;&#65039;&#10060;</button>`
+                : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">&#9728;&#65039;</button>`;
             
             const pomodoroBtn = `<button class="action-btn" data-action="manage-sub-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
             const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">✓</button>`;
@@ -6305,8 +6336,8 @@ const renderer = {
                 const today = new Date().setHours(0,0,0,0);
                 checklistItems = item.checklist.map((checkItem, idx) => {
                     const todayBtn = checkItem.scheduledDate === today
-                        ? `<button class="action-btn" data-action="remove-checklist-today" data-index="${idx}" title="Verwijder uit vandaag" style="width: 24px; height: 18px; font-size: 10px;">📅&#10060;</button>`
-                        : `<button class="action-btn" data-action="set-checklist-today" data-index="${idx}" title="Plan voor vandaag" style="width: 18px; height: 18px; font-size: 10px;">📅</button>`;
+                        ? `<button class="action-btn" data-action="remove-checklist-today" data-index="${idx}" title="Verwijder uit vandaag" style="width: 24px; height: 18px; font-size: 10px;">&#9728;&#65039;&#10060;</button>`
+                        : `<button class="action-btn" data-action="set-checklist-today" data-index="${idx}" title="Plan voor vandaag" style="width: 18px; height: 18px; font-size: 10px;">&#9728;&#65039;</button>`;
                     
                     const pomodoroBtn = `<button class="action-btn" data-action="add-checklist-pomodoro" data-index="${idx}" title="Toevoegen aan Pomodoro" style="width: 18px; height: 18px; font-size: 10px;">⏱</button>`;
                     
@@ -6320,9 +6351,9 @@ const renderer = {
                                        value="${checkItem.text.replace(/"/g, '&quot;')}"
                                        style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
                                        autofocus>
-                                <button class="action-btn" data-action="save-checklist-edit" data-index="${idx}" title="Opslaan" 
-                                        style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">&#10003;</button>
-                                <button class="action-btn danger" data-action="cancel-checklist-edit" data-index="${idx}" title="Annuleren" 
+                                <button class="action-btn success" data-action="save-checklist-edit" data-index="${idx}" title="Opslaan" 
+                                        style="width: 18px; height: 18px; font-size: 10px;">&#10003;</button>
+                                <button class="action-btn cancel" data-action="cancel-checklist-edit" data-index="${idx}" title="Annuleren" 
                                         style="width: 18px; height: 18px; font-size: 10px;">&#215;</button>
                             </div>
                         `;
@@ -6349,10 +6380,10 @@ const renderer = {
                         <input type="text" class="checklist-input" data-subtask-id="${item.id}" placeholder="Nieuw checklist item..." 
                                style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
                                autofocus>
-                        <button class="action-btn" data-action="save-checklist-input" data-subtask-id="${item.id}" title="Opslaan" 
-                                style="width: 18px; height: 18px; font-size: 10px; background: #dcfce7; color: #166534;">✓</button>
-                        <button class="action-btn danger" data-action="cancel-checklist-input" data-subtask-id="${item.id}" title="Annuleren" 
-                                style="width: 18px; height: 18px; font-size: 10px;">×</button>
+                        <button class="action-btn success" data-action="save-checklist-input" data-subtask-id="${item.id}" title="Opslaan" 
+                                style="width: 18px; height: 18px; font-size: 10px;">&#10003;</button>
+                        <button class="action-btn cancel" data-action="cancel-checklist-input" data-subtask-id="${item.id}" title="Annuleren" 
+                                style="width: 18px; height: 18px; font-size: 10px;">&#215;</button>
                     </div>
                 `;
             }
@@ -6601,7 +6632,11 @@ const renderer = {
                 e.stopPropagation();
                 const idx = parseInt(checkboxEl.dataset.index);
                 if (item.checklist && item.checklist[idx]) {
+                    const wasNotDone = !item.checklist[idx].done;
                     item.checklist[idx].done = checkboxEl.checked;
+                    if (checkboxEl.checked && wasNotDone) {
+                        celebration.show(item.checklist[idx].text);
+                    }
                     await app.save();
                     app.render();
                 }
@@ -7645,7 +7680,7 @@ const crud = {
         }).join('');
         
         if (state.db.pomodoroSessions.length === 0) {
-            alert('Geen sessies beschikbaar. Maak eerst een sessie aan via de "⚡⌨️ Sessies" knop.');
+            toastNotifications.show('warning', 'Geen Sessies', 'Maak eerst een sessie aan via de "Sessies" knop.');
             return;
         }
         
@@ -9180,7 +9215,7 @@ const weekView = {
                  data-subtask-id="${item._subtaskId || ''}"
                  data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
                  data-item-type="${item._type || 'task'}"
-                 title="${item._type === 'task' ? item._proj : item._type === 'subtask' ? item._task : item._subtask}">
+                 title="${item._type === 'task' ? (item._proj || '') : item._type === 'subtask' ? (item._task || '') : (item._subtask || '')}">
                 ${typeBadge} ${priorityIcon} ${item.name || item.text}
             </div>
         `;
@@ -9250,7 +9285,7 @@ const weekView = {
         } else if (item._type === 'checklist') {
             typeBadge = '□';
             typeClass = 'type-checklist';
-            meta = `${item._cat} → ${item._proj} → ${item._task} → ${item._subtask}`;
+            meta = `${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`;
         }
         
         return `
@@ -9296,7 +9331,7 @@ const weekView = {
         } else if (item._type === 'checklist') {
             typeBadge = '□';
             typeClass = 'type-checklist';
-            meta = `${item._cat} → ${item._proj} → ${item._task} → ${item._subtask}`;
+            meta = `${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`;
         }
             
         return `
@@ -9898,7 +9933,7 @@ const morningWizard = {
                     context = `${item._cat} / ${item._proj} / ${item._task}`;
                 } else if (item.type === 'checklist') {
                     typeBadge = '□ Checklist';
-                    context = `${item._cat} / ${item._proj} / ${item._task} / ${item._subtask}`;
+                    context = `${item._cat || ''} / ${item._proj || ''} / ${item._task || ''} / ${item._subtask || ''}`;
                 }
                 
                 const card = document.createElement('div');
@@ -10901,7 +10936,7 @@ const morningWizard = {
                 context = `${item._cat} / ${item._proj} / ${item._task}`;
             } else if (item.type === 'checklist') {
                 typeBadge = '□';
-                context = `${item._cat} / ${item._proj} / ${item._task} / ${item._subtask}`;
+                context = `${item._cat || ''} / ${item._proj || ''} / ${item._task || ''} / ${item._subtask || ''}`;
             }
             
             const card = document.createElement('div');
@@ -11730,7 +11765,7 @@ const modal = {
         const addDiv = document.createElement('div');
         addDiv.style.cssText = 'display: flex; gap: 8px; margin-top: 8px;';
         addDiv.innerHTML = `
-            <input type="text" id="newChecklistItemInput" placeholder="Nieuw checklist item..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 14px;">
+            <input type="text" id="newChecklistItemInput" class="form-input" placeholder="Nieuw checklist item..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 14px;">
             <button class="btn btn-primary" id="addChecklistItemBtn" style="padding: 8px 16px;">Toevoegen</button>
         `;
         checklistContainer.appendChild(addDiv);
