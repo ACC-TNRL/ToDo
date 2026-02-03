@@ -2893,6 +2893,490 @@
             color: var(--text-light);
         }
 
+        /* ===== INSIGHTS VIEW STYLES ===== */
+        .insights-container {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .insights-header {
+            margin-bottom: 24px;
+        }
+
+        .insights-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 8px 0;
+        }
+
+        .insights-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .insights-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .insight-stat-card {
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .insight-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .insight-stat-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .insight-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .insight-stat-value.success {
+            color: #22c55e;
+        }
+
+        .insight-stat-value.streak {
+            color: #f59e0b;
+        }
+
+        .insight-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .insight-stat-sub {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        .insights-section {
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .insights-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-week-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .insight-day-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .insight-day-label {
+            width: 80px;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .insight-day-label.today {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .insight-day-bar-container {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-app);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .insight-day-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            min-width: 2px;
+        }
+
+        .insight-day-bar.zero {
+            background: var(--border-color);
+            min-width: 4px;
+        }
+
+        .insight-day-stats {
+            width: 80px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .insight-day-stats .completed {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .insights-patterns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .insight-pattern-card {
+            background: var(--bg-app);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .insight-pattern-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .insight-pattern-content h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .insight-pattern-content p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .insights-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .insights-empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .insights-empty h3 {
+            margin: 0 0 8px 0;
+            color: var(--text-main);
+            font-size: 18px;
+        }
+
+        .insights-empty p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .insight-period-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .insight-period-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-app);
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .insight-period-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .insight-period-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .insight-mini-progress {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .insight-mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .insight-pomodoro-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .insight-pomodoro-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .insight-pomodoro-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        @media (max-width: 768px) {
+            .insights-container {
+                padding: 16px;
+            }
+
+            .insights-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insight-stat-value {
+                font-size: 24px;
+            }
+
+            .insight-day-label {
+                width: 50px;
+                font-size: 11px;
+            }
+
+            .insight-day-stats {
+                width: 60px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .insights-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Insights two-column layout */
+        .insights-two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .insights-two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Attention/Procrastination Items */
+        .attention-count {
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        body.dark-mode .attention-count {
+            background: #78350f;
+            color: #fef3c7;
+        }
+
+        .attention-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .attention-item {
+            background: var(--bg-app);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .attention-item.high {
+            border-left-color: #ea580c;
+        }
+
+        .attention-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            gap: 12px;
+        }
+
+        .attention-item-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 14px;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .attention-item-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            background: var(--bg-panel);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .attention-item-context {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .attention-item-tip {
+            font-size: 12px;
+            color: #92400e;
+            background: #fef3c7;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .attention-item-tip {
+            background: #78350f;
+            color: #fef3c7;
+        }
+
+        .attention-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .attention-item-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-sm {
+            padding: 4px 10px !important;
+            font-size: 11px !important;
+        }
+
+        /* Procrastination badge in Alles view */
+        .procrastination-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: #92400e;
+            margin-left: 6px;
+            cursor: help;
+        }
+
+        .procrastination-badge.high {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        body.dark-mode .procrastination-badge {
+            background: #78350f;
+            color: #fef3c7;
+        }
+
+        body.dark-mode .procrastination-badge.high {
+            background: #9a3412;
+            color: #fed7aa;
+        }
+
+        /* Streak tooltip styling */
+        .streak-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .streak-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: var(--bg-panel);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        .streak-tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* All under control message */
+        .all-good-message {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+        }
+
+        .all-good-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
         /* ===== FEEDBACK SYSTEM STYLES ===== */
         .feedback-button {
             position: fixed;
@@ -4025,6 +4509,7 @@
             <option value="today">&#9728;&#65039; Vandaag</option>
             <option value="overdue">⚠️ Achterstallig</option>
             <option value="week">📅 Week</option>
+            <option value="insights">&#128200; Inzichten</option>
             <option value="archive">&#128451; Archief</option>
             <option value="search" style="display:none;">🔍 Zoekresultaten</option>
         </select>
@@ -4223,6 +4708,13 @@
     </div>
     
     <div class="archive-list" id="archiveList">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+
+<!-- Insights View -->
+<div class="archive-container" id="insightsContainer">
+    <div id="mainContent">
         <!-- Will be populated by JavaScript -->
     </div>
 </div>
@@ -4657,6 +5149,10 @@ const firebaseAuth = {
                     if (!state.db.pomodoroSessions) {
                         state.db.pomodoroSessions = [];
                     }
+                    // Ensure productivityStats exists for backwards compatibility
+                    if (!state.db.productivityStats) {
+                        state.db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
+                    }
                     // Process recurring tasks on data load
                     await app.processRecurringTasks();
                     app.render();
@@ -4688,7 +5184,7 @@ const firebaseAuth = {
     },
     
     onUserLogout() {
-        state.db = { categories: [], pomodoroSessions: [], archive: [] };
+        state.db = { categories: [], pomodoroSessions: [], archive: [], productivityStats: { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } } };
         state.sel = { cat: null, proj: null, task: null };
         app.render();
         this.updateUI();
@@ -4849,7 +5345,7 @@ const CONSTANTS = {
 };
 
 const state = {
-    db: { categories: [], pomodoroSessions: [] },
+    db: { categories: [], pomodoroSessions: [], productivityStats: { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } } },
     sel: { cat: null, proj: null, task: null },
     drag: null,
     checklistDrag: null,
@@ -5303,6 +5799,8 @@ const app = {
                     task.done = !task.done;
                     if (task.done) {
                         task.completedAt = Date.now();
+                        productivityTracker.logCompleted();
+                        productivityTracker.resetItemProcrastination(task);
                         if (wasNotDone) {
                             celebration.show(task.name);
                         }
@@ -5459,11 +5957,13 @@ const app = {
         const weekContainer = document.getElementById('weekPlannerContainer');
         const todayContainer = document.getElementById('todayPriorityContainer');
         const archiveContainer = document.getElementById('archiveContainer');
+        const insightsContainer = document.getElementById('insightsContainer');
         
         // Hide all special containers first
         if (weekContainer) weekContainer.classList.remove('active');
         if (todayContainer) todayContainer.classList.remove('active');
         if (archiveContainer) archiveContainer.classList.remove('active');
+        if (insightsContainer) insightsContainer.classList.remove('active');
         
         if (view === 'week') {
             // Week view
@@ -5491,6 +5991,15 @@ const app = {
             if (archiveContainer) {
                 archiveContainer.classList.add('active');
                 archiveView.render();
+            }
+        } else if (view === 'insights') {
+            // Insights view
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'none';
+            });
+            if (insightsContainer) {
+                insightsContainer.classList.add('active');
+                insightsView.render();
             }
         } else {
             // Normal views (all, overdue, search)
@@ -6212,6 +6721,20 @@ const renderer = {
                 }
             }
 
+            // Procrastinatie badge voor taken en subtaken
+            if ((type === 'task' || type === 'sub') && !item.done) {
+                const procLevel = productivityTracker.getItemProcrastinationLevel(item);
+                if (procLevel !== 'none' && item.procrastinationData) {
+                    const data = item.procrastinationData;
+                    const daysOpen = data.firstScheduledDate 
+                        ? Math.floor((Date.now() - data.firstScheduledDate) / (1000*60*60*24))
+                        : 0;
+                    const timesRescheduled = data.timesRescheduled || 0;
+                    const tooltipText = `${daysOpen} dagen open${timesRescheduled > 0 ? ', ' + timesRescheduled + 'x herplant' : ''}`;
+                    metaParts.push(`<span class="procrastination-badge ${procLevel === 'high' ? 'high' : ''}" title="${tooltipText}">&#128197; ${daysOpen}d${timesRescheduled > 0 ? ' &#183;' + timesRescheduled + 'x' : ''}</span>`);
+                }
+            }
+
             if (metaParts.length > 0) {
                 metaHtml = `<div class="item-meta">${metaParts.join('')}</div>`;
             }
@@ -6527,6 +7050,8 @@ const renderer = {
                 item.done = e.target.checked;
                 if (item.done) {
                     item.completedAt = Date.now();
+                    productivityTracker.logCompleted();
+                    productivityTracker.resetItemProcrastination(item);
                     if (wasNotDone) {
                         celebration.show(item.name);
                     }
@@ -7593,9 +8118,12 @@ const crud = {
         // Try to find as task
         const task = helpers.findTaskById(itemId);
         if (task) {
+            const isReschedule = task.scheduledDate && task.scheduledDate !== today;
             task.scheduledDate = today;
             task.todayPriority = 999;
             itemFound = true;
+            productivityTracker.logScheduled();
+            productivityTracker.trackItemScheduled(task, isReschedule);
             await app.save();
             app.render();
             app.setStatus("Taak ingepland voor vandaag", "success");
@@ -7609,9 +8137,12 @@ const crud = {
                     if (task.subtasks) {
                         const subtask = task.subtasks.find(sub => sub.id === itemId);
                         if (subtask) {
+                            const isReschedule = subtask.scheduledDate && subtask.scheduledDate !== today;
                             subtask.scheduledDate = today;
                             subtask.todayPriority = 999;
                             itemFound = true;
+                            productivityTracker.logScheduled();
+                            productivityTracker.trackItemScheduled(subtask, isReschedule);
                         }
                     }
                 });
@@ -7635,6 +8166,7 @@ const crud = {
             delete task.scheduledDate;
             delete task.todayPriority;
             itemFound = true;
+            productivityTracker.logRemoved();
             await app.save();
             app.render();
             app.setStatus("Taak verwijderd uit vandaag", "success");
@@ -7651,6 +8183,7 @@ const crud = {
                             delete subtask.scheduledDate;
                             delete subtask.todayPriority;
                             itemFound = true;
+                            productivityTracker.logRemoved();
                         }
                     }
                 });
@@ -7670,6 +8203,8 @@ const crud = {
             item.pomodoroSessions = [];
         }
         
+        const previousSessions = [...item.pomodoroSessions];
+        
         // Bouw lijst met alle sessies
         const sessionsList = state.db.pomodoroSessions.map(session => {
             const isChecked = item.pomodoroSessions.includes(session.id);
@@ -7687,6 +8222,14 @@ const crud = {
         // Toon modal met checkboxes
         const result = await this.showSessionsModal(item.text || item.name, sessionsList);
         if (!result) return;
+        
+        // Track changes
+        const addedSessions = result.filter(id => !previousSessions.includes(id));
+        const removedSessions = previousSessions.filter(id => !result.includes(id));
+        
+        // Log tracking events
+        addedSessions.forEach(() => productivityTracker.logPomodoroPlanned());
+        removedSessions.forEach(() => productivityTracker.logPomodoroRemoved());
         
         // Update item met geselecteerde sessies
         item.pomodoroSessions = result;
@@ -8898,6 +9441,727 @@ const archiveView = {
     }
 };
 
+// ===== PRODUCTIVITY TRACKER (Stats Collection) =====
+const productivityTracker = {
+    // Initialize stats structure if not present
+    init() {
+        if (!state.db.productivityStats) {
+            state.db.productivityStats = {
+                dailyLogs: [],
+                streaks: { current: 0, longest: 0, lastActiveDate: null }
+            };
+        }
+    },
+
+    // Get or create today's stats entry
+    getTodayStats() {
+        this.init();
+        const today = new Date().setHours(0,0,0,0);
+        let todayLog = state.db.productivityStats.dailyLogs.find(l => l.date === today);
+        if (!todayLog) {
+            todayLog = {
+                date: today,
+                scheduled: 0,
+                completed: 0,
+                rescheduled: 0,
+                removed: 0,
+                pomodoroPlanned: 0,
+                pomodoroCompleted: 0,
+                pomodoroRemoved: 0,
+                focusMinutes: 0
+            };
+            state.db.productivityStats.dailyLogs.push(todayLog);
+            // Keep only last 90 days
+            this.cleanup();
+        }
+        return todayLog;
+    },
+
+    // Log when item is scheduled for today
+    logScheduled() {
+        const stats = this.getTodayStats();
+        stats.scheduled++;
+        this.updateStreak();
+    },
+
+    // Log when item is completed
+    logCompleted() {
+        const stats = this.getTodayStats();
+        stats.completed++;
+        this.updateStreak();
+    },
+
+    // Log when item is rescheduled to different day
+    logRescheduled() {
+        const stats = this.getTodayStats();
+        stats.rescheduled++;
+    },
+
+    // Log when item is removed from today
+    logRemoved() {
+        const stats = this.getTodayStats();
+        stats.removed++;
+    },
+
+    // Log when item is added to pomodoro session
+    logPomodoroPlanned() {
+        const stats = this.getTodayStats();
+        stats.pomodoroPlanned++;
+    },
+
+    // Log when item is completed in pomodoro
+    logPomodoroCompleted() {
+        const stats = this.getTodayStats();
+        stats.pomodoroCompleted++;
+    },
+
+    // Log when item is removed from pomodoro
+    logPomodoroRemoved() {
+        const stats = this.getTodayStats();
+        stats.pomodoroRemoved++;
+    },
+
+    // Log focus time in minutes
+    logFocusTime(minutes) {
+        const stats = this.getTodayStats();
+        stats.focusMinutes += minutes;
+    },
+
+    // Update streak counter
+    updateStreak() {
+        this.init();
+        const today = new Date().setHours(0,0,0,0);
+        const streaks = state.db.productivityStats.streaks;
+        
+        if (streaks.lastActiveDate === today) {
+            // Already counted today
+            return;
+        }
+        
+        const yesterday = today - (24 * 60 * 60 * 1000);
+        
+        if (streaks.lastActiveDate === yesterday) {
+            // Consecutive day
+            streaks.current++;
+        } else if (streaks.lastActiveDate !== today) {
+            // Streak broken, start new
+            streaks.current = 1;
+        }
+        
+        streaks.lastActiveDate = today;
+        
+        // Update longest if needed
+        if (streaks.current > streaks.longest) {
+            streaks.longest = streaks.current;
+        }
+    },
+
+    // Remove old entries (keep 90 days)
+    cleanup() {
+        if (!state.db.productivityStats) return;
+        const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
+        state.db.productivityStats.dailyLogs = 
+            state.db.productivityStats.dailyLogs.filter(l => l.date >= cutoff);
+    },
+
+    // Get stats for a specific date range
+    getStatsForRange(startDate, endDate) {
+        this.init();
+        return state.db.productivityStats.dailyLogs.filter(l => 
+            l.date >= startDate && l.date <= endDate
+        );
+    },
+
+    // Calculate aggregated stats for a period
+    calculatePeriodStats(days = 7) {
+        const today = new Date().setHours(0,0,0,0);
+        const startDate = today - ((days - 1) * 24 * 60 * 60 * 1000);
+        const logs = this.getStatsForRange(startDate, today);
+        
+        const totals = {
+            scheduled: 0,
+            completed: 0,
+            rescheduled: 0,
+            removed: 0,
+            pomodoroPlanned: 0,
+            pomodoroCompleted: 0,
+            pomodoroRemoved: 0,
+            focusMinutes: 0,
+            daysWithActivity: logs.length
+        };
+        
+        logs.forEach(log => {
+            totals.scheduled += log.scheduled || 0;
+            totals.completed += log.completed || 0;
+            totals.rescheduled += log.rescheduled || 0;
+            totals.removed += log.removed || 0;
+            totals.pomodoroPlanned += log.pomodoroPlanned || 0;
+            totals.pomodoroCompleted += log.pomodoroCompleted || 0;
+            totals.pomodoroRemoved += log.pomodoroRemoved || 0;
+            totals.focusMinutes += log.focusMinutes || 0;
+        });
+        
+        return totals;
+    },
+
+    // Track item scheduling for procrastination data
+    trackItemScheduled(item, isReschedule = false) {
+        if (!item) return;
+        
+        if (!item.procrastinationData) {
+            item.procrastinationData = {
+                timesScheduled: 0,
+                timesRescheduled: 0,
+                firstScheduledDate: null,
+                lastScheduledDate: null
+            };
+        }
+        
+        const now = Date.now();
+        
+        if (!item.procrastinationData.firstScheduledDate) {
+            item.procrastinationData.firstScheduledDate = now;
+        }
+        
+        item.procrastinationData.lastScheduledDate = now;
+        item.procrastinationData.timesScheduled++;
+        
+        if (isReschedule) {
+            item.procrastinationData.timesRescheduled++;
+        }
+    },
+
+    // Reset procrastination data when item is completed
+    resetItemProcrastination(item) {
+        if (item && item.procrastinationData) {
+            delete item.procrastinationData;
+        }
+    },
+
+    // Get procrastination score for an item
+    getItemProcrastinationScore(item) {
+        if (!item || !item.procrastinationData) return 0;
+        
+        const data = item.procrastinationData;
+        const daysSinceFirst = data.firstScheduledDate 
+            ? Math.floor((Date.now() - data.firstScheduledDate) / (1000*60*60*24))
+            : 0;
+        
+        // Score: days since first (max 14) + reschedules * 3
+        return Math.min(daysSinceFirst, 14) + ((data.timesRescheduled || 0) * 3);
+    },
+
+    // Get procrastination level: 'none', 'medium', 'high'
+    getItemProcrastinationLevel(item) {
+        const score = this.getItemProcrastinationScore(item);
+        if (score >= 11) return 'high';
+        if (score >= 6) return 'medium';
+        return 'none';
+    },
+
+    // Get all items that need attention (sorted by score)
+    getItemsNeedingAttention() {
+        const items = [];
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (!task.done && task.procrastinationData) {
+                        const score = this.getItemProcrastinationScore(task);
+                        if (score >= 6) {
+                            items.push({
+                                type: 'task',
+                                item: task,
+                                score: score,
+                                context: `${cat.name} > ${proj.name}`,
+                                catId: cat.id,
+                                projId: proj.id
+                            });
+                        }
+                    }
+                    
+                    task.subtasks?.forEach(sub => {
+                        if (!sub.done && sub.procrastinationData) {
+                            const score = this.getItemProcrastinationScore(sub);
+                            if (score >= 6) {
+                                items.push({
+                                    type: 'subtask',
+                                    item: sub,
+                                    score: score,
+                                    context: `${cat.name} > ${proj.name} > ${task.name}`,
+                                    catId: cat.id,
+                                    projId: proj.id,
+                                    taskId: task.id
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+        });
+        
+        // Sort by score descending
+        return items.sort((a, b) => b.score - a.score);
+    }
+};
+
+// ===== INSIGHTS VIEW =====
+const insightsView = {
+    currentPeriod: 7, // days
+
+    render() {
+        const container = document.getElementById('mainContent');
+        productivityTracker.init();
+        
+        const stats = productivityTracker.calculatePeriodStats(this.currentPeriod);
+        const todayStats = productivityTracker.getTodayStats();
+        const streaks = state.db.productivityStats.streaks;
+        const attentionItems = productivityTracker.getItemsNeedingAttention();
+        
+        // Check if we have any data
+        const hasData = state.db.productivityStats.dailyLogs.length > 0 && 
+                       (stats.scheduled > 0 || stats.completed > 0);
+        
+        if (!hasData) {
+            container.innerHTML = this.renderEmptyState();
+            return;
+        }
+        
+        const completionRate = stats.scheduled > 0 
+            ? Math.round((stats.completed / stats.scheduled) * 100) 
+            : 0;
+        
+        const pomodoroRate = stats.pomodoroPlanned > 0
+            ? Math.round((stats.pomodoroCompleted / stats.pomodoroPlanned) * 100)
+            : 0;
+        
+        container.innerHTML = `
+            <div class="insights-container">
+                <div class="insights-header">
+                    <h2>&#128200; Inzichten</h2>
+                    <p>Je productiviteitspatronen op een rijtje</p>
+                </div>
+                
+                <div class="insight-period-selector">
+                    <button class="insight-period-btn ${this.currentPeriod === 7 ? 'active' : ''}" 
+                            onclick="insightsView.setPeriod(7)">7 dagen</button>
+                    <button class="insight-period-btn ${this.currentPeriod === 14 ? 'active' : ''}" 
+                            onclick="insightsView.setPeriod(14)">14 dagen</button>
+                    <button class="insight-period-btn ${this.currentPeriod === 30 ? 'active' : ''}" 
+                            onclick="insightsView.setPeriod(30)">30 dagen</button>
+                </div>
+                
+                <div class="insights-summary">
+                    ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
+                    ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${stats.scheduled} gepland`)}
+                    ${this.renderStreakCard(streaks)}
+                    ${this.renderStatCard('&#9201;', `${pomodoroRate}%`, 'Pomodoro succes', `${stats.pomodoroCompleted}/${stats.pomodoroPlanned} items`)}
+                </div>
+                
+                <div class="insights-two-column">
+                    <div class="insights-section">
+                        <h3 class="insights-section-title">&#128197; Voortgang per dag</h3>
+                        ${this.renderWeekChart()}
+                    </div>
+                    
+                    ${this.renderNeedsAttentionSection(attentionItems)}
+                </div>
+                
+                <div class="insights-section">
+                    <h3 class="insights-section-title">&#128161; Patronen & Inzichten</h3>
+                    <div class="insights-patterns">
+                        ${this.renderPatterns(stats, streaks)}
+                    </div>
+                </div>
+                
+                ${stats.pomodoroPlanned > 0 ? `
+                <div class="insights-section">
+                    <h3 class="insights-section-title">&#127813; Pomodoro Details</h3>
+                    ${this.renderPomodoroDetails(stats)}
+                </div>
+                ` : ''}
+            </div>
+        `;
+    },
+
+    renderEmptyState() {
+        return `
+            <div class="insights-container">
+                <div class="insights-header">
+                    <h2>&#128200; Inzichten</h2>
+                </div>
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">&#128202;</div>
+                    <h3>Nog geen data beschikbaar</h3>
+                    <p>Begin met het plannen en voltooien van taken om je productiviteitspatronen te ontdekken.</p>
+                    <p style="margin-top: 12px; font-size: 13px;">
+                        Ga naar <strong>Vandaag</strong> of <strong>Week</strong> view om taken in te plannen.
+                    </p>
+                </div>
+            </div>
+        `;
+    },
+
+    renderStatCard(icon, value, label, description) {
+        return `
+            <div class="insight-stat-card">
+                <div class="insight-stat-icon">${icon}</div>
+                <div class="insight-stat-value">${value}</div>
+                <div class="insight-stat-label">${label}</div>
+                <div class="insight-stat-sub">${description}</div>
+            </div>
+        `;
+    },
+
+    renderStreakCard(streaks) {
+        const current = streaks.current || 0;
+        const longest = streaks.longest || 0;
+        
+        // Determine streak message
+        let streakMessage = '';
+        let streakEmoji = '&#128293;'; // fire
+        
+        if (current === 0) {
+            streakMessage = 'Voltooi vandaag een taak om te starten!';
+            streakEmoji = '&#128161;'; // lightbulb
+        } else if (current === 1) {
+            streakMessage = 'Goed begin! Ga zo door.';
+        } else if (current < longest) {
+            const toRecord = longest - current;
+            streakMessage = `Nog ${toRecord} ${toRecord === 1 ? 'dag' : 'dagen'} tot je record!`;
+        } else if (current === longest && current > 1) {
+            streakMessage = 'Je evenaart je record!';
+            streakEmoji = '&#127942;'; // trophy
+        } else if (current > longest) {
+            streakMessage = 'Nieuw persoonlijk record!';
+            streakEmoji = '&#127881;'; // party
+        }
+        
+        const tooltipText = 'Een streak telt het aantal opeenvolgende dagen waarop je minimaal 1 taak hebt voltooid';
+        
+        return `
+            <div class="insight-stat-card streak-tooltip" data-tooltip="${tooltipText}">
+                <div class="insight-stat-icon">${streakEmoji}</div>
+                <div class="insight-stat-value streak">${current}</div>
+                <div class="insight-stat-label">${current === 1 ? 'dag' : 'dagen'} actief</div>
+                <div class="insight-stat-sub">${streakMessage}</div>
+                ${longest > 0 ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">Record: ${longest} dagen</div>` : ''}
+            </div>
+        `;
+    },
+
+    renderNeedsAttentionSection(items) {
+        if (items.length === 0) {
+            return `
+                <div class="insights-section">
+                    <h3 class="insights-section-title">&#128161; Items die aandacht nodig hebben</h3>
+                    <div class="all-good-message">
+                        <div class="all-good-icon">&#127881;</div>
+                        <p>Alles onder controle! Geen items die extra aandacht nodig hebben.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const displayItems = items.slice(0, 5);
+        
+        return `
+            <div class="insights-section">
+                <h3 class="insights-section-title">
+                    &#128161; Items die aandacht nodig hebben
+                    <span class="attention-count">${items.length}</span>
+                </h3>
+                <div class="attention-items-list">
+                    ${displayItems.map(item => this.renderAttentionItem(item)).join('')}
+                </div>
+                ${items.length > 5 ? `
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" 
+                            onclick="insightsView.showAllAttentionItems()">
+                        Bekijk alle ${items.length} items
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    },
+
+    renderAttentionItem(itemData) {
+        const item = itemData.item;
+        const data = item.procrastinationData || {};
+        const daysOpen = data.firstScheduledDate 
+            ? Math.floor((Date.now() - data.firstScheduledDate) / (1000*60*60*24))
+            : 0;
+        const timesRescheduled = data.timesRescheduled || 0;
+        const level = productivityTracker.getItemProcrastinationLevel(item);
+        
+        // Generate contextual tip
+        let tip = 'Even aandacht geven?';
+        if (timesRescheduled >= 3) {
+            tip = 'Al meerdere keer herplant - misschien opsplitsen in kleinere taken?';
+        } else if (daysOpen >= 7) {
+            tip = 'Lang open - begin met de allereerste kleine stap';
+        } else if (daysOpen >= 3) {
+            tip = 'Een paar dagen open - wat houdt je tegen?';
+        }
+        
+        const itemName = item.name || item.text || 'Naamloos item';
+        
+        return `
+            <div class="attention-item ${level === 'high' ? 'high' : ''}">
+                <div class="attention-item-header">
+                    <span class="attention-item-name">${this.escapeHtml(itemName)}</span>
+                    <span class="attention-item-meta">${daysOpen}d${timesRescheduled > 0 ? ` &#183; ${timesRescheduled}x` : ''}</span>
+                </div>
+                <div class="attention-item-context">${this.escapeHtml(itemData.context)}</div>
+                <div class="attention-item-tip">&#128161; ${tip}</div>
+                <div class="attention-item-actions">
+                    <button class="btn btn-sm btn-primary" onclick="insightsView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || item.id}')">
+                        &#9654; Bekijken
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="insightsView.scheduleForToday('${item.id}', '${itemData.type}')">
+                        &#9728;&#65039; Vandaag doen
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    renderWeekChart() {
+        const today = new Date().setHours(0,0,0,0);
+        const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+        
+        let html = '<div class="insight-week-chart">';
+        
+        // Get max for scaling
+        let maxCompleted = 1;
+        for (let i = this.currentPeriod - 1; i >= 0; i--) {
+            const dayTimestamp = today - (i * 24 * 60 * 60 * 1000);
+            const dayStats = state.db.productivityStats.dailyLogs.find(l => l.date === dayTimestamp);
+            if (dayStats && dayStats.completed > maxCompleted) {
+                maxCompleted = dayStats.completed;
+            }
+        }
+        
+        // Render last N days
+        const daysToShow = Math.min(this.currentPeriod, 14); // Max 14 days in chart
+        for (let i = daysToShow - 1; i >= 0; i--) {
+            const dayTimestamp = today - (i * 24 * 60 * 60 * 1000);
+            const dayDate = new Date(dayTimestamp);
+            const dayStats = state.db.productivityStats.dailyLogs.find(l => l.date === dayTimestamp);
+            
+            const completed = dayStats ? dayStats.completed : 0;
+            const scheduled = dayStats ? dayStats.scheduled : 0;
+            const barWidth = maxCompleted > 0 ? (completed / maxCompleted) * 100 : 0;
+            const isToday = dayTimestamp === today;
+            
+            const dayLabel = isToday ? 'Vandaag' : 
+                (i === 1 ? 'Gisteren' : `${dayNames[dayDate.getDay()]} ${dayDate.getDate()}`);
+            
+            html += `
+                <div class="insight-day-row">
+                    <div class="insight-day-label ${isToday ? 'today' : ''}">${dayLabel}</div>
+                    <div class="insight-day-bar-container">
+                        <div class="insight-day-bar ${completed === 0 ? 'zero' : ''}" 
+                             style="width: ${Math.max(barWidth, 2)}%"></div>
+                    </div>
+                    <div class="insight-day-stats">
+                        <span class="completed">${completed}</span>/${scheduled || '-'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        return html;
+    },
+
+    renderPatterns(stats, streaks) {
+        const patterns = [];
+        
+        // Streak pattern
+        if (streaks.current >= 3) {
+            patterns.push({
+                icon: '&#128293;',
+                title: `${streaks.current} dagen op rij actief!`,
+                text: 'Geweldig! Je bouwt een goede routine op. Blijf zo doorgaan!'
+            });
+        } else if (streaks.current === 0 && streaks.longest > 0) {
+            patterns.push({
+                icon: '&#128170;',
+                title: 'Klaar voor een nieuwe start?',
+                text: `Je langste streak was ${streaks.longest} dagen. Vandaag is een goed moment om opnieuw te beginnen!`
+            });
+        }
+        
+        // Completion rate pattern
+        const completionRate = stats.scheduled > 0 
+            ? Math.round((stats.completed / stats.scheduled) * 100) : 0;
+        
+        if (completionRate >= 80) {
+            patterns.push({
+                icon: '&#127942;',
+                title: 'Uitstekende voltooiingsratio!',
+                text: `Je rondt ${completionRate}% van je geplande items af. Dat is top!`
+            });
+        } else if (completionRate >= 50 && completionRate < 80) {
+            patterns.push({
+                icon: '&#128161;',
+                title: 'Goede voortgang',
+                text: `Je rondt ${completionRate}% af. Tip: Plan misschien iets minder items per dag voor hogere voltooiing.`
+            });
+        } else if (completionRate > 0 && completionRate < 50) {
+            patterns.push({
+                icon: '&#127793;',
+                title: 'Ruimte voor groei',
+                text: 'Probeer kleinere taken te plannen of minder items per dag. Kwaliteit boven kwantiteit!'
+            });
+        }
+        
+        // Pomodoro pattern
+        if (stats.pomodoroPlanned > 5) {
+            const pomRate = Math.round((stats.pomodoroCompleted / stats.pomodoroPlanned) * 100);
+            if (pomRate >= 70) {
+                patterns.push({
+                    icon: '&#127813;',
+                    title: 'Pomodoro werkt voor jou!',
+                    text: `${pomRate}% van je pomodoro items worden voltooid. Focus sessies helpen je duidelijk.`
+                });
+            } else {
+                patterns.push({
+                    icon: '&#9201;',
+                    title: 'Pomodoro tip',
+                    text: 'Probeer minder items per sessie toe te voegen voor betere focus.'
+                });
+            }
+        }
+        
+        // Rescheduling pattern
+        if (stats.rescheduled > stats.completed && stats.rescheduled > 3) {
+            patterns.push({
+                icon: '&#128197;',
+                title: 'Veel herplanningen',
+                text: 'Je herplant vaak items. Overweeg om taken kleiner te maken of realistischer in te plannen.'
+            });
+        }
+        
+        // Add default pattern if none
+        if (patterns.length === 0) {
+            patterns.push({
+                icon: '&#128640;',
+                title: 'Blijf bezig!',
+                text: 'Plan taken in via Vandaag of Week view om meer inzichten te krijgen.'
+            });
+        }
+        
+        return patterns.map(p => `
+            <div class="insight-pattern-card">
+                <div class="insight-pattern-icon">${p.icon}</div>
+                <div class="insight-pattern-content">
+                    <h4>${p.title}</h4>
+                    <p>${p.text}</p>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderPomodoroDetails(stats) {
+        const successRate = stats.pomodoroPlanned > 0 
+            ? Math.round((stats.pomodoroCompleted / stats.pomodoroPlanned) * 100) : 0;
+        
+        return `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div class="insight-pattern-card">
+                    <div class="insight-pattern-content" style="width: 100%;">
+                        <div class="insight-pomodoro-row">
+                            <span>Items gepland</span>
+                            <span class="insight-pomodoro-value">${stats.pomodoroPlanned}</span>
+                        </div>
+                        <div class="insight-pomodoro-row">
+                            <span>Items voltooid</span>
+                            <span class="insight-pomodoro-value" style="color: #22c55e;">${stats.pomodoroCompleted}</span>
+                        </div>
+                        <div class="insight-pomodoro-row">
+                            <span>Items verwijderd</span>
+                            <span class="insight-pomodoro-value">${stats.pomodoroRemoved}</span>
+                        </div>
+                        <div class="insight-mini-progress">
+                            <div class="insight-mini-progress-fill" style="width: ${successRate}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="insight-pattern-card">
+                    <div class="insight-pattern-content" style="width: 100%;">
+                        <div class="insight-pomodoro-row">
+                            <span>Focus tijd</span>
+                            <span class="insight-pomodoro-value">${Math.round(stats.focusMinutes)} min</span>
+                        </div>
+                        <div class="insight-pomodoro-row">
+                            <span>Gem. per sessie</span>
+                            <span class="insight-pomodoro-value">
+                                ${stats.pomodoroCompleted > 0 ? Math.round(stats.focusMinutes / stats.pomodoroCompleted) : 0} min
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    setPeriod(days) {
+        this.currentPeriod = days;
+        this.render();
+    },
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+
+    navigateToItem(catId, projId, taskId) {
+        state.sel.cat = catId;
+        state.sel.proj = projId;
+        state.sel.task = taskId;
+        app.changeView('all');
+    },
+
+    async scheduleForToday(itemId, type) {
+        await crud.setToday(itemId);
+        this.render();
+        toastNotifications.show('success', 'Ingepland', 'Item is ingepland voor vandaag');
+    },
+
+    showAllAttentionItems() {
+        const items = productivityTracker.getItemsNeedingAttention();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay show';
+        overlay.style.display = 'flex';
+        
+        overlay.innerHTML = `
+            <div class="modal" style="max-width: 600px; max-height: 80vh;">
+                <div class="modal-header">
+                    <h2 class="modal-title">&#128161; Alle items die aandacht nodig hebben (${items.length})</h2>
+                    <button class="pomodoro-close" onclick="this.closest('.modal-overlay').remove()">&#10005;</button>
+                </div>
+                <div style="padding: 16px; overflow-y: auto; max-height: 60vh;">
+                    <div class="attention-items-list">
+                        ${items.map(item => this.renderAttentionItem(item)).join('')}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Sluiten</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+    }
+};
+
 const weekView = {
     currentWeekStart: null,
     collapsedCategories: new Set(),
@@ -9408,7 +10672,12 @@ const weekView = {
                 const subtask = parentTask.subtasks?.find(s => s.id === subtaskId);
                 if (!subtask || !subtask.checklist || !subtask.checklist[checklistIndex]) return;
                 
-                subtask.checklist[checklistIndex].scheduledDate = dayTimestamp;
+                const checkItem = subtask.checklist[checklistIndex];
+                const hadSchedule = checkItem.scheduledDate;
+                checkItem.scheduledDate = dayTimestamp;
+                productivityTracker.trackItemScheduled(checkItem, !!hadSchedule);
+                if (!hadSchedule) productivityTracker.logScheduled();
+                else productivityTracker.logRescheduled();
             } else if (itemType === 'subtask' && taskParentId) {
                 // Subtaak
                 const parentTask = proj.tasks?.find(t => t.id === taskParentId);
@@ -9417,13 +10686,21 @@ const weekView = {
                 const subtask = parentTask.subtasks?.find(s => s.id === taskId);
                 if (!subtask) return;
                 
+                const hadSchedule = subtask.scheduledDate;
                 subtask.scheduledDate = dayTimestamp;
+                productivityTracker.trackItemScheduled(subtask, !!hadSchedule);
+                if (!hadSchedule) productivityTracker.logScheduled();
+                else productivityTracker.logRescheduled();
             } else {
                 // Normale taak
                 const task = proj.tasks?.find(t => t.id === taskId);
                 if (!task) return;
                 
+                const hadSchedule = task.scheduledDate;
                 task.scheduledDate = dayTimestamp;
+                productivityTracker.trackItemScheduled(task, !!hadSchedule);
+                if (!hadSchedule) productivityTracker.logScheduled();
+                else productivityTracker.logRescheduled();
             }
             
             await app.save();
@@ -12612,6 +13889,7 @@ const pomodoro = {
         
         // Save focus time for stats
         sessionReview.stats.focusTime = this.duration;
+        productivityTracker.logFocusTime(Math.round(this.duration / 60));
         
         // Sluit pomodoro en open session review
         this.close();
@@ -12847,6 +14125,9 @@ const pomodoro = {
                 pomItem.item.done = checkbox.checked;
                 if (pomItem.item.done) {
                     pomItem.item.completedAt = Date.now();
+                    productivityTracker.logPomodoroCompleted();
+                    productivityTracker.logCompleted();
+                    productivityTracker.resetItemProcrastination(pomItem.item);
                     if (wasNotDone) {
                         const itemName = pomItem.item.name || pomItem.item.text;
                         celebration.show(itemName);
@@ -12868,6 +14149,7 @@ const pomodoro = {
                         pomItem.item.pomodoroSessions = pomItem.item.pomodoroSessions.filter(
                             sid => sid !== state.activePomodoroSession
                         );
+                        productivityTracker.logPomodoroRemoved();
                     }
                     await app.save();
                     this.renderTasks();
