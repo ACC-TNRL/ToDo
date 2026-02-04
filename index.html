@@ -3073,6 +3073,20 @@
             min-width: 4px;
         }
 
+        .insight-day-bar.unscheduled {
+            background: #3b82f6;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .insight-day-bar.unscheduled:first-child {
+            border-radius: 4px;
+        }
+
+        .insight-day-bar-inner {
+            display: flex;
+            height: 100%;
+        }
+
         .insight-day-pct {
             width: 45px;
             font-size: 12px;
@@ -5851,10 +5865,17 @@ const app = {
                 if (task) {
                     undoRedo.saveState();
                     const wasNotDone = !task.done;
+                    const today = new Date().setHours(0, 0, 0, 0);
+                    const wasScheduledForToday = task.scheduledDate === today;
                     task.done = !task.done;
                     if (task.done) {
                         task.completedAt = Date.now();
-                        productivityTracker.logCompleted();
+                        // Use appropriate log based on whether item was scheduled
+                        if (wasScheduledForToday) {
+                            productivityTracker.logCompleted();
+                        } else {
+                            productivityTracker.logUnscheduledCompleted();
+                        }
                         productivityTracker.resetItemProcrastination(task);
                         if (wasNotDone) {
                             celebration.show(task.name);
@@ -5863,7 +5884,11 @@ const app = {
                         // Unchecking - altijd cleanup doen, stats alleen binnen grace period
                         const withinGrace = productivityTracker.restoreItemProcrastination(task);
                         if (withinGrace) {
-                            productivityTracker.logUncompleted();
+                            if (wasScheduledForToday) {
+                                productivityTracker.logUncompleted();
+                            } else {
+                                productivityTracker.logUnscheduledUncompleted();
+                            }
                         }
                         delete task.completedAt;
                     }
@@ -7137,10 +7162,18 @@ const renderer = {
                     }
                 }
                 
+                const today = new Date().setHours(0, 0, 0, 0);
+                const wasScheduledForToday = item.scheduledDate === today;
+                
                 item.done = e.target.checked;
                 if (item.done) {
                     item.completedAt = Date.now();
-                    productivityTracker.logCompleted();
+                    // Use appropriate log based on whether item was scheduled
+                    if (wasScheduledForToday) {
+                        productivityTracker.logCompleted();
+                    } else {
+                        productivityTracker.logUnscheduledCompleted();
+                    }
                     productivityTracker.resetItemProcrastination(item);
                     if (wasNotDone) {
                         celebration.show(item.name);
@@ -7149,7 +7182,11 @@ const renderer = {
                     // Unchecking - altijd cleanup doen, stats alleen binnen grace period
                     const withinGrace = productivityTracker.restoreItemProcrastination(item);
                     if (withinGrace) {
-                        productivityTracker.logUncompleted();
+                        if (wasScheduledForToday) {
+                            productivityTracker.logUncompleted();
+                        } else {
+                            productivityTracker.logUnscheduledUncompleted();
+                        }
                     }
                     delete item.completedAt;
                 }
@@ -7254,11 +7291,17 @@ const renderer = {
                 if (item.checklist && item.checklist[idx]) {
                     const checkItem = item.checklist[idx];
                     const wasNotDone = !checkItem.done;
+                    const today = new Date().setHours(0, 0, 0, 0);
+                    const wasScheduledForToday = checkItem.scheduledDate === today;
                     checkItem.done = checkboxEl.checked;
                     
                     if (checkItem.done) {
                         // Completing checklist item
-                        productivityTracker.logCompleted();
+                        if (wasScheduledForToday) {
+                            productivityTracker.logCompleted();
+                        } else {
+                            productivityTracker.logUnscheduledCompleted();
+                        }
                         productivityTracker.resetItemProcrastination(checkItem);
                         if (wasNotDone) {
                             celebration.show(checkItem.text);
@@ -7267,7 +7310,11 @@ const renderer = {
                         // Uncompleting - check grace period
                         const withinGrace = productivityTracker.restoreItemProcrastination(checkItem);
                         if (withinGrace) {
-                            productivityTracker.logUncompleted();
+                            if (wasScheduledForToday) {
+                                productivityTracker.logUncompleted();
+                            } else {
+                                productivityTracker.logUnscheduledUncompleted();
+                            }
                         }
                     }
                     
@@ -9632,6 +9679,7 @@ const productivityTracker = {
                 date: today,
                 scheduled: 0,
                 completed: 0,
+                unscheduledCompleted: 0,
                 rescheduled: 0,
                 removed: 0,
                 pomodoroPlanned: 0,
@@ -9642,6 +9690,10 @@ const productivityTracker = {
             state.db.productivityStats.dailyLogs.push(todayLog);
             // Keep only last 90 days
             this.cleanup();
+        }
+        // Ensure unscheduledCompleted exists for older logs
+        if (todayLog.unscheduledCompleted === undefined) {
+            todayLog.unscheduledCompleted = 0;
         }
         return todayLog;
     },
@@ -9660,11 +9712,34 @@ const productivityTracker = {
         this.updateStreak();
     },
 
+    // Log when unscheduled item is completed (Option 2: adds to scheduled, completed, and unscheduledCompleted)
+    logUnscheduledCompleted() {
+        const stats = this.getTodayStats();
+        stats.scheduled++;           // Retroactively "scheduled"
+        stats.completed++;
+        stats.unscheduledCompleted++;
+        this.updateStreak();
+    },
+
     // Log when item is uncompleted (within grace period)
     logUncompleted() {
         const stats = this.getTodayStats();
         if (stats.completed > 0) {
             stats.completed--;
+        }
+    },
+
+    // Log when unscheduled item is uncompleted (within grace period)
+    logUnscheduledUncompleted() {
+        const stats = this.getTodayStats();
+        if (stats.scheduled > 0) {
+            stats.scheduled--;       // Remove retroactive scheduling
+        }
+        if (stats.completed > 0) {
+            stats.completed--;
+        }
+        if (stats.unscheduledCompleted > 0) {
+            stats.unscheduledCompleted--;
         }
     },
 
@@ -9762,6 +9837,7 @@ const productivityTracker = {
         const totals = {
             scheduled: 0,
             completed: 0,
+            unscheduledCompleted: 0,
             rescheduled: 0,
             removed: 0,
             pomodoroPlanned: 0,
@@ -9774,6 +9850,7 @@ const productivityTracker = {
         logs.forEach(log => {
             totals.scheduled += log.scheduled || 0;
             totals.completed += log.completed || 0;
+            totals.unscheduledCompleted += log.unscheduledCompleted || 0;
             totals.rescheduled += log.rescheduled || 0;
             totals.removed += log.removed || 0;
             totals.pomodoroPlanned += log.pomodoroPlanned || 0;
@@ -9942,8 +10019,10 @@ const insightsView = {
             return;
         }
         
-        const completionRate = stats.scheduled > 0 
-            ? Math.round((stats.completed / stats.scheduled) * 100) 
+        // With Option 2, scheduled already includes unscheduled completed items
+        const totalItems = stats.scheduled;
+        const completionRate = totalItems > 0 
+            ? Math.round((stats.completed / totalItems) * 100) 
             : 0;
         
         // Pomodoro: show N/A when 0/0
@@ -9975,7 +10054,7 @@ const insightsView = {
                 <div class="insights-content">
                     <div class="insights-summary">
                         ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
-                        ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${stats.scheduled} gepland`)}
+                        ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${totalItems} items`)}
                         ${this.renderStreakCard(streaks)}
                         ${this.renderStatCard('&#9201;', pomodoroDisplay, 'Pomodoro succes', pomodoroSub)}
                     </div>
@@ -10169,41 +10248,80 @@ const insightsView = {
             
             const completed = dayStats ? dayStats.completed : 0;
             const scheduled = dayStats ? dayStats.scheduled : 0;
+            const unscheduledCompleted = dayStats ? (dayStats.unscheduledCompleted || 0) : 0;
+            const scheduledCompleted = completed - unscheduledCompleted;
             const isToday = dayTimestamp === today;
             
-            // Calculate completion rate (completed/scheduled)
-            const completionRate = scheduled > 0 ? (completed / scheduled) * 100 : 0;
-            const barWidth = Math.min(completionRate, 100); // Cap at 100%
+            // Total items = scheduled (which now includes unscheduled completed items)
+            const totalItems = scheduled;
             
-            // Determine bar color class based on completion rate
+            // Calculate overall completion rate
+            const completionRate = totalItems > 0 ? (completed / totalItems) * 100 : 0;
+            const totalBarWidth = Math.min(completionRate, 100);
+            
+            // Calculate segment widths within the bar
+            let scheduledBarWidth = 0;
+            let unscheduledBarWidth = 0;
+            
+            if (completed > 0) {
+                scheduledBarWidth = (scheduledCompleted / completed) * totalBarWidth;
+                unscheduledBarWidth = (unscheduledCompleted / completed) * totalBarWidth;
+            }
+            
+            // Determine scheduled bar color class based on scheduled completion rate
+            // (how much of originally scheduled items were completed)
+            const originalScheduled = scheduled - unscheduledCompleted;
+            const scheduledCompletionRate = originalScheduled > 0 
+                ? (scheduledCompleted / originalScheduled) * 100 
+                : 0;
+            
             let barClass = 'zero';
-            if (scheduled === 0) {
+            if (scheduledCompleted === 0 && unscheduledCompleted === 0) {
                 barClass = 'zero';
-            } else if (completionRate > 0 && completionRate < 50) {
+            } else if (scheduledCompletionRate > 0 && scheduledCompletionRate < 50) {
                 barClass = 'low';
-            } else if (completionRate >= 50 && completionRate < 80) {
+            } else if (scheduledCompletionRate >= 50 && scheduledCompletionRate < 80) {
                 barClass = 'medium';
-            } else if (completionRate >= 80) {
+            } else if (scheduledCompletionRate >= 80) {
                 barClass = 'high';
             }
             
             // Percentage display
-            const pctDisplay = scheduled > 0 ? `${Math.round(completionRate)}%` : '-';
+            const pctDisplay = totalItems > 0 ? `${Math.round(completionRate)}%` : '-';
             
             // Compact day label for >14 days
             const dayLabel = isToday ? 'Vandaag' : 
                 (i === 1 ? 'Gisteren' : `${dayNames[dayDate.getDay()]} ${dayDate.getDate()}`);
             
+            // Build bar HTML
+            let barHtml = '';
+            if (completed === 0 && totalItems === 0) {
+                // No activity
+                barHtml = `<div class="insight-day-bar zero" style="width: 4px"></div>`;
+            } else if (completed === 0) {
+                // Items scheduled but none completed
+                barHtml = `<div class="insight-day-bar zero" style="width: 4px"></div>`;
+            } else {
+                // Has completions - show scheduled (green) and unscheduled (blue)
+                barHtml = '<div class="insight-day-bar-inner">';
+                if (scheduledCompleted > 0) {
+                    barHtml += `<div class="insight-day-bar ${barClass}" style="width: ${scheduledBarWidth}%; border-radius: ${unscheduledCompleted > 0 ? '4px 0 0 4px' : '4px'};"></div>`;
+                }
+                if (unscheduledCompleted > 0) {
+                    barHtml += `<div class="insight-day-bar unscheduled" style="width: ${unscheduledBarWidth}%;"></div>`;
+                }
+                barHtml += '</div>';
+            }
+            
             html += `
                 <div class="insight-day-row">
                     <div class="insight-day-label ${isToday ? 'today' : ''}">${dayLabel}</div>
                     <div class="insight-day-bar-container">
-                        <div class="insight-day-bar ${barClass}" 
-                             style="width: ${Math.max(barWidth, 2)}%"></div>
+                        ${barHtml}
                     </div>
                     <div class="insight-day-pct">${pctDisplay}</div>
                     <div class="insight-day-stats">
-                        <span class="completed">${completed}</span>/${scheduled || '-'}
+                        <span class="completed">${completed}</span>/${totalItems || '-'}
                     </div>
                 </div>
             `;
@@ -14361,11 +14479,18 @@ const pomodoro = {
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
                 const wasNotDone = !pomItem.item.done;
+                const today = new Date().setHours(0, 0, 0, 0);
+                const wasScheduledForToday = pomItem.item.scheduledDate === today;
                 pomItem.item.done = checkbox.checked;
                 if (pomItem.item.done) {
                     pomItem.item.completedAt = Date.now();
                     productivityTracker.logPomodoroCompleted();
-                    productivityTracker.logCompleted();
+                    // Use appropriate log based on whether item was scheduled
+                    if (wasScheduledForToday) {
+                        productivityTracker.logCompleted();
+                    } else {
+                        productivityTracker.logUnscheduledCompleted();
+                    }
                     productivityTracker.resetItemProcrastination(pomItem.item);
                     if (wasNotDone) {
                         const itemName = pomItem.item.name || pomItem.item.text;
@@ -14375,7 +14500,11 @@ const pomodoro = {
                     // Unchecking - altijd cleanup doen, stats alleen binnen grace period
                     const withinGrace = productivityTracker.restoreItemProcrastination(pomItem.item);
                     if (withinGrace) {
-                        productivityTracker.logUncompleted();
+                        if (wasScheduledForToday) {
+                            productivityTracker.logUncompleted();
+                        } else {
+                            productivityTracker.logUnscheduledUncompleted();
+                        }
                     }
                     delete pomItem.item.completedAt;
                 }
