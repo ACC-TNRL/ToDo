@@ -2983,6 +2983,24 @@
             margin-top: 8px;
         }
 
+        .insight-stat-change {
+            font-size: 11px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .insight-stat-change.positive {
+            color: #22c55e;
+        }
+
+        .insight-stat-change.negative {
+            color: #ef4444;
+        }
+
+        .insight-stat-change.neutral {
+            color: var(--text-muted);
+        }
+
         .insights-section {
             background: var(--bg-panel);
             border-radius: var(--radius-lg);
@@ -3002,122 +3020,177 @@
             gap: 8px;
         }
 
-        .insight-week-chart {
+        /* Vertical Bar Chart */
+        .insight-bar-chart {
+            width: 100%;
+            height: 220px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
         }
 
-        .insight-day-row {
+        .chart-container {
+            flex: 1;
             display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            padding: 0 4px;
+            min-height: 0;
+        }
+
+        .chart-bar-wrapper {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
             align-items: center;
-            gap: 12px;
+            min-width: 0;
+            position: relative;
         }
 
-        .insight-week-chart.compact .insight-day-row {
-            gap: 8px;
+        .chart-bar-wrapper:hover .chart-bar-stack {
+            opacity: 0.8;
         }
 
-        .insight-day-label {
-            width: 80px;
-            font-size: 13px;
+        .chart-bar-wrapper:hover .chart-tooltip {
+            display: block;
+        }
+
+        .chart-bar-stack {
+            width: 100%;
+            max-width: 40px;
+            display: flex;
+            flex-direction: column-reverse;
+            border-radius: 3px 3px 0 0;
+            overflow: hidden;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+
+        .chart-bar-scheduled {
+            background: linear-gradient(180deg, #16a34a, #22c55e);
+            transition: height 0.3s ease;
+        }
+
+        .chart-bar-unscheduled {
+            background: #3b82f6;
+            transition: height 0.3s ease;
+        }
+
+        .chart-bar-empty {
+            width: 100%;
+            max-width: 40px;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .chart-x-axis {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 4px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+            min-height: 24px;
+        }
+
+        .chart-x-label {
+            font-size: 10px;
             color: var(--text-muted);
-            flex-shrink: 0;
+            text-align: center;
+            white-space: nowrap;
         }
 
-        .insight-week-chart.compact .insight-day-label {
-            width: 65px;
-            font-size: 11px;
-        }
-
-        .insight-day-label.today {
+        .chart-x-label.today {
             color: var(--primary);
             font-weight: 600;
         }
 
-        .insight-day-bar-container {
-            flex: 1;
-            height: 24px;
-            background: var(--bg-app);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
+        .chart-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 8px;
         }
 
-        .insight-week-chart.compact .insight-day-bar-container {
-            height: 18px;
+        .chart-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border-color);
         }
 
-        .insight-day-bar {
-            height: 100%;
-            background: #22c55e;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-            min-width: 2px;
+        .chart-tooltip-date {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
         }
 
-        .insight-day-bar.low {
-            background: #86efac;
+        .chart-tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--text-muted);
         }
 
-        .insight-day-bar.medium {
-            background: #22c55e;
+        .chart-tooltip-row.completed {
+            color: #22c55e;
         }
 
-        .insight-day-bar.high {
+        .chart-tooltip-row.extra {
+            color: #3b82f6;
+        }
+
+        .chart-tooltip-pct {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .insight-chart-legend {
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .insight-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .insight-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .insight-legend-color.scheduled {
             background: linear-gradient(90deg, #22c55e, #16a34a);
         }
 
-        .insight-day-bar.zero {
-            background: var(--border-color);
-            min-width: 4px;
-        }
-
-        .insight-day-bar.unscheduled {
+        .insight-legend-color.unscheduled {
             background: #3b82f6;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .insight-day-bar.unscheduled:first-child {
-            border-radius: 4px;
-        }
-
-        .insight-day-bar-inner {
-            display: flex;
-            height: 100%;
-        }
-
-        .insight-day-pct {
-            width: 45px;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-align: right;
-            flex-shrink: 0;
-            margin-right: 8px;
-        }
-
-        .insight-week-chart.compact .insight-day-pct {
-            width: 40px;
-            font-size: 10px;
-            margin-right: 4px;
-        }
-
-        .insight-day-stats {
-            width: 50px;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .insight-week-chart.compact .insight-day-stats {
-            width: 40px;
-            font-size: 10px;
-        }
-
-        .insight-day-stats .completed {
-            color: #22c55e;
-            font-weight: 600;
         }
 
         .insights-patterns {
@@ -7429,8 +7502,8 @@ const renderer = {
                     if (!checkItem.scheduledDate) {
                         checkItem.scheduledDate = today;
                         checkItem.todayPriority = 999;
-                        // Track scheduling for statistics
-                        productivityTracker.logScheduled();
+                        // Track scheduling for the target date (today)
+                        productivityTracker.logScheduledForDate(today);
                         productivityTracker.trackItemScheduled(checkItem, false);
                         await app.save();
                         app.setStatus("Checklist item toegevoegd aan vandaag", "success");
@@ -7445,8 +7518,13 @@ const renderer = {
                 e.stopPropagation();
                 const idx = parseInt(todayBtn.dataset.index);
                 if (item.checklist && item.checklist[idx]) {
-                    delete item.checklist[idx].scheduledDate;
-                    delete item.checklist[idx].todayPriority;
+                    const checkItem = item.checklist[idx];
+                    const oldScheduledDate = checkItem.scheduledDate;
+                    if (oldScheduledDate) {
+                        productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                    }
+                    delete checkItem.scheduledDate;
+                    delete checkItem.todayPriority;
                     // Track removal for statistics
                     productivityTracker.logRemoved();
                     await app.save();
@@ -8316,11 +8394,20 @@ const crud = {
         // Try to find as task
         const task = helpers.findTaskById(itemId);
         if (task) {
-            const isReschedule = task.scheduledDate && task.scheduledDate !== today;
+            const oldScheduledDate = task.scheduledDate;
+            const isReschedule = oldScheduledDate && oldScheduledDate !== today;
+            
+            // If rescheduling, remove from old date first
+            if (isReschedule) {
+                productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+            }
+            
             task.scheduledDate = today;
             task.todayPriority = 999;
             itemFound = true;
-            productivityTracker.logScheduled();
+            
+            // Add to new date (today)
+            productivityTracker.logScheduledForDate(today);
             productivityTracker.trackItemScheduled(task, isReschedule);
             await app.save();
             app.render();
@@ -8335,11 +8422,20 @@ const crud = {
                     if (task.subtasks) {
                         const subtask = task.subtasks.find(sub => sub.id === itemId);
                         if (subtask) {
-                            const isReschedule = subtask.scheduledDate && subtask.scheduledDate !== today;
+                            const oldScheduledDate = subtask.scheduledDate;
+                            const isReschedule = oldScheduledDate && oldScheduledDate !== today;
+                            
+                            // If rescheduling, remove from old date first
+                            if (isReschedule) {
+                                productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                            }
+                            
                             subtask.scheduledDate = today;
                             subtask.todayPriority = 999;
                             itemFound = true;
-                            productivityTracker.logScheduled();
+                            
+                            // Add to new date (today)
+                            productivityTracker.logScheduledForDate(today);
                             productivityTracker.trackItemScheduled(subtask, isReschedule);
                         }
                     }
@@ -8361,6 +8457,10 @@ const crud = {
         // Try to find as task
         const task = helpers.findTaskById(itemId);
         if (task) {
+            const oldScheduledDate = task.scheduledDate;
+            if (oldScheduledDate) {
+                productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+            }
             delete task.scheduledDate;
             delete task.todayPriority;
             itemFound = true;
@@ -8378,6 +8478,10 @@ const crud = {
                     if (task.subtasks) {
                         const subtask = task.subtasks.find(sub => sub.id === itemId);
                         if (subtask) {
+                            const oldScheduledDate = subtask.scheduledDate;
+                            if (oldScheduledDate) {
+                                productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                            }
                             delete subtask.scheduledDate;
                             delete subtask.todayPriority;
                             itemFound = true;
@@ -9673,10 +9777,27 @@ const productivityTracker = {
     getTodayStats() {
         this.init();
         const today = new Date().setHours(0,0,0,0);
-        let todayLog = state.db.productivityStats.dailyLogs.find(l => l.date === today);
-        if (!todayLog) {
-            todayLog = {
-                date: today,
+        return this.getStatsForDate(today);
+    },
+
+    // Get or create stats for a specific date
+    getStatsForDate(dateTimestamp) {
+        this.init();
+        
+        // Normalize to midnight
+        const normalizedDate = new Date(dateTimestamp).setHours(0,0,0,0);
+        
+        // Don't create stats for dates older than 90 days
+        const today = new Date().setHours(0,0,0,0);
+        const ninetyDaysAgo = today - (90 * 24 * 60 * 60 * 1000);
+        if (normalizedDate < ninetyDaysAgo) {
+            return null;
+        }
+        
+        let dateLog = state.db.productivityStats.dailyLogs.find(l => l.date === normalizedDate);
+        if (!dateLog) {
+            dateLog = {
+                date: normalizedDate,
                 scheduled: 0,
                 completed: 0,
                 unscheduledCompleted: 0,
@@ -9687,21 +9808,37 @@ const productivityTracker = {
                 pomodoroRemoved: 0,
                 focusMinutes: 0
             };
-            state.db.productivityStats.dailyLogs.push(todayLog);
+            state.db.productivityStats.dailyLogs.push(dateLog);
             // Keep only last 90 days
             this.cleanup();
         }
         // Ensure unscheduledCompleted exists for older logs
-        if (todayLog.unscheduledCompleted === undefined) {
-            todayLog.unscheduledCompleted = 0;
+        if (dateLog.unscheduledCompleted === undefined) {
+            dateLog.unscheduledCompleted = 0;
         }
-        return todayLog;
+        return dateLog;
     },
 
-    // Log when item is scheduled for today
+    // Log when item is scheduled for a specific date
+    logScheduledForDate(dateTimestamp) {
+        const stats = this.getStatsForDate(dateTimestamp);
+        if (stats) {
+            stats.scheduled++;
+        }
+    },
+
+    // Log when item is unscheduled from a specific date
+    logUnscheduledFromDate(dateTimestamp) {
+        const stats = this.getStatsForDate(dateTimestamp);
+        if (stats && stats.scheduled > 0) {
+            stats.scheduled--;
+        }
+    },
+
+    // Log when item is scheduled for today (backward compatible wrapper)
     logScheduled() {
-        const stats = this.getTodayStats();
-        stats.scheduled++;
+        const today = new Date().setHours(0,0,0,0);
+        this.logScheduledForDate(today);
         this.updateStreak();
     },
 
@@ -9859,7 +9996,55 @@ const productivityTracker = {
             totals.focusMinutes += log.focusMinutes || 0;
         });
         
+        // Update items record if current period beats it
+        this.updateItemsRecord(days, totals.completed);
+        
         return totals;
+    },
+
+    // Calculate stats for the PREVIOUS period (for comparison)
+    calculatePreviousPeriodStats(days = 7) {
+        const today = new Date().setHours(0,0,0,0);
+        const periodEndDate = today - (days * 24 * 60 * 60 * 1000);
+        const periodStartDate = periodEndDate - ((days - 1) * 24 * 60 * 60 * 1000);
+        const logs = this.getStatsForRange(periodStartDate, periodEndDate);
+        
+        let completed = 0;
+        logs.forEach(log => {
+            completed += log.completed || 0;
+        });
+        
+        return { completed };
+    },
+
+    // Update items completed record for a period
+    updateItemsRecord(days, completed) {
+        this.init();
+        
+        // Ensure itemsRecord structure exists
+        if (!state.db.productivityStats.itemsRecord) {
+            state.db.productivityStats.itemsRecord = {};
+        }
+        
+        const periodKey = `days${days}`;
+        const currentRecord = state.db.productivityStats.itemsRecord[periodKey] || { count: 0, date: null };
+        
+        if (completed > currentRecord.count) {
+            state.db.productivityStats.itemsRecord[periodKey] = {
+                count: completed,
+                date: Date.now()
+            };
+        }
+    },
+
+    // Get items record for a period
+    getItemsRecord(days) {
+        this.init();
+        if (!state.db.productivityStats.itemsRecord) {
+            return { count: 0, date: null };
+        }
+        const periodKey = `days${days}`;
+        return state.db.productivityStats.itemsRecord[periodKey] || { count: 0, date: null };
     },
 
     // Track item scheduling for procrastination data
@@ -10006,8 +10191,8 @@ const insightsView = {
         productivityTracker.init();
         
         const stats = productivityTracker.calculatePeriodStats(this.currentPeriod);
+        const previousStats = productivityTracker.calculatePreviousPeriodStats(this.currentPeriod);
         const todayStats = productivityTracker.getTodayStats();
-        const streaks = state.db.productivityStats.streaks;
         const attentionItems = productivityTracker.getItemsNeedingAttention();
         
         // Check if we have any data
@@ -10055,7 +10240,7 @@ const insightsView = {
                     <div class="insights-summary">
                         ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
                         ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${totalItems} items`)}
-                        ${this.renderStreakCard(streaks)}
+                        ${this.renderItemsCompletedCard(stats, previousStats, this.currentPeriod)}
                         ${this.renderStatCard('&#9201;', pomodoroDisplay, 'Pomodoro succes', pomodoroSub)}
                     </div>
                     
@@ -10071,7 +10256,7 @@ const insightsView = {
                     <div class="insights-section">
                         <h3 class="insights-section-title">&#128161; Patronen & Inzichten</h3>
                         <div class="insights-patterns">
-                            ${this.renderPatterns(stats, streaks)}
+                            ${this.renderPatterns(stats, previousStats, this.currentPeriod)}
                         </div>
                     </div>
                     
@@ -10119,39 +10304,74 @@ const insightsView = {
         `;
     },
 
-    renderStreakCard(streaks) {
-        const current = streaks.current || 0;
-        const longest = streaks.longest || 0;
+    renderItemsCompletedCard(stats, previousStats, period) {
+        const completed = stats.completed || 0;
+        const previousCompleted = previousStats.completed || 0;
+        const record = productivityTracker.getItemsRecord(period);
         
-        // Determine streak message
-        let streakMessage = '';
-        let streakEmoji = '&#128293;'; // fire
-        
-        if (current === 0) {
-            streakMessage = 'Voltooi vandaag een taak om te starten!';
-            streakEmoji = '&#128161;'; // lightbulb
-        } else if (current === 1) {
-            streakMessage = 'Goed begin! Ga zo door.';
-        } else if (current < longest) {
-            const toRecord = longest - current;
-            streakMessage = `Nog ${toRecord} ${toRecord === 1 ? 'dag' : 'dagen'} tot je record!`;
-        } else if (current === longest && current > 1) {
-            streakMessage = 'Je evenaart je record!';
-            streakEmoji = '&#127942;'; // trophy
-        } else if (current > longest) {
-            streakMessage = 'Nieuw persoonlijk record!';
-            streakEmoji = '&#127881;'; // party
+        // Calculate percentage change
+        let changeText = '';
+        let changeClass = '';
+        if (previousCompleted > 0) {
+            const changePercent = Math.round(((completed - previousCompleted) / previousCompleted) * 100);
+            if (changePercent > 0) {
+                changeText = `+${changePercent}% vs vorige periode`;
+                changeClass = 'positive';
+            } else if (changePercent < 0) {
+                changeText = `${changePercent}% vs vorige periode`;
+                changeClass = 'negative';
+            } else {
+                changeText = 'Gelijk aan vorige periode';
+                changeClass = 'neutral';
+            }
+        } else if (completed > 0) {
+            changeText = 'Eerste periode met data!';
+            changeClass = 'positive';
         }
         
-        const tooltipText = 'Streak: dagen op rij actief. 1 dag overslaan mag - je streak blijft behouden!';
+        // Determine message based on performance
+        let message = '';
+        let emoji = '&#127942;'; // trophy
+        
+        if (completed === 0) {
+            message = 'Voltooi je eerste item!';
+            emoji = '&#128161;'; // lightbulb
+        } else if (record.count > 0 && completed >= record.count) {
+            if (completed > record.count) {
+                message = 'Nieuw record!';
+                emoji = '&#127881;'; // party
+            } else {
+                message = 'Je evenaart je record!';
+            }
+        } else if (record.count > 0) {
+            const toRecord = record.count - completed;
+            message = `Nog ${toRecord} tot je record`;
+        } else {
+            message = 'Goed bezig!';
+        }
+        
+        // Format period text
+        const periodText = `in ${period} dagen`;
+        
+        // Format record with date
+        let recordText = '';
+        if (record.count > 0 && record.date) {
+            const recordDate = new Date(record.date);
+            const monthNames = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+            const monthYear = `${monthNames[recordDate.getMonth()]} '${String(recordDate.getFullYear()).slice(-2)}`;
+            recordText = `Record: ${record.count} items (${monthYear})`;
+        }
+        
+        const tooltipText = `Items voltooid in de afgelopen ${period} dagen. Vergelijking met de ${period} dagen daarvoor.`;
         
         return `
-            <div class="insight-stat-card streak-tooltip" data-tooltip="${tooltipText}">
-                <div class="insight-stat-icon">${streakEmoji}</div>
-                <div class="insight-stat-value streak">${current}</div>
-                <div class="insight-stat-label">${current === 1 ? 'dag' : 'dagen'} actief</div>
-                <div class="insight-stat-sub">${streakMessage}</div>
-                ${longest > 0 ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">Record: ${longest} dagen</div>` : ''}
+            <div class="insight-stat-card items-completed-tooltip" data-tooltip="${tooltipText}">
+                <div class="insight-stat-icon">${emoji}</div>
+                <div class="insight-stat-value">${completed}</div>
+                <div class="insight-stat-label">items voltooid</div>
+                <div class="insight-stat-sub">${periodText}</div>
+                ${changeText ? `<div class="insight-stat-change ${changeClass}">${changeText}</div>` : ''}
+                ${recordText ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">${recordText}</div>` : ''}
             </div>
         `;
     },
@@ -10234,12 +10454,14 @@ const insightsView = {
     renderWeekChart() {
         const today = new Date().setHours(0,0,0,0);
         const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+        const monthNames = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
         
-        // Toon alle dagen, compact mode voor >14 dagen
         const daysToShow = this.currentPeriod;
-        const isCompact = daysToShow > 14;
         
-        let html = `<div class="insight-week-chart ${isCompact ? 'compact' : ''}">`;
+        // Collect data and find max for scaling
+        const dayData = [];
+        let maxCompleted = 0;
+        let hasUnscheduledInPeriod = false;
         
         for (let i = daysToShow - 1; i >= 0; i--) {
             const dayTimestamp = today - (i * 24 * 60 * 60 * 1000);
@@ -10252,100 +10474,135 @@ const insightsView = {
             const scheduledCompleted = completed - unscheduledCompleted;
             const isToday = dayTimestamp === today;
             
-            // Total items = scheduled (which now includes unscheduled completed items)
-            const totalItems = scheduled;
+            if (unscheduledCompleted > 0) hasUnscheduledInPeriod = true;
+            if (completed > maxCompleted) maxCompleted = completed;
             
-            // Calculate overall completion rate
-            const completionRate = totalItems > 0 ? (completed / totalItems) * 100 : 0;
-            const totalBarWidth = Math.min(completionRate, 100);
+            dayData.push({
+                date: dayDate,
+                timestamp: dayTimestamp,
+                completed,
+                scheduled,
+                unscheduledCompleted,
+                scheduledCompleted,
+                isToday,
+                dayIndex: i
+            });
+        }
+        
+        // If no data, set max to 1 to avoid division by zero
+        if (maxCompleted === 0) maxCompleted = 1;
+        
+        // Determine which labels to show based on period
+        const labelInterval = daysToShow <= 7 ? 1 : (daysToShow <= 14 ? 2 : 5);
+        
+        // Build bars HTML
+        let barsHtml = '';
+        dayData.forEach((day, idx) => {
+            const scheduledHeight = (day.scheduledCompleted / maxCompleted) * 100;
+            const unscheduledHeight = (day.unscheduledCompleted / maxCompleted) * 100;
+            const totalItems = day.scheduled;
+            const pct = totalItems > 0 ? Math.round((day.completed / totalItems) * 100) : 0;
             
-            // Calculate segment widths within the bar
-            let scheduledBarWidth = 0;
-            let unscheduledBarWidth = 0;
+            // Format date for tooltip
+            const dateStr = `${dayNames[day.date.getDay()]} ${day.date.getDate()} ${monthNames[day.date.getMonth()]}`;
             
-            if (completed > 0) {
-                scheduledBarWidth = (scheduledCompleted / completed) * totalBarWidth;
-                unscheduledBarWidth = (unscheduledCompleted / completed) * totalBarWidth;
-            }
-            
-            // Determine scheduled bar color class based on scheduled completion rate
-            // (how much of originally scheduled items were completed)
-            const originalScheduled = scheduled - unscheduledCompleted;
-            const scheduledCompletionRate = originalScheduled > 0 
-                ? (scheduledCompleted / originalScheduled) * 100 
-                : 0;
-            
-            let barClass = 'zero';
-            if (scheduledCompleted === 0 && unscheduledCompleted === 0) {
-                barClass = 'zero';
-            } else if (scheduledCompletionRate > 0 && scheduledCompletionRate < 50) {
-                barClass = 'low';
-            } else if (scheduledCompletionRate >= 50 && scheduledCompletionRate < 80) {
-                barClass = 'medium';
-            } else if (scheduledCompletionRate >= 80) {
-                barClass = 'high';
-            }
-            
-            // Percentage display
-            const pctDisplay = totalItems > 0 ? `${Math.round(completionRate)}%` : '-';
-            
-            // Compact day label for >14 days
-            const dayLabel = isToday ? 'Vandaag' : 
-                (i === 1 ? 'Gisteren' : `${dayNames[dayDate.getDay()]} ${dayDate.getDate()}`);
-            
-            // Build bar HTML
-            let barHtml = '';
-            if (completed === 0 && totalItems === 0) {
-                // No activity
-                barHtml = `<div class="insight-day-bar zero" style="width: 4px"></div>`;
-            } else if (completed === 0) {
-                // Items scheduled but none completed
-                barHtml = `<div class="insight-day-bar zero" style="width: 4px"></div>`;
+            let barContent = '';
+            if (day.completed === 0) {
+                barContent = `<div class="chart-bar-empty"></div>`;
             } else {
-                // Has completions - show scheduled (green) and unscheduled (blue)
-                barHtml = '<div class="insight-day-bar-inner">';
-                if (scheduledCompleted > 0) {
-                    barHtml += `<div class="insight-day-bar ${barClass}" style="width: ${scheduledBarWidth}%; border-radius: ${unscheduledCompleted > 0 ? '4px 0 0 4px' : '4px'};"></div>`;
-                }
-                if (unscheduledCompleted > 0) {
-                    barHtml += `<div class="insight-day-bar unscheduled" style="width: ${unscheduledBarWidth}%;"></div>`;
-                }
-                barHtml += '</div>';
+                barContent = `
+                    <div class="chart-bar-stack" style="height: ${Math.max(scheduledHeight + unscheduledHeight, 5)}%">
+                        ${day.scheduledCompleted > 0 ? `<div class="chart-bar-scheduled" style="height: ${(day.scheduledCompleted / day.completed) * 100}%"></div>` : ''}
+                        ${day.unscheduledCompleted > 0 ? `<div class="chart-bar-unscheduled" style="height: ${(day.unscheduledCompleted / day.completed) * 100}%"></div>` : ''}
+                    </div>
+                `;
             }
             
-            html += `
-                <div class="insight-day-row">
-                    <div class="insight-day-label ${isToday ? 'today' : ''}">${dayLabel}</div>
-                    <div class="insight-day-bar-container">
-                        ${barHtml}
+            barsHtml += `
+                <div class="chart-bar-wrapper">
+                    ${barContent}
+                    <div class="chart-tooltip">
+                        <div class="chart-tooltip-date">${day.isToday ? 'Vandaag' : dateStr}</div>
+                        <div class="chart-tooltip-row completed">Voltooid: <strong>${day.completed}</strong></div>
+                        <div class="chart-tooltip-row">Gepland: ${day.scheduled}</div>
+                        ${day.unscheduledCompleted > 0 ? `<div class="chart-tooltip-row extra">Extra: ${day.unscheduledCompleted}</div>` : ''}
+                        ${totalItems > 0 ? `<div class="chart-tooltip-pct">${pct}%</div>` : ''}
                     </div>
-                    <div class="insight-day-pct">${pctDisplay}</div>
-                    <div class="insight-day-stats">
-                        <span class="completed">${completed}</span>/${totalItems || '-'}
+                </div>
+            `;
+        });
+        
+        // Build x-axis labels
+        let labelsHtml = '';
+        dayData.forEach((day, idx) => {
+            // Show label based on interval, always show first, last, and today
+            const showLabel = (idx % labelInterval === 0) || idx === 0 || idx === dayData.length - 1 || day.isToday;
+            
+            if (showLabel) {
+                const label = day.isToday ? 'Vandaag' : `${dayNames[day.date.getDay()]} ${day.date.getDate()}`;
+                labelsHtml += `<span class="chart-x-label ${day.isToday ? 'today' : ''}">${label}</span>`;
+            } else {
+                labelsHtml += `<span class="chart-x-label"></span>`;
+            }
+        });
+        
+        // Build legend
+        let legendHtml = '';
+        if (hasUnscheduledInPeriod) {
+            legendHtml = `
+                <div class="insight-chart-legend">
+                    <div class="insight-legend-item">
+                        <span class="insight-legend-color scheduled"></span>
+                        <span>Gepland</span>
+                    </div>
+                    <div class="insight-legend-item">
+                        <span class="insight-legend-color unscheduled"></span>
+                        <span>Extra</span>
                     </div>
                 </div>
             `;
         }
         
-        html += '</div>';
-        return html;
+        return `
+            <div class="insight-bar-chart">
+                <div class="chart-container">
+                    ${barsHtml}
+                </div>
+                <div class="chart-x-axis">
+                    ${labelsHtml}
+                </div>
+                ${legendHtml}
+            </div>
+        `;
     },
 
-    renderPatterns(stats, streaks) {
+    renderPatterns(stats, previousStats, period) {
         const patterns = [];
         
-        // Streak pattern
-        if (streaks.current >= 3) {
+        // Items completed comparison pattern
+        const completed = stats.completed || 0;
+        const previousCompleted = previousStats.completed || 0;
+        
+        if (previousCompleted > 0) {
+            const changePercent = Math.round(((completed - previousCompleted) / previousCompleted) * 100);
+            if (changePercent >= 20) {
+                patterns.push({
+                    icon: '&#128640;',
+                    title: `${changePercent}% meer voltooid!`,
+                    text: `Je hebt ${completed} items voltooid, tegenover ${previousCompleted} in de vorige periode. Geweldig!`
+                });
+            } else if (changePercent <= -20) {
+                patterns.push({
+                    icon: '&#128170;',
+                    title: 'Rustiger periode',
+                    text: `Je hebt ${completed} items voltooid. Dat is minder dan vorige periode (${previousCompleted}), maar elke stap telt!`
+                });
+            }
+        } else if (completed > 0) {
             patterns.push({
-                icon: '&#128293;',
-                title: `${streaks.current} dagen op rij actief!`,
-                text: 'Geweldig! Je bouwt een goede routine op. Blijf zo doorgaan!'
-            });
-        } else if (streaks.current === 0 && streaks.longest > 0) {
-            patterns.push({
-                icon: '&#128170;',
-                title: 'Klaar voor een nieuwe start?',
-                text: `Je langste streak was ${streaks.longest} dagen. Vandaag is een goed moment om opnieuw te beginnen!`
+                icon: '&#127881;',
+                title: 'Eerste data!',
+                text: `Je hebt ${completed} items voltooid in deze periode. Een mooie start!`
             });
         }
         
@@ -11031,10 +11288,18 @@ const weekView = {
                 
                 const checkItem = subtask.checklist[checklistIndex];
                 const hadSchedule = checkItem.scheduledDate;
+                
+                // Update scheduling stats for correct dates
+                if (hadSchedule && hadSchedule !== dayTimestamp) {
+                    productivityTracker.logUnscheduledFromDate(hadSchedule);
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                    productivityTracker.logRescheduled();
+                } else if (!hadSchedule) {
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                }
+                
                 checkItem.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(checkItem, !!hadSchedule);
-                if (!hadSchedule) productivityTracker.logScheduled();
-                else productivityTracker.logRescheduled();
             } else if (itemType === 'subtask' && taskParentId) {
                 // Subtaak
                 const parentTask = proj.tasks?.find(t => t.id === taskParentId);
@@ -11044,20 +11309,36 @@ const weekView = {
                 if (!subtask) return;
                 
                 const hadSchedule = subtask.scheduledDate;
+                
+                // Update scheduling stats for correct dates
+                if (hadSchedule && hadSchedule !== dayTimestamp) {
+                    productivityTracker.logUnscheduledFromDate(hadSchedule);
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                    productivityTracker.logRescheduled();
+                } else if (!hadSchedule) {
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                }
+                
                 subtask.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(subtask, !!hadSchedule);
-                if (!hadSchedule) productivityTracker.logScheduled();
-                else productivityTracker.logRescheduled();
             } else {
                 // Normale taak
                 const task = proj.tasks?.find(t => t.id === taskId);
                 if (!task) return;
                 
                 const hadSchedule = task.scheduledDate;
+                
+                // Update scheduling stats for correct dates
+                if (hadSchedule && hadSchedule !== dayTimestamp) {
+                    productivityTracker.logUnscheduledFromDate(hadSchedule);
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                    productivityTracker.logRescheduled();
+                } else if (!hadSchedule) {
+                    productivityTracker.logScheduledForDate(dayTimestamp);
+                }
+                
                 task.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(task, !!hadSchedule);
-                if (!hadSchedule) productivityTracker.logScheduled();
-                else productivityTracker.logRescheduled();
             }
             
             await app.save();
