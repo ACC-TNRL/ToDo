@@ -2895,26 +2895,36 @@
 
         /* ===== INSIGHTS VIEW STYLES ===== */
         .insights-container {
-            padding: 24px;
-            max-width: 1200px;
-            margin: 0 auto;
+            /* Outer container - geen max-width, zoals archive-container */
         }
 
         .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
         }
 
-        .insights-header h2 {
+        .insights-title {
             font-size: 24px;
             font-weight: 700;
             color: var(--text-main);
-            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .insights-header p {
+        .insights-subtitle {
             color: var(--text-muted);
             font-size: 14px;
             margin: 0;
+        }
+
+        .insights-content {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .insights-summary {
@@ -3004,11 +3014,20 @@
             gap: 12px;
         }
 
+        .insight-week-chart.compact .insight-day-row {
+            gap: 8px;
+        }
+
         .insight-day-label {
             width: 80px;
             font-size: 13px;
             color: var(--text-muted);
             flex-shrink: 0;
+        }
+
+        .insight-week-chart.compact .insight-day-label {
+            width: 65px;
+            font-size: 11px;
         }
 
         .insight-day-label.today {
@@ -3025,12 +3044,28 @@
             position: relative;
         }
 
+        .insight-week-chart.compact .insight-day-bar-container {
+            height: 18px;
+        }
+
         .insight-day-bar {
             height: 100%;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
+            background: #22c55e;
             border-radius: 4px;
             transition: width 0.5s ease;
             min-width: 2px;
+        }
+
+        .insight-day-bar.low {
+            background: #86efac;
+        }
+
+        .insight-day-bar.medium {
+            background: #22c55e;
+        }
+
+        .insight-day-bar.high {
+            background: linear-gradient(90deg, #22c55e, #16a34a);
         }
 
         .insight-day-bar.zero {
@@ -3038,12 +3073,32 @@
             min-width: 4px;
         }
 
-        .insight-day-stats {
-            width: 80px;
+        .insight-day-pct {
+            width: 45px;
             font-size: 12px;
             color: var(--text-muted);
             text-align: right;
             flex-shrink: 0;
+            margin-right: 8px;
+        }
+
+        .insight-week-chart.compact .insight-day-pct {
+            width: 40px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+
+        .insight-day-stats {
+            width: 50px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .insight-week-chart.compact .insight-day-stats {
+            width: 40px;
+            font-size: 10px;
         }
 
         .insight-day-stats .completed {
@@ -5805,6 +5860,11 @@ const app = {
                             celebration.show(task.name);
                         }
                     } else {
+                        // Unchecking - altijd cleanup doen, stats alleen binnen grace period
+                        const withinGrace = productivityTracker.restoreItemProcrastination(task);
+                        if (withinGrace) {
+                            productivityTracker.logUncompleted();
+                        }
                         delete task.completedAt;
                     }
                     this.save();
@@ -6976,21 +7036,39 @@ const renderer = {
                             }
                             
                             if (result.value === 'complete-all') {
+                                const today = new Date().setHours(0, 0, 0, 0);
                                 openSubtasks.forEach(sub => {
                                     sub.done = true;
                                     sub.completedAt = Date.now();
                                     // CASCADE: ook checklist items voltooien
-                                    sub.checklist?.forEach(c => { c.done = true; });
+                                    sub.checklist?.forEach(c => {
+                                        if (!c.done) {
+                                            c.done = true;
+                                            if (c.scheduledDate === today) {
+                                                productivityTracker.logCompleted();
+                                                productivityTracker.resetItemProcrastination(c);
+                                            }
+                                        }
+                                    });
                                 });
                             }
                             e.target.checked = true;
                         } else if (setting === 'complete-all') {
                             // Auto-complete all subtasks AND their checklist items
+                            const today = new Date().setHours(0, 0, 0, 0);
                             openSubtasks.forEach(sub => {
                                 sub.done = true;
                                 sub.completedAt = Date.now();
                                 // CASCADE: ook checklist items voltooien
-                                sub.checklist?.forEach(c => { c.done = true; });
+                                sub.checklist?.forEach(c => {
+                                    if (!c.done) {
+                                        c.done = true;
+                                        if (c.scheduledDate === today) {
+                                            productivityTracker.logCompleted();
+                                            productivityTracker.resetItemProcrastination(c);
+                                        }
+                                    }
+                                });
                             });
                         }
                         // 'task-only' does nothing extra
@@ -7032,15 +7110,27 @@ const renderer = {
                             }
                             
                             if (result.value === 'complete-all') {
+                                const today = new Date().setHours(0, 0, 0, 0);
                                 openChecklist.forEach(c => {
                                     c.done = true;
+                                    // Track completion if checklist item was scheduled for today
+                                    if (c.scheduledDate === today) {
+                                        productivityTracker.logCompleted();
+                                        productivityTracker.resetItemProcrastination(c);
+                                    }
                                 });
                             }
                             e.target.checked = true;
                         } else if (setting === 'complete-all') {
                             // Auto-complete all checklist items
+                            const today = new Date().setHours(0, 0, 0, 0);
                             openChecklist.forEach(c => {
                                 c.done = true;
+                                // Track completion if checklist item was scheduled for today
+                                if (c.scheduledDate === today) {
+                                    productivityTracker.logCompleted();
+                                    productivityTracker.resetItemProcrastination(c);
+                                }
                             });
                         }
                         // 'task-only' does nothing extra - checklist items remain open
@@ -7056,6 +7146,11 @@ const renderer = {
                         celebration.show(item.name);
                     }
                 } else {
+                    // Unchecking - altijd cleanup doen, stats alleen binnen grace period
+                    const withinGrace = productivityTracker.restoreItemProcrastination(item);
+                    if (withinGrace) {
+                        productivityTracker.logUncompleted();
+                    }
                     delete item.completedAt;
                 }
                 if(type === 'task') item.status = item.done ? 'done' : 'doing';
@@ -7157,11 +7252,25 @@ const renderer = {
                 e.stopPropagation();
                 const idx = parseInt(checkboxEl.dataset.index);
                 if (item.checklist && item.checklist[idx]) {
-                    const wasNotDone = !item.checklist[idx].done;
-                    item.checklist[idx].done = checkboxEl.checked;
-                    if (checkboxEl.checked && wasNotDone) {
-                        celebration.show(item.checklist[idx].text);
+                    const checkItem = item.checklist[idx];
+                    const wasNotDone = !checkItem.done;
+                    checkItem.done = checkboxEl.checked;
+                    
+                    if (checkItem.done) {
+                        // Completing checklist item
+                        productivityTracker.logCompleted();
+                        productivityTracker.resetItemProcrastination(checkItem);
+                        if (wasNotDone) {
+                            celebration.show(checkItem.text);
+                        }
+                    } else {
+                        // Uncompleting - check grace period
+                        const withinGrace = productivityTracker.restoreItemProcrastination(checkItem);
+                        if (withinGrace) {
+                            productivityTracker.logUncompleted();
+                        }
                     }
+                    
                     await app.save();
                     app.render();
                 }
@@ -7269,9 +7378,13 @@ const renderer = {
                 const idx = parseInt(todayBtn.dataset.index);
                 if (item.checklist && item.checklist[idx]) {
                     const today = new Date().setHours(0, 0, 0, 0);
-                    if (!item.checklist[idx].scheduledDate) {
-                        item.checklist[idx].scheduledDate = today;
-                        item.checklist[idx].todayPriority = 999;
+                    const checkItem = item.checklist[idx];
+                    if (!checkItem.scheduledDate) {
+                        checkItem.scheduledDate = today;
+                        checkItem.todayPriority = 999;
+                        // Track scheduling for statistics
+                        productivityTracker.logScheduled();
+                        productivityTracker.trackItemScheduled(checkItem, false);
                         await app.save();
                         app.setStatus("Checklist item toegevoegd aan vandaag", "success");
                         app.render();
@@ -7287,6 +7400,8 @@ const renderer = {
                 if (item.checklist && item.checklist[idx]) {
                     delete item.checklist[idx].scheduledDate;
                     delete item.checklist[idx].todayPriority;
+                    // Track removal for statistics
+                    productivityTracker.logRemoved();
                     await app.save();
                     app.setStatus("Checklist item verwijderd uit vandaag", "success");
                     app.render();
@@ -7721,12 +7836,21 @@ const crud = {
                     item.skip = true;
                 });
             } else if (result.value === 'complete') {
+                const today = new Date().setHours(0, 0, 0, 0);
                 tasksWithOpenSubtasks.forEach(item => {
                     item.openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
                         // CASCADE: ook checklist items voltooien
-                        sub.checklist?.forEach(c => { c.done = true; });
+                        sub.checklist?.forEach(c => {
+                            if (!c.done) {
+                                c.done = true;
+                                if (c.scheduledDate === today) {
+                                    productivityTracker.logCompleted();
+                                    productivityTracker.resetItemProcrastination(c);
+                                }
+                            }
+                        });
                     });
                 });
             } else if (result.value === 'delete') {
@@ -7736,12 +7860,21 @@ const crud = {
             }
         } else if (setting === 'complete-all') {
             // Auto-complete all open subtasks AND their checklist items
+            const today = new Date().setHours(0, 0, 0, 0);
             tasksWithOpenSubtasks.forEach(item => {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
                     // CASCADE: ook checklist items voltooien
-                    sub.checklist?.forEach(c => { c.done = true; });
+                    sub.checklist?.forEach(c => {
+                        if (!c.done) {
+                            c.done = true;
+                            if (c.scheduledDate === today) {
+                                productivityTracker.logCompleted();
+                                productivityTracker.resetItemProcrastination(c);
+                            }
+                        }
+                    });
                 });
             });
         }
@@ -7967,12 +8100,21 @@ const crud = {
                     item.skip = true;
                 });
             } else if (result.value === 'complete') {
+                const today = new Date().setHours(0, 0, 0, 0);
                 tasksWithOpenSubtasks.forEach(item => {
                     item.openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
                         // CASCADE: ook checklist items voltooien
-                        sub.checklist?.forEach(c => { c.done = true; });
+                        sub.checklist?.forEach(c => {
+                            if (!c.done) {
+                                c.done = true;
+                                if (c.scheduledDate === today) {
+                                    productivityTracker.logCompleted();
+                                    productivityTracker.resetItemProcrastination(c);
+                                }
+                            }
+                        });
                     });
                 });
             } else if (result.value === 'delete') {
@@ -7982,12 +8124,21 @@ const crud = {
             }
         } else if (setting === 'complete-all') {
             // Auto-complete all open subtasks AND their checklist items
+            const today = new Date().setHours(0, 0, 0, 0);
             tasksWithOpenSubtasks.forEach(item => {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
                     // CASCADE: ook checklist items voltooien
-                    sub.checklist?.forEach(c => { c.done = true; });
+                    sub.checklist?.forEach(c => {
+                        if (!c.done) {
+                            c.done = true;
+                            if (c.scheduledDate === today) {
+                                productivityTracker.logCompleted();
+                                productivityTracker.resetItemProcrastination(c);
+                            }
+                        }
+                    });
                 });
             });
         }
@@ -8886,19 +9037,37 @@ const todayView = {
                     }
                     
                     if (result.value === 'complete-all') {
+                        const today = new Date().setHours(0, 0, 0, 0);
                         openSubtasks.forEach(sub => {
                             sub.done = true;
                             sub.completedAt = Date.now();
                             // CASCADE: ook checklist items voltooien
-                            sub.checklist?.forEach(c => { c.done = true; });
+                            sub.checklist?.forEach(c => {
+                                if (!c.done) {
+                                    c.done = true;
+                                    if (c.scheduledDate === today) {
+                                        productivityTracker.logCompleted();
+                                        productivityTracker.resetItemProcrastination(c);
+                                    }
+                                }
+                            });
                         });
                     }
                 } else if (setting === 'complete-all') {
+                    const today = new Date().setHours(0, 0, 0, 0);
                     openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
                         // CASCADE: ook checklist items voltooien
-                        sub.checklist?.forEach(c => { c.done = true; });
+                        sub.checklist?.forEach(c => {
+                            if (!c.done) {
+                                c.done = true;
+                                if (c.scheduledDate === today) {
+                                    productivityTracker.logCompleted();
+                                    productivityTracker.resetItemProcrastination(c);
+                                }
+                            }
+                        });
                     });
                 }
                 // 'task-only' does nothing extra
@@ -9491,6 +9660,14 @@ const productivityTracker = {
         this.updateStreak();
     },
 
+    // Log when item is uncompleted (within grace period)
+    logUncompleted() {
+        const stats = this.getTodayStats();
+        if (stats.completed > 0) {
+            stats.completed--;
+        }
+    },
+
     // Log when item is rescheduled to different day
     logRescheduled() {
         const stats = this.getTodayStats();
@@ -9527,7 +9704,7 @@ const productivityTracker = {
         stats.focusMinutes += minutes;
     },
 
-    // Update streak counter
+    // Update streak counter (with 1-day tolerance)
     updateStreak() {
         this.init();
         const today = new Date().setHours(0,0,0,0);
@@ -9539,12 +9716,16 @@ const productivityTracker = {
         }
         
         const yesterday = today - (24 * 60 * 60 * 1000);
+        const twoDaysAgo = today - (2 * 24 * 60 * 60 * 1000);
         
         if (streaks.lastActiveDate === yesterday) {
-            // Consecutive day
+            // Consecutive day - streak continues
+            streaks.current++;
+        } else if (streaks.lastActiveDate === twoDaysAgo) {
+            // 1 day missed - streak continues (tolerance)
             streaks.current++;
         } else if (streaks.lastActiveDate !== today) {
-            // Streak broken, start new
+            // 2+ days missed - streak resets
             streaks.current = 1;
         }
         
@@ -9631,11 +9812,45 @@ const productivityTracker = {
         }
     },
 
-    // Reset procrastination data when item is completed
+    // Reset procrastination data when item is completed (with backup for grace period)
     resetItemProcrastination(item) {
-        if (item && item.procrastinationData) {
+        if (!item) return;
+        
+        // ALTIJD timestamp zetten voor grace period (ongeacht procrastinationData)
+        item._completedTimestamp = Date.now();
+        
+        // Alleen backup maken als er procrastinationData is
+        if (item.procrastinationData) {
+            item._procrastinationBackup = JSON.parse(JSON.stringify(item.procrastinationData));
             delete item.procrastinationData;
         }
+    },
+
+    // Restore procrastination data if within grace period (5 minutes)
+    // Returns true if within grace period, false otherwise
+    restoreItemProcrastination(item) {
+        if (!item) return false;
+        
+        const gracePeriod = 5 * 60 * 1000; // 5 minutes
+        const withinGrace = item._completedTimestamp && (Date.now() - item._completedTimestamp < gracePeriod);
+        
+        // Herstel procrastinationData als binnen grace period en backup bestaat
+        if (withinGrace && item._procrastinationBackup) {
+            item.procrastinationData = item._procrastinationBackup;
+        }
+        
+        // Clean up backup data (altijd opruimen)
+        delete item._procrastinationBackup;
+        delete item._completedTimestamp;
+        
+        return withinGrace;
+    },
+
+    // Check if item was recently completed (within grace period)
+    isWithinGracePeriod(item) {
+        if (!item || !item._completedTimestamp) return false;
+        const gracePeriod = 5 * 60 * 1000; // 5 minutes
+        return (Date.now() - item._completedTimestamp < gracePeriod);
     },
 
     // Get procrastination score for an item
@@ -9731,15 +9946,21 @@ const insightsView = {
             ? Math.round((stats.completed / stats.scheduled) * 100) 
             : 0;
         
-        const pomodoroRate = stats.pomodoroPlanned > 0
-            ? Math.round((stats.pomodoroCompleted / stats.pomodoroPlanned) * 100)
-            : 0;
+        // Pomodoro: show N/A when 0/0
+        const pomodoroDisplay = stats.pomodoroPlanned > 0
+            ? `${Math.round((stats.pomodoroCompleted / stats.pomodoroPlanned) * 100)}%`
+            : 'N/A';
+        const pomodoroSub = stats.pomodoroPlanned > 0
+            ? `${stats.pomodoroCompleted}/${stats.pomodoroPlanned} items`
+            : 'Nog geen sessies';
         
         container.innerHTML = `
             <div class="insights-container">
                 <div class="insights-header">
-                    <h2>&#128200; Inzichten</h2>
-                    <p>Je productiviteitspatronen op een rijtje</p>
+                    <div class="insights-title">
+                        &#128200; Inzichten
+                    </div>
+                    <p class="insights-subtitle">Je productiviteitspatronen op een rijtje</p>
                 </div>
                 
                 <div class="insight-period-selector">
@@ -9751,35 +9972,37 @@ const insightsView = {
                             onclick="insightsView.setPeriod(30)">30 dagen</button>
                 </div>
                 
-                <div class="insights-summary">
-                    ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
-                    ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${stats.scheduled} gepland`)}
-                    ${this.renderStreakCard(streaks)}
-                    ${this.renderStatCard('&#9201;', `${pomodoroRate}%`, 'Pomodoro succes', `${stats.pomodoroCompleted}/${stats.pomodoroPlanned} items`)}
-                </div>
-                
-                <div class="insights-two-column">
-                    <div class="insights-section">
-                        <h3 class="insights-section-title">&#128197; Voortgang per dag</h3>
-                        ${this.renderWeekChart()}
+                <div class="insights-content">
+                    <div class="insights-summary">
+                        ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
+                        ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${stats.scheduled} gepland`)}
+                        ${this.renderStreakCard(streaks)}
+                        ${this.renderStatCard('&#9201;', pomodoroDisplay, 'Pomodoro succes', pomodoroSub)}
                     </div>
                     
-                    ${this.renderNeedsAttentionSection(attentionItems)}
-                </div>
-                
-                <div class="insights-section">
-                    <h3 class="insights-section-title">&#128161; Patronen & Inzichten</h3>
-                    <div class="insights-patterns">
-                        ${this.renderPatterns(stats, streaks)}
+                    <div class="insights-two-column">
+                        <div class="insights-section">
+                            <h3 class="insights-section-title">&#128197; Voortgang per dag</h3>
+                            ${this.renderWeekChart()}
+                        </div>
+                        
+                        ${this.renderNeedsAttentionSection(attentionItems)}
                     </div>
+                    
+                    <div class="insights-section">
+                        <h3 class="insights-section-title">&#128161; Patronen & Inzichten</h3>
+                        <div class="insights-patterns">
+                            ${this.renderPatterns(stats, streaks)}
+                        </div>
+                    </div>
+                    
+                    ${stats.pomodoroPlanned > 0 ? `
+                    <div class="insights-section">
+                        <h3 class="insights-section-title">&#127813; Pomodoro Details</h3>
+                        ${this.renderPomodoroDetails(stats)}
+                    </div>
+                    ` : ''}
                 </div>
-                
-                ${stats.pomodoroPlanned > 0 ? `
-                <div class="insights-section">
-                    <h3 class="insights-section-title">&#127813; Pomodoro Details</h3>
-                    ${this.renderPomodoroDetails(stats)}
-                </div>
-                ` : ''}
             </div>
         `;
     },
@@ -9788,15 +10011,19 @@ const insightsView = {
         return `
             <div class="insights-container">
                 <div class="insights-header">
-                    <h2>&#128200; Inzichten</h2>
+                    <div class="insights-title">
+                        &#128200; Inzichten
+                    </div>
                 </div>
-                <div class="insights-empty">
-                    <div class="insights-empty-icon">&#128202;</div>
-                    <h3>Nog geen data beschikbaar</h3>
-                    <p>Begin met het plannen en voltooien van taken om je productiviteitspatronen te ontdekken.</p>
-                    <p style="margin-top: 12px; font-size: 13px;">
-                        Ga naar <strong>Vandaag</strong> of <strong>Week</strong> view om taken in te plannen.
-                    </p>
+                <div class="insights-content">
+                    <div class="insights-empty">
+                        <div class="insights-empty-icon">&#128202;</div>
+                        <h3>Nog geen data beschikbaar</h3>
+                        <p>Begin met het plannen en voltooien van taken om je productiviteitspatronen te ontdekken.</p>
+                        <p style="margin-top: 12px; font-size: 13px;">
+                            Ga naar <strong>Vandaag</strong> of <strong>Week</strong> view om taken in te plannen.
+                        </p>
+                    </div>
                 </div>
             </div>
         `;
@@ -9837,7 +10064,7 @@ const insightsView = {
             streakEmoji = '&#127881;'; // party
         }
         
-        const tooltipText = 'Een streak telt het aantal opeenvolgende dagen waarop je minimaal 1 taak hebt voltooid';
+        const tooltipText = 'Streak: dagen op rij actief. 1 dag overslaan mag - je streak blijft behouden!';
         
         return `
             <div class="insight-stat-card streak-tooltip" data-tooltip="${tooltipText}">
@@ -9929,20 +10156,12 @@ const insightsView = {
         const today = new Date().setHours(0,0,0,0);
         const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
         
-        let html = '<div class="insight-week-chart">';
+        // Toon alle dagen, compact mode voor >14 dagen
+        const daysToShow = this.currentPeriod;
+        const isCompact = daysToShow > 14;
         
-        // Get max for scaling
-        let maxCompleted = 1;
-        for (let i = this.currentPeriod - 1; i >= 0; i--) {
-            const dayTimestamp = today - (i * 24 * 60 * 60 * 1000);
-            const dayStats = state.db.productivityStats.dailyLogs.find(l => l.date === dayTimestamp);
-            if (dayStats && dayStats.completed > maxCompleted) {
-                maxCompleted = dayStats.completed;
-            }
-        }
+        let html = `<div class="insight-week-chart ${isCompact ? 'compact' : ''}">`;
         
-        // Render last N days
-        const daysToShow = Math.min(this.currentPeriod, 14); // Max 14 days in chart
         for (let i = daysToShow - 1; i >= 0; i--) {
             const dayTimestamp = today - (i * 24 * 60 * 60 * 1000);
             const dayDate = new Date(dayTimestamp);
@@ -9950,9 +10169,28 @@ const insightsView = {
             
             const completed = dayStats ? dayStats.completed : 0;
             const scheduled = dayStats ? dayStats.scheduled : 0;
-            const barWidth = maxCompleted > 0 ? (completed / maxCompleted) * 100 : 0;
             const isToday = dayTimestamp === today;
             
+            // Calculate completion rate (completed/scheduled)
+            const completionRate = scheduled > 0 ? (completed / scheduled) * 100 : 0;
+            const barWidth = Math.min(completionRate, 100); // Cap at 100%
+            
+            // Determine bar color class based on completion rate
+            let barClass = 'zero';
+            if (scheduled === 0) {
+                barClass = 'zero';
+            } else if (completionRate > 0 && completionRate < 50) {
+                barClass = 'low';
+            } else if (completionRate >= 50 && completionRate < 80) {
+                barClass = 'medium';
+            } else if (completionRate >= 80) {
+                barClass = 'high';
+            }
+            
+            // Percentage display
+            const pctDisplay = scheduled > 0 ? `${Math.round(completionRate)}%` : '-';
+            
+            // Compact day label for >14 days
             const dayLabel = isToday ? 'Vandaag' : 
                 (i === 1 ? 'Gisteren' : `${dayNames[dayDate.getDay()]} ${dayDate.getDate()}`);
             
@@ -9960,9 +10198,10 @@ const insightsView = {
                 <div class="insight-day-row">
                     <div class="insight-day-label ${isToday ? 'today' : ''}">${dayLabel}</div>
                     <div class="insight-day-bar-container">
-                        <div class="insight-day-bar ${completed === 0 ? 'zero' : ''}" 
+                        <div class="insight-day-bar ${barClass}" 
                              style="width: ${Math.max(barWidth, 2)}%"></div>
                     </div>
+                    <div class="insight-day-pct">${pctDisplay}</div>
                     <div class="insight-day-stats">
                         <span class="completed">${completed}</span>/${scheduled || '-'}
                     </div>
@@ -14133,6 +14372,11 @@ const pomodoro = {
                         celebration.show(itemName);
                     }
                 } else {
+                    // Unchecking - altijd cleanup doen, stats alleen binnen grace period
+                    const withinGrace = productivityTracker.restoreItemProcrastination(pomItem.item);
+                    if (withinGrace) {
+                        productivityTracker.logUncompleted();
+                    }
                     delete pomItem.item.completedAt;
                 }
                 await app.save();
