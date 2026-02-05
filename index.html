@@ -7138,6 +7138,13 @@ const renderer = {
                                 openSubtasks.forEach(sub => {
                                     sub.done = true;
                                     sub.completedAt = Date.now();
+                                    // Track subtask completion
+                                    if (sub.scheduledDate === today) {
+                                        productivityTracker.logCompleted();
+                                    } else {
+                                        productivityTracker.logUnscheduledCompleted();
+                                    }
+                                    productivityTracker.resetItemProcrastination(sub);
                                     // CASCADE: ook checklist items voltooien
                                     sub.checklist?.forEach(c => {
                                         if (!c.done) {
@@ -7157,6 +7164,13 @@ const renderer = {
                             openSubtasks.forEach(sub => {
                                 sub.done = true;
                                 sub.completedAt = Date.now();
+                                // Track subtask completion
+                                if (sub.scheduledDate === today) {
+                                    productivityTracker.logCompleted();
+                                } else {
+                                    productivityTracker.logUnscheduledCompleted();
+                                }
+                                productivityTracker.resetItemProcrastination(sub);
                                 // CASCADE: ook checklist items voltooien
                                 sub.checklist?.forEach(c => {
                                     if (!c.done) {
@@ -7966,6 +7980,13 @@ const crud = {
                     item.openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
+                        // Track subtask completion
+                        if (sub.scheduledDate === today) {
+                            productivityTracker.logCompleted();
+                        } else {
+                            productivityTracker.logUnscheduledCompleted();
+                        }
+                        productivityTracker.resetItemProcrastination(sub);
                         // CASCADE: ook checklist items voltooien
                         sub.checklist?.forEach(c => {
                             if (!c.done) {
@@ -7990,6 +8011,13 @@ const crud = {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
+                    // Track subtask completion
+                    if (sub.scheduledDate === today) {
+                        productivityTracker.logCompleted();
+                    } else {
+                        productivityTracker.logUnscheduledCompleted();
+                    }
+                    productivityTracker.resetItemProcrastination(sub);
                     // CASCADE: ook checklist items voltooien
                     sub.checklist?.forEach(c => {
                         if (!c.done) {
@@ -8254,6 +8282,13 @@ const crud = {
                 item.openSubtasks.forEach(sub => {
                     sub.done = true;
                     sub.completedAt = Date.now();
+                    // Track subtask completion
+                    if (sub.scheduledDate === today) {
+                        productivityTracker.logCompleted();
+                    } else {
+                        productivityTracker.logUnscheduledCompleted();
+                    }
+                    productivityTracker.resetItemProcrastination(sub);
                     // CASCADE: ook checklist items voltooien
                     sub.checklist?.forEach(c => {
                         if (!c.done) {
@@ -9192,6 +9227,13 @@ const todayView = {
                         openSubtasks.forEach(sub => {
                             sub.done = true;
                             sub.completedAt = Date.now();
+                            // Track subtask completion
+                            if (sub.scheduledDate === today) {
+                                productivityTracker.logCompleted();
+                            } else {
+                                productivityTracker.logUnscheduledCompleted();
+                            }
+                            productivityTracker.resetItemProcrastination(sub);
                             // CASCADE: ook checklist items voltooien
                             sub.checklist?.forEach(c => {
                                 if (!c.done) {
@@ -9209,6 +9251,13 @@ const todayView = {
                     openSubtasks.forEach(sub => {
                         sub.done = true;
                         sub.completedAt = Date.now();
+                        // Track subtask completion
+                        if (sub.scheduledDate === today) {
+                            productivityTracker.logCompleted();
+                        } else {
+                            productivityTracker.logUnscheduledCompleted();
+                        }
+                        productivityTracker.resetItemProcrastination(sub);
                         // CASCADE: ook checklist items voltooien
                         sub.checklist?.forEach(c => {
                             if (!c.done) {
@@ -9273,12 +9322,23 @@ const todayView = {
         // Save undo state before making changes
         undoRedo.saveState();
         
+        // Track previous state for stats
+        const wasNotDone = !targetItem.done;
+        
         // Toggle the item
         targetItem.done = !targetItem.done;
         if (targetItem.done) {
             targetItem.completedAt = Date.now();
+            // Track completion in productivity stats - all items in Today view are scheduled for today
+            productivityTracker.logCompleted();
+            productivityTracker.resetItemProcrastination(targetItem);
             celebration.show(targetItem.name || targetItem.text);
         } else {
+            // Unchecking - cleanup procrastination data and stats within grace period
+            const withinGrace = productivityTracker.restoreItemProcrastination(targetItem);
+            if (withinGrace) {
+                productivityTracker.logUncompleted();
+            }
             delete targetItem.completedAt;
         }
         
@@ -10495,11 +10555,16 @@ const insightsView = {
         // Determine which labels to show based on period
         const labelInterval = daysToShow <= 7 ? 1 : (daysToShow <= 14 ? 2 : 5);
         
-        // Build bars HTML
+        // Build bars HTML - scale to 100% (percentage of scheduled completed)
         let barsHtml = '';
         dayData.forEach((day, idx) => {
-            const scheduledHeight = (day.scheduledCompleted / maxCompleted) * 100;
-            const unscheduledHeight = (day.unscheduledCompleted / maxCompleted) * 100;
+            // Calculate percentage: how much of scheduled was completed (max 100%)
+            const completionPct = day.scheduled > 0 ? Math.min((day.completed / day.scheduled) * 100, 100) : 0;
+            // Split between scheduled and unscheduled portions within that percentage
+            const scheduledPortion = day.completed > 0 ? (day.scheduledCompleted / day.completed) : 0;
+            const unscheduledPortion = day.completed > 0 ? (day.unscheduledCompleted / day.completed) : 0;
+            const scheduledHeight = completionPct * scheduledPortion;
+            const unscheduledHeight = completionPct * unscheduledPortion;
             const totalItems = day.scheduled;
             const pct = totalItems > 0 ? Math.round((day.completed / totalItems) * 100) : 0;
             
@@ -10539,7 +10604,8 @@ const insightsView = {
             const showLabel = (idx % labelInterval === 0) || idx === 0 || idx === dayData.length - 1 || day.isToday;
             
             if (showLabel) {
-                const label = day.isToday ? 'Vandaag' : `${dayNames[day.date.getDay()]} ${day.date.getDate()}`;
+                const dayNum = String(day.date.getDate()).padStart(2, '0');
+                const label = day.isToday ? 'Vandaag' : `${dayNum}-${monthNames[day.date.getMonth()]}`;
                 labelsHtml += `<span class="chart-x-label ${day.isToday ? 'today' : ''}">${label}</span>`;
             } else {
                 labelsHtml += `<span class="chart-x-label"></span>`;
