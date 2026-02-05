@@ -7151,8 +7151,10 @@ const renderer = {
                                             c.done = true;
                                             if (c.scheduledDate === today) {
                                                 productivityTracker.logCompleted();
-                                                productivityTracker.resetItemProcrastination(c);
+                                            } else {
+                                                productivityTracker.logUnscheduledCompleted();
                                             }
+                                            productivityTracker.resetItemProcrastination(c);
                                         }
                                     });
                                 });
@@ -7177,8 +7179,10 @@ const renderer = {
                                         c.done = true;
                                         if (c.scheduledDate === today) {
                                             productivityTracker.logCompleted();
-                                            productivityTracker.resetItemProcrastination(c);
+                                        } else {
+                                            productivityTracker.logUnscheduledCompleted();
                                         }
+                                        productivityTracker.resetItemProcrastination(c);
                                     }
                                 });
                             });
@@ -7993,8 +7997,10 @@ const crud = {
                                 c.done = true;
                                 if (c.scheduledDate === today) {
                                     productivityTracker.logCompleted();
-                                    productivityTracker.resetItemProcrastination(c);
+                                } else {
+                                    productivityTracker.logUnscheduledCompleted();
                                 }
+                                productivityTracker.resetItemProcrastination(c);
                             }
                         });
                     });
@@ -8024,8 +8030,10 @@ const crud = {
                             c.done = true;
                             if (c.scheduledDate === today) {
                                 productivityTracker.logCompleted();
-                                productivityTracker.resetItemProcrastination(c);
+                            } else {
+                                productivityTracker.logUnscheduledCompleted();
                             }
+                            productivityTracker.resetItemProcrastination(c);
                         }
                     });
                 });
@@ -8264,8 +8272,10 @@ const crud = {
                                 c.done = true;
                                 if (c.scheduledDate === today) {
                                     productivityTracker.logCompleted();
-                                    productivityTracker.resetItemProcrastination(c);
+                                } else {
+                                    productivityTracker.logUnscheduledCompleted();
                                 }
+                                productivityTracker.resetItemProcrastination(c);
                             }
                         });
                     });
@@ -8295,8 +8305,10 @@ const crud = {
                             c.done = true;
                             if (c.scheduledDate === today) {
                                 productivityTracker.logCompleted();
-                                productivityTracker.resetItemProcrastination(c);
+                            } else {
+                                productivityTracker.logUnscheduledCompleted();
                             }
+                            productivityTracker.resetItemProcrastination(c);
                         }
                     });
                 });
@@ -9240,8 +9252,10 @@ const todayView = {
                                     c.done = true;
                                     if (c.scheduledDate === today) {
                                         productivityTracker.logCompleted();
-                                        productivityTracker.resetItemProcrastination(c);
+                                    } else {
+                                        productivityTracker.logUnscheduledCompleted();
                                     }
+                                    productivityTracker.resetItemProcrastination(c);
                                 }
                             });
                         });
@@ -9264,8 +9278,10 @@ const todayView = {
                                 c.done = true;
                                 if (c.scheduledDate === today) {
                                     productivityTracker.logCompleted();
-                                    productivityTracker.resetItemProcrastination(c);
+                                } else {
+                                    productivityTracker.logUnscheduledCompleted();
                                 }
+                                productivityTracker.resetItemProcrastination(c);
                             }
                         });
                     });
@@ -9359,6 +9375,7 @@ const todayView = {
                     if (type === 'task' && task.id === id && task.scheduledDate === today) {
                         delete task.scheduledDate;
                         delete task.todayPriority;
+                        productivityTracker.logUnscheduledFromDate(today);
                         itemFound = true;
                     }
                     
@@ -9367,6 +9384,7 @@ const todayView = {
                             if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
                                 delete sub.scheduledDate;
                                 delete sub.todayPriority;
+                                productivityTracker.logUnscheduledFromDate(today);
                                 itemFound = true;
                             }
                             
@@ -9375,6 +9393,7 @@ const todayView = {
                                     if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
                                         delete checkItem.scheduledDate;
                                         delete checkItem.todayPriority;
+                                        productivityTracker.logUnscheduledFromDate(today);
                                         itemFound = true;
                                     }
                                 });
