@@ -5341,6 +5341,7 @@ const firebaseAuth = {
                     }
                     // Process recurring tasks on data load
                     await app.processRecurringTasks();
+                    await app.checkAndResetTodayTasks();
                     app.render();
                     toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
                 }
@@ -5852,6 +5853,7 @@ const app = {
             // Process recurring tasks on app init (for non-Firebase users)
             setTimeout(() => {
                 this.processRecurringTasks();
+                this.checkAndResetTodayTasks();
             }, 500);
             
             console.log('✓ App initialized successfully');
@@ -5998,9 +6000,11 @@ const app = {
                             celebration.show(task.name);
                         }
                     } else {
-                        // Unchecking - altijd cleanup doen, stats alleen binnen grace period
-                        const withinGrace = productivityTracker.restoreItemProcrastination(task);
-                        if (withinGrace) {
+                        // Unchecking - always correct stats if completed today
+                        const completedToday = task.completedAt && 
+                            new Date(task.completedAt).setHours(0,0,0,0) === today;
+                        productivityTracker.restoreItemProcrastination(task);
+                        if (completedToday) {
                             if (wasScheduledForToday) {
                                 productivityTracker.logUncompleted();
                             } else {
@@ -6231,31 +6235,54 @@ const app = {
         const today = new Date().setHours(0,0,0,0);
         const lastOpen = localStorage.getItem('lastOpenDate');
         
-        // Als het een nieuwe dag is, reset alle doDate velden van gisteren
+        // Als het een nieuwe dag is
         if (lastOpen && parseInt(lastOpen) < today) {
-            let changed = false;
+            // Check of wizard vandaag al is afgerond
+            const wizardDoneToday = state.db.productivityStats?.lastMorningWizardDate === today;
             
-            state.db.categories.forEach(cat => {
-                cat.projects?.forEach(proj => {
-                    proj.tasks?.forEach(task => {
-                        // Reset alleen als de scheduledDate van gisteren of eerder is
-                        if (task.scheduledDate && task.scheduledDate < today) {
-                            task.scheduledDate = null;
-                            changed = true;
-                        }
-                    });
-                });
-            });
-            
-            if (changed) {
-                await this.save();
-                this.setStatus("Taken van gisteren gereset", "success");
+            if (wizardDoneToday) {
+                // Wizard al gedaan vandaag - direct opruimen
+                this.resetOverdueScheduledDates();
             }
+            // Anders: NIET resetten - wizard moet overdue items nog tonen
         }
         
         // Sla huidige datum op
         localStorage.setItem('lastOpenDate', today.toString());
         state.lastOpenDate = today;
+    },
+
+    // Reset scheduledDate voor alle onvoltooide items van eerdere dagen
+    // Wordt aangeroepen NA de wizard, of bij pagina-load als wizard al gedaan is
+    resetOverdueScheduledDates() {
+        const today = new Date().setHours(0,0,0,0);
+        let changed = false;
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Reset alleen niet-voltooide items met oude scheduledDate
+                    if (!task.done && task.scheduledDate && task.scheduledDate < today) {
+                        task.scheduledDate = null;
+                        changed = true;
+                    }
+                    task.subtasks?.forEach(sub => {
+                        if (!sub.done && sub.scheduledDate && sub.scheduledDate < today) {
+                            sub.scheduledDate = null;
+                            changed = true;
+                        }
+                        sub.checklist?.forEach(c => {
+                            if (!c.done && c.scheduledDate && c.scheduledDate < today) {
+                                c.scheduledDate = null;
+                                changed = true;
+                            }
+                        });
+                    });
+                });
+            });
+        });
+        
+        return changed;
     },
 
     async processRecurringTasks() {
@@ -7277,11 +7304,13 @@ const renderer = {
                                 const today = new Date().setHours(0, 0, 0, 0);
                                 openChecklist.forEach(c => {
                                     c.done = true;
-                                    // Track completion if checklist item was scheduled for today
+                                    // Track completion for checklist item
                                     if (c.scheduledDate === today) {
                                         productivityTracker.logCompleted();
-                                        productivityTracker.resetItemProcrastination(c);
+                                    } else {
+                                        productivityTracker.logUnscheduledCompleted();
                                     }
+                                    productivityTracker.resetItemProcrastination(c);
                                 });
                             }
                             e.target.checked = true;
@@ -7290,11 +7319,13 @@ const renderer = {
                             const today = new Date().setHours(0, 0, 0, 0);
                             openChecklist.forEach(c => {
                                 c.done = true;
-                                // Track completion if checklist item was scheduled for today
+                                // Track completion for checklist item
                                 if (c.scheduledDate === today) {
                                     productivityTracker.logCompleted();
-                                    productivityTracker.resetItemProcrastination(c);
+                                } else {
+                                    productivityTracker.logUnscheduledCompleted();
                                 }
+                                productivityTracker.resetItemProcrastination(c);
                             });
                         }
                         // 'task-only' does nothing extra - checklist items remain open
@@ -7318,9 +7349,11 @@ const renderer = {
                         celebration.show(item.name);
                     }
                 } else {
-                    // Unchecking - altijd cleanup doen, stats alleen binnen grace period
-                    const withinGrace = productivityTracker.restoreItemProcrastination(item);
-                    if (withinGrace) {
+                    // Unchecking - always correct stats if completed today
+                    const completedToday = item.completedAt && 
+                        new Date(item.completedAt).setHours(0,0,0,0) === today;
+                    productivityTracker.restoreItemProcrastination(item);
+                    if (completedToday) {
                         if (wasScheduledForToday) {
                             productivityTracker.logUncompleted();
                         } else {
@@ -7446,9 +7479,12 @@ const renderer = {
                             celebration.show(checkItem.text);
                         }
                     } else {
-                        // Uncompleting - check grace period
-                        const withinGrace = productivityTracker.restoreItemProcrastination(checkItem);
-                        if (withinGrace) {
+                        // Uncompleting - always correct stats if completed today
+                        const completedTimestamp = checkItem._completedTimestamp;
+                        const completedToday = completedTimestamp && 
+                            new Date(completedTimestamp).setHours(0,0,0,0) === today;
+                        productivityTracker.restoreItemProcrastination(checkItem);
+                        if (completedToday) {
                             if (wasScheduledForToday) {
                                 productivityTracker.logUncompleted();
                             } else {
@@ -7790,6 +7826,30 @@ const crud = {
         const idx = list.findIndex(i => i.id === id);
         
         if (idx > -1) {
+            // Adjust scheduled counts for deleted item and its children
+            const deletedItem = list[idx];
+            if (deletedItem && deletedItem.scheduledDate) {
+                productivityTracker.logUnscheduledFromDate(deletedItem.scheduledDate);
+            }
+            if (type === 'task' && deletedItem) {
+                deletedItem.subtasks?.forEach(sub => {
+                    if (sub.scheduledDate) {
+                        productivityTracker.logUnscheduledFromDate(sub.scheduledDate);
+                    }
+                    sub.checklist?.forEach(c => {
+                        if (c.scheduledDate) {
+                            productivityTracker.logUnscheduledFromDate(c.scheduledDate);
+                        }
+                    });
+                });
+            }
+            if (type === 'sub' && deletedItem) {
+                deletedItem.checklist?.forEach(c => {
+                    if (c.scheduledDate) {
+                        productivityTracker.logUnscheduledFromDate(c.scheduledDate);
+                    }
+                });
+            }
             list.splice(idx, 1);
             if (state.sel[type] === id) state.sel[type] = null;
             await app.save();
@@ -7845,6 +7905,23 @@ const crud = {
         }
         
         const now = Date.now();
+        
+        // Adjust scheduled counts for all items being archived
+        proj.tasks?.forEach(task => {
+            if (task.scheduledDate) {
+                productivityTracker.logUnscheduledFromDate(task.scheduledDate);
+            }
+            task.subtasks?.forEach(sub => {
+                if (sub.scheduledDate) {
+                    productivityTracker.logUnscheduledFromDate(sub.scheduledDate);
+                }
+                sub.checklist?.forEach(c => {
+                    if (c.scheduledDate) {
+                        productivityTracker.logUnscheduledFromDate(c.scheduledDate);
+                    }
+                });
+            });
+        });
         
         // Archive ALL subtasks first
         proj.tasks?.forEach(task => {
@@ -9416,9 +9493,11 @@ const todayView = {
             productivityTracker.resetItemProcrastination(targetItem);
             celebration.show(targetItem.name || targetItem.text);
         } else {
-            // Unchecking - cleanup procrastination data and stats within grace period
-            const withinGrace = productivityTracker.restoreItemProcrastination(targetItem);
-            if (withinGrace) {
+            // Unchecking - always correct stats if completed today
+            const completedToday = targetItem.completedAt && 
+                new Date(targetItem.completedAt).setHours(0,0,0,0) === today;
+            productivityTracker.restoreItemProcrastination(targetItem);
+            if (completedToday) {
                 productivityTracker.logUncompleted();
             }
             delete targetItem.completedAt;
@@ -12395,6 +12474,9 @@ const morningWizard = {
                     if (item.type === 'task') {
                         const realTask = proj.tasks?.find(t => t.id === item._taskId);
                         if (realTask) {
+                            const oldDate = realTask.scheduledDate;
+                            if (oldDate === today) return; // Already scheduled for today
+                            if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                             realTask.scheduledDate = today;
                             productivityTracker.logScheduledForDate(today);
                         }
@@ -12403,6 +12485,9 @@ const morningWizard = {
                             if (task.id !== item._taskId) return;
                             const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
                             if (realSub) {
+                                const oldDate = realSub.scheduledDate;
+                                if (oldDate === today) return; // Already scheduled for today
+                                if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                                 realSub.scheduledDate = today;
                                 productivityTracker.logScheduledForDate(today);
                             }
@@ -12413,7 +12498,11 @@ const morningWizard = {
                             task.subtasks?.forEach(sub => {
                                 if (sub.id !== item._subtaskId) return;
                                 if (sub.checklist && sub.checklist[item._checklistIndex]) {
-                                    sub.checklist[item._checklistIndex].scheduledDate = today;
+                                    const checkItem = sub.checklist[item._checklistIndex];
+                                    const oldDate = checkItem.scheduledDate;
+                                    if (oldDate === today) return; // Already scheduled for today
+                                    if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
+                                    checkItem.scheduledDate = today;
                                     productivityTracker.logScheduledForDate(today);
                                 }
                             });
@@ -12478,8 +12567,12 @@ const morningWizard = {
                     // Direct task
                     const realTask = proj.tasks?.find(t => t.id === item._taskId);
                     if (realTask) {
-                        realTask.scheduledDate = today;
-                        productivityTracker.logScheduledForDate(today);
+                        const oldDate = realTask.scheduledDate;
+                        if (oldDate !== today) {
+                            if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
+                            realTask.scheduledDate = today;
+                            productivityTracker.logScheduledForDate(today);
+                        }
                     }
                 } else if (item.type === 'subtask') {
                     // Subtask binnen task
@@ -12487,8 +12580,12 @@ const morningWizard = {
                         if (task.id !== item._taskId) return;
                         const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
                         if (realSub) {
-                            realSub.scheduledDate = today;
-                            productivityTracker.logScheduledForDate(today);
+                            const oldDate = realSub.scheduledDate;
+                            if (oldDate !== today) {
+                                if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
+                                realSub.scheduledDate = today;
+                                productivityTracker.logScheduledForDate(today);
+                            }
                         }
                     });
                 } else if (item.type === 'checklist') {
@@ -12498,8 +12595,13 @@ const morningWizard = {
                         task.subtasks?.forEach(sub => {
                             if (sub.id !== item._subtaskId) return;
                             if (sub.checklist && sub.checklist[item._checklistIndex]) {
-                                sub.checklist[item._checklistIndex].scheduledDate = today;
-                                productivityTracker.logScheduledForDate(today);
+                                const checkItem = sub.checklist[item._checklistIndex];
+                                const oldDate = checkItem.scheduledDate;
+                                if (oldDate !== today) {
+                                    if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
+                                    checkItem.scheduledDate = today;
+                                    productivityTracker.logScheduledForDate(today);
+                                }
                             }
                         });
                     });
@@ -13448,8 +13550,11 @@ const morningWizard = {
                     if (proj.id !== recurringTask._projId) return;
                     const task = proj.tasks?.find(t => t.id === recurringTask.id);
                     if (task) {
+                        const wasAlreadyScheduledToday = task.scheduledDate === today;
                         task.scheduledDate = today;
-                        productivityTracker.logScheduledForDate(today);
+                        if (!wasAlreadyScheduledToday) {
+                            productivityTracker.logScheduledForDate(today);
+                        }
                     }
                 });
             });
@@ -13528,6 +13633,9 @@ const morningWizard = {
             state.db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
         }
         state.db.productivityStats.lastMorningWizardDate = today;
+        
+        // Clean up any remaining overdue scheduled dates the user didn't explicitly handle
+        app.resetOverdueScheduledDates();
         
         app.save();
         this.close();
@@ -15349,9 +15457,11 @@ const pomodoro = {
                         celebration.show(itemName);
                     }
                 } else {
-                    // Unchecking - altijd cleanup doen, stats alleen binnen grace period
-                    const withinGrace = productivityTracker.restoreItemProcrastination(pomItem.item);
-                    if (withinGrace) {
+                    // Unchecking - always correct stats if completed today
+                    const completedToday = pomItem.item.completedAt && 
+                        new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
+                    productivityTracker.restoreItemProcrastination(pomItem.item);
+                    if (completedToday) {
                         if (wasScheduledForToday) {
                             productivityTracker.logUncompleted();
                         } else {
@@ -16412,4 +16522,3 @@ app.init();
     </div>
 </div>
 </html>
-
