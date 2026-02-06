@@ -3914,6 +3914,40 @@
             color: var(--text-muted);
         }
         
+        /* Recurring task preview styling */
+        .week-task-card.recurring-preview {
+            opacity: 0.65;
+            border-style: dashed;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--bg-panel),
+                var(--bg-panel) 10px,
+                rgba(99, 102, 241, 0.03) 10px,
+                rgba(99, 102, 241, 0.03) 20px
+            );
+            cursor: default;
+        }
+        
+        body.dark-mode .week-task-card.recurring-preview {
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--bg-panel),
+                var(--bg-panel) 10px,
+                rgba(99, 102, 241, 0.08) 10px,
+                rgba(99, 102, 241, 0.08) 20px
+            );
+        }
+        
+        .week-task-card.recurring-preview:hover {
+            opacity: 0.85;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .week-task-card.recurring-preview .week-task-navigate {
+            opacity: 1;
+        }
+        
         .week-empty-message {
             text-align: center;
             padding: 40px 20px;
@@ -4495,6 +4529,16 @@
         
         .wizard-btn-secondary:hover {
             border-color: var(--primary);
+        }
+        
+        /* Recurring Tasks Wizard Styling */
+        .wizard-recurring-item {
+            background: var(--primary-light) !important;
+        }
+        
+        .wizard-recurring-list {
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         /* Review Cards */
@@ -6275,6 +6319,10 @@ const app = {
                             // Reset task for next occurrence
                             task.done = false;
                             task.status = 'planned';
+                            
+                            // NOTE: We do NOT set scheduledDate here anymore
+                            // Recurring tasks are scheduled via the Morning Wizard
+                            // This allows users to control which recurring tasks they commit to each day
                             
                             // Calculate next due date
                             const next = new Date(nextDue);
@@ -10910,6 +10958,94 @@ const weekView = {
         this.render();
     },
     
+    // Check if a recurring task should appear on a specific day
+    isRecurringOnDay(task, dayTimestamp) {
+        const r = task.recurring;
+        if (!r || !r.enabled) return false;
+        
+        const dayDate = new Date(dayTimestamp);
+        const dayOfWeek = dayDate.getDay(); // 0=Sunday, 1=Monday, etc.
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        // Don't show past days (before today) - those are handled by normal scheduling
+        if (dayTimestamp < today) return false;
+        
+        // Check end conditions
+        if (r.endDate && dayTimestamp > r.endDate) return false;
+        
+        // Check frequency
+        if (r.frequency === 'daily') {
+            // Daily with specific days
+            if (r.days && r.days.length > 0 && r.days.length < 7) {
+                return r.days.includes(dayOfWeek);
+            }
+            // Plain daily (every day or every N days)
+            return true;
+        } else if (r.frequency === 'weekly') {
+            // Weekly on specific days
+            if (r.days && r.days.length > 0) {
+                return r.days.includes(dayOfWeek);
+            }
+            // Weekly without specific days - same day as original due
+            const originalDay = task.dueDate ? new Date(task.dueDate).getDay() : new Date(r.nextDue || today).getDay();
+            return dayOfWeek === originalDay;
+        } else if (r.frequency === 'weekdays') {
+            // Monday to Friday only
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+        } else if (r.frequency === 'monthly') {
+            // Monthly tasks - check if this day matches the monthly pattern
+            if (r.monthDayType === 'first' && dayDate.getDate() === 1) return true;
+            if (r.monthDayType === 'last') {
+                const lastDay = new Date(dayDate.getFullYear(), dayDate.getMonth() + 1, 0).getDate();
+                return dayDate.getDate() === lastDay;
+            }
+            if (r.monthDay && dayDate.getDate() === r.monthDay) return true;
+            return false;
+        }
+        
+        return false;
+    },
+    
+    // Get recurring tasks that should appear on a day but aren't explicitly scheduled
+    getRecurringTasksForDay(dayTimestamp) {
+        const items = [];
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Skip if not recurring or disabled
+                    if (!task.recurring?.enabled) return;
+                    
+                    // Skip if already scheduled for this day (will be shown normally)
+                    if (task.scheduledDate === dayTimestamp) return;
+                    
+                    // Skip if task is done
+                    if (task.done) return;
+                    
+                    // Skip past days (before today)
+                    if (dayTimestamp < today) return;
+                    
+                    // Show if recurring pattern matches (today or future)
+                    if (this.isRecurringOnDay(task, dayTimestamp)) {
+                        items.push({
+                            ...task,
+                            _type: 'task',
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id,
+                            _taskId: task.id,
+                            _isRecurringPreview: true // Flag for visual differentiation
+                        });
+                    }
+                });
+            });
+        });
+        
+        return items;
+    },
+    
     getTasksForDay(dayTimestamp) {
         const items = [];
         state.db.categories.forEach(cat => {
@@ -10969,6 +11105,11 @@ const weekView = {
                 });
             });
         });
+        
+        // Add recurring task previews for future days
+        const recurringPreviews = this.getRecurringTasksForDay(dayTimestamp);
+        items.push(...recurringPreviews);
+        
         return items;
     },
     
@@ -11231,6 +11372,8 @@ const weekView = {
     
     renderTaskCard(item) {
         const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '';
+        const isRecurringPreview = item._isRecurringPreview || false;
+        const recurringIcon = item.recurring?.enabled ? '🔃' : '';
         
         // Type badges and icons matching today view
         let typeBadge = '';
@@ -11251,19 +11394,25 @@ const weekView = {
             meta = `${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`;
         }
         
+        // Add recurring-preview class for visual differentiation
+        const recurringClass = isRecurringPreview ? 'recurring-preview' : '';
+        const draggable = isRecurringPreview ? 'false' : 'true'; // Recurring previews can't be dragged
+        
         return `
-            <div class="week-task-card ${typeClass}" 
-                 draggable="true"
+            <div class="week-task-card ${typeClass} ${recurringClass}" 
+                 draggable="${draggable}"
                  data-task-id="${item.id}"
                  data-cat-id="${item._catId}"
                  data-proj-id="${item._projId}"
                  data-task-parent-id="${item._taskId || ''}"
                  data-subtask-id="${item._subtaskId || ''}"
                  data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
-                 data-item-type="${item._type || 'task'}">
+                 data-item-type="${item._type || 'task'}"
+                 data-is-recurring-preview="${isRecurringPreview}"
+                 title="${isRecurringPreview ? 'Terugkerende taak (preview)' : ''}">
                 <div class="week-task-header">
                     <span class="week-task-badge">${typeBadge}</span>
-                    <div class="week-task-title">${priorityIcon} ${item.name || item.text}</div>
+                    <div class="week-task-title">${recurringIcon} ${priorityIcon} ${item.name || item.text}</div>
                     <button class="week-task-navigate" 
                             onclick="event.stopPropagation(); weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}');"
                             title="Ga naar deze taak in alles view">
@@ -11514,11 +11663,11 @@ const reminders = {
         const btn = document.getElementById('reminderActionBtn');
         
         title.innerHTML = '&#127774; Goedemorgen! Nieuwe week!';
-        message.textContent = 'Het is maandag! Wil je even je week doornemen en plannen?';
-        btn.innerHTML = '&#128197; Ja, week plannen!';
+        message.textContent = 'Laten we je dag indelen. Daarna kun je je weekoverzicht bekijken.';
+        btn.innerHTML = '&#9745; Dag starten!';
         btn.onclick = () => {
             this.dismiss();
-            app.changeView('week');
+            morningWizard.open();
         };
         
         modal.classList.add('show');
@@ -11669,15 +11818,20 @@ const parkingLot = {
 
 // Morning Wizard
 const morningWizard = {
-    currentStep: 1,
+    currentStep: 0,
     overdueTasks: [],
+    recurringTasks: [],
     selectedBigThree: [],
     expandedTasks: [], // Track which tasks are expanded to show subtasks
     sortMode: 'deadline', // 'deadline' of 'age'
     
     open() {
         console.log('Morning Wizard opening...');
-        this.currentStep = 1;
+        this.recurringTasks = this.getRecurringTasksForWizard();
+        
+        // Start at step 0 if there are recurring tasks, otherwise step 1
+        this.currentStep = this.recurringTasks.length > 0 ? 0 : 1;
+        
         this.overdueTasks = this.getOverdueTasks();
         this.selectedBigThree = [];
         this.sortMode = 'deadline'; // Reset to default
@@ -11707,6 +11861,119 @@ const morningWizard = {
     
     close() {
         document.getElementById('morningWizard').classList.remove('show');
+    },
+    
+    getRecurringTasksForWizard() {
+        const items = [];
+        const today = new Date().setHours(0, 0, 0, 0);
+        const lastWizardDate = state.db.productivityStats?.lastMorningWizardDate || 0;
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    // Skip if not recurring or disabled
+                    if (!task.recurring?.enabled) return;
+                    
+                    // Skip if already done
+                    if (task.done) return;
+                    
+                    // Skip if already scheduled for today
+                    if (task.scheduledDate === today) return;
+                    
+                    const r = task.recurring;
+                    
+                    // Check if this task should appear today based on its pattern
+                    const shouldAppearToday = this.recurringMatchesDay(r, today, task.dueDate);
+                    
+                    // Check if this task was missed since last wizard
+                    let isCatchUp = false;
+                    let missedDate = null;
+                    
+                    if (lastWizardDate > 0 && lastWizardDate < today) {
+                        // Check days between last wizard and today for missed occurrences
+                        for (let d = lastWizardDate + 86400000; d < today; d += 86400000) {
+                            if (this.recurringMatchesDay(r, d, task.dueDate)) {
+                                isCatchUp = true;
+                                missedDate = d;
+                                break; // Just mark as catch-up, don't need all dates
+                            }
+                        }
+                    }
+                    
+                    if (shouldAppearToday || isCatchUp) {
+                        // Determine frequency label
+                        let freqLabel = '';
+                        let freqIcon = '';
+                        if (r.frequency === 'daily') {
+                            freqLabel = r.days?.length > 0 && r.days.length < 7 ? 'Specifieke dagen' : 'Dagelijks';
+                            freqIcon = '📅';
+                        } else if (r.frequency === 'weekdays') {
+                            freqLabel = 'Werkdagen';
+                            freqIcon = '📆';
+                        } else if (r.frequency === 'weekly') {
+                            const dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+                            const days = r.days?.map(d => dayNames[d]).join(', ') || '';
+                            freqLabel = days ? `Wekelijks (${days})` : 'Wekelijks';
+                            freqIcon = '🗓️';
+                        } else if (r.frequency === 'monthly') {
+                            freqLabel = 'Maandelijks';
+                            freqIcon = '📊';
+                        }
+                        
+                        items.push({
+                            type: 'task',
+                            item: task,
+                            id: task.id,
+                            name: task.name,
+                            _cat: cat.name,
+                            _proj: proj.name,
+                            _catId: cat.id,
+                            _projId: proj.id,
+                            _taskId: task.id,
+                            _freqLabel: freqLabel,
+                            _freqIcon: freqIcon,
+                            _isCatchUp: isCatchUp,
+                            _missedDate: missedDate
+                        });
+                    }
+                });
+            });
+        });
+        
+        return items;
+    },
+    
+    recurringMatchesDay(r, dayTimestamp, taskDueDate) {
+        const dayDate = new Date(dayTimestamp);
+        const dayOfWeek = dayDate.getDay();
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        // Check end conditions
+        if (r.endDate && dayTimestamp > r.endDate) return false;
+        
+        if (r.frequency === 'daily') {
+            if (r.days && r.days.length > 0 && r.days.length < 7) {
+                return r.days.includes(dayOfWeek);
+            }
+            return true;
+        } else if (r.frequency === 'weekly') {
+            if (r.days && r.days.length > 0) {
+                return r.days.includes(dayOfWeek);
+            }
+            const originalDay = taskDueDate ? new Date(taskDueDate).getDay() : dayOfWeek;
+            return dayOfWeek === originalDay;
+        } else if (r.frequency === 'weekdays') {
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+        } else if (r.frequency === 'monthly') {
+            if (r.monthDayType === 'first' && dayDate.getDate() === 1) return true;
+            if (r.monthDayType === 'last') {
+                const lastDay = new Date(dayDate.getFullYear(), dayDate.getMonth() + 1, 0).getDate();
+                return dayDate.getDate() === lastDay;
+            }
+            if (r.monthDay && dayDate.getDate() === r.monthDay) return true;
+        }
+        
+        return false;
     },
     
     getOverdueTasks() {
@@ -11832,20 +12099,103 @@ const morningWizard = {
         document.querySelectorAll('.progress-dot').forEach(dot => {
             const step = parseInt(dot.dataset.step);
             dot.classList.toggle('active', step === this.currentStep);
+            // Hide step 0 dot if no recurring tasks
+            if (step === 0) {
+                dot.style.display = this.recurringTasks.length > 0 ? 'block' : 'none';
+            }
         });
         
-        // Update buttons
-        document.getElementById('wizardBack').style.display = this.currentStep > 1 ? 'block' : 'none';
+        // Update buttons - hide back if at minimum step
+        const minStep = this.recurringTasks.length > 0 ? 0 : 1;
+        document.getElementById('wizardBack').style.display = this.currentStep > minStep ? 'block' : 'none';
         
         const content = document.getElementById('wizardContent');
         
-        if (this.currentStep === 1) {
+        if (this.currentStep === 0) {
+            this.renderStep0(content);
+        } else if (this.currentStep === 1) {
             this.renderStep1(content);
         } else if (this.currentStep === 2) {
             this.renderStep2(content);
         } else if (this.currentStep === 3) {
             this.renderStep3(content);
         }
+    },
+    
+    renderStep0(content) {
+        document.getElementById('wizardTitle').textContent = 'Terugkerende taken 🔃';
+        document.getElementById('wizardSubtitle').textContent = 'Deze taken worden vandaag ingepland';
+        document.getElementById('wizardNext').textContent = 'Volgende';
+        
+        const regularTasks = this.recurringTasks.filter(t => !t._isCatchUp);
+        const catchUpTasks = this.recurringTasks.filter(t => t._isCatchUp);
+        
+        let html = `
+            <div class="wizard-recurring-intro" style="text-align: center; padding: 12px 16px; margin-bottom: 16px; background: var(--primary-light); border-radius: var(--radius-md);">
+                <span style="font-size: 14px; color: var(--text-main);">
+                    ✓ ${this.recurringTasks.length} terugkerende ${this.recurringTasks.length === 1 ? 'taak wordt' : 'taken worden'} automatisch ingepland
+                </span>
+            </div>
+        `;
+        
+        // Regular recurring tasks for today
+        if (regularTasks.length > 0) {
+            html += `
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <span>📅 Vandaag</span>
+                        <span style="background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 12px;">${regularTasks.length}</span>
+                    </div>
+                    <div class="wizard-recurring-list">
+                        ${regularTasks.map(task => this.renderRecurringTaskItem(task)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Catch-up tasks (missed from previous days)
+        if (catchUpTasks.length > 0) {
+            html += `
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <span>⏰ Inhalen</span>
+                        <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${catchUpTasks.length}</span>
+                    </div>
+                    <div class="wizard-recurring-list">
+                        ${catchUpTasks.map(task => this.renderRecurringTaskItem(task)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        content.innerHTML = html;
+    },
+    
+    renderRecurringTaskItem(task) {
+        const missedLabel = task._isCatchUp && task._missedDate 
+            ? `<span style="font-size: 11px; color: #d97706; margin-left: 8px;">(gemist)</span>` 
+            : '';
+        
+        return `
+            <div class="wizard-recurring-item" 
+                 style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-panel); border: 2px solid var(--primary); border-radius: var(--radius-md); margin-bottom: 8px;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <span style="color: white; font-size: 14px;">✓</span>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${task.name} ${missedLabel}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                        ${task._cat} → ${task._proj}
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                    <span style="font-size: 16px;">${task._freqIcon}</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">${task._freqLabel}</span>
+                </div>
+            </div>
+        `;
     },
     
     renderStep1(content) {
@@ -12250,10 +12600,7 @@ const morningWizard = {
             later: availableTasks.filter(t => t._urgency === 'later')
         };
         
-        // Smart default: auto-selecteer top 3 urgent taken als er nog geen selectie is
-        if (this.selectedBigThree.length === 0 && groups.urgent.length > 0) {
-            this.selectedBigThree = groups.urgent.slice(0, Math.min(3, groups.urgent.length));
-        }
+        // No auto-selection - user must consciously choose their Big Three
         
         // Update count display
         const selectedUrgent = this.selectedBigThree.filter(t => t._urgency === 'urgent').length;
@@ -13009,6 +13356,10 @@ const morningWizard = {
     next() {
         console.log('Wizard next() called, currentStep:', this.currentStep);
         if (this.currentStep < 3) {
+            // If we're on step 0, schedule all recurring tasks
+            if (this.currentStep === 0) {
+                this.scheduleRecurringTasks();
+            }
             this.currentStep++;
             this.renderStep();
         } else {
@@ -13017,10 +13368,37 @@ const morningWizard = {
     },
     
     back() {
-        if (this.currentStep > 1) {
+        const minStep = this.recurringTasks.length > 0 ? 0 : 1;
+        if (this.currentStep > minStep) {
             this.currentStep--;
             this.renderStep();
         }
+    },
+    
+    scheduleRecurringTasks() {
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        // Schedule ALL recurring tasks (no selection needed)
+        this.recurringTasks.forEach(recurringTask => {
+            // Find and schedule the actual task
+            state.db.categories.forEach(cat => {
+                if (cat.id !== recurringTask._catId) return;
+                cat.projects?.forEach(proj => {
+                    if (proj.id !== recurringTask._projId) return;
+                    const task = proj.tasks?.find(t => t.id === recurringTask.id);
+                    if (task) {
+                        task.scheduledDate = today;
+                        productivityTracker.logScheduledForDate(today);
+                    }
+                });
+            });
+        });
+        
+        // Save lastMorningWizardDate
+        if (!state.db.productivityStats) {
+            state.db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
+        }
+        state.db.productivityStats.lastMorningWizardDate = today;
     },
     
     finish() {
@@ -13068,10 +13446,41 @@ const morningWizard = {
             });
         });
         
+        // Ensure lastMorningWizardDate is saved (in case user skipped step 0)
+        if (!state.db.productivityStats) {
+            state.db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
+        }
+        state.db.productivityStats.lastMorningWizardDate = today;
+        
         app.save();
         this.close();
         app.changeView('today');
         app.setStatus('Dag ingepland! Succes! 💪', 'success');
+        
+        // On Monday, offer to view week overview
+        const dayOfWeek = new Date().getDay();
+        if (dayOfWeek === 1) {
+            setTimeout(() => {
+                this.showWeekOverviewOffer();
+            }, 800);
+        }
+    },
+    
+    showWeekOverviewOffer() {
+        const modal = document.getElementById('reminderModal');
+        const title = document.getElementById('reminderTitle');
+        const message = document.getElementById('reminderMessage');
+        const btn = document.getElementById('reminderActionBtn');
+        
+        title.innerHTML = '📅 Weekoverzicht bekijken?';
+        message.textContent = 'Je dag is ingepland! Wil je ook je weekoverzicht bekijken?';
+        btn.innerHTML = '👀 Ja, week bekijken';
+        btn.onclick = () => {
+            reminderManager.dismiss();
+            app.changeView('week');
+        };
+        
+        modal.classList.add('show');
     }
 };
 
@@ -15768,6 +16177,7 @@ app.init();
         <div class="wizard-title" id="wizardTitle">Goedemorgen! 🌅</div>
         <div class="wizard-subtitle" id="wizardSubtitle">Laten we je dag voorbereiden</div>
         <div class="wizard-progress">
+            <div class="progress-dot" data-step="0"></div>
             <div class="progress-dot" data-step="1"></div>
             <div class="progress-dot" data-step="2"></div>
             <div class="progress-dot" data-step="3"></div>
