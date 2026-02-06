@@ -12343,12 +12343,18 @@ const morningWizard = {
                     
                     if (item.type === 'task') {
                         const realTask = proj.tasks?.find(t => t.id === item._taskId);
-                        if (realTask) realTask.scheduledDate = today;
+                        if (realTask) {
+                            realTask.scheduledDate = today;
+                            productivityTracker.logScheduledForDate(today);
+                        }
                     } else if (item.type === 'subtask') {
                         proj.tasks?.forEach(task => {
                             if (task.id !== item._taskId) return;
                             const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
-                            if (realSub) realSub.scheduledDate = today;
+                            if (realSub) {
+                                realSub.scheduledDate = today;
+                                productivityTracker.logScheduledForDate(today);
+                            }
                         });
                     } else if (item.type === 'checklist') {
                         proj.tasks?.forEach(task => {
@@ -12357,6 +12363,7 @@ const morningWizard = {
                                 if (sub.id !== item._subtaskId) return;
                                 if (sub.checklist && sub.checklist[item._checklistIndex]) {
                                     sub.checklist[item._checklistIndex].scheduledDate = today;
+                                    productivityTracker.logScheduledForDate(today);
                                 }
                             });
                         });
@@ -12421,6 +12428,7 @@ const morningWizard = {
                     const realTask = proj.tasks?.find(t => t.id === item._taskId);
                     if (realTask) {
                         realTask.scheduledDate = today;
+                        productivityTracker.logScheduledForDate(today);
                     }
                 } else if (item.type === 'subtask') {
                     // Subtask binnen task
@@ -12429,6 +12437,7 @@ const morningWizard = {
                         const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
                         if (realSub) {
                             realSub.scheduledDate = today;
+                            productivityTracker.logScheduledForDate(today);
                         }
                     });
                 } else if (item.type === 'checklist') {
@@ -12439,6 +12448,7 @@ const morningWizard = {
                             if (sub.id !== item._subtaskId) return;
                             if (sub.checklist && sub.checklist[item._checklistIndex]) {
                                 sub.checklist[item._checklistIndex].scheduledDate = today;
+                                productivityTracker.logScheduledForDate(today);
                             }
                         });
                     });
@@ -13416,8 +13426,13 @@ const morningWizard = {
                         // Hele task selecteren
                         const realTask = proj.tasks?.find(t => t.id === item.id);
                         if (realTask) {
+                            const wasAlreadyScheduledToday = realTask.scheduledDate === today;
                             realTask.scheduledDate = today;
                             realTask.todayPriority = index;
+                            // Only count if not already scheduled for today
+                            if (!wasAlreadyScheduledToday) {
+                                productivityTracker.logScheduledForDate(today);
+                            }
                         }
                     } else if (item.type === 'subtask') {
                         // Individuele subtask selecteren
@@ -13425,8 +13440,13 @@ const morningWizard = {
                             if (task.id !== item._taskId) return;
                             const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
                             if (realSub) {
+                                const wasAlreadyScheduledToday = realSub.scheduledDate === today;
                                 realSub.scheduledDate = today;
                                 realSub.todayPriority = index;
+                                // Only count if not already scheduled for today
+                                if (!wasAlreadyScheduledToday) {
+                                    productivityTracker.logScheduledForDate(today);
+                                }
                             }
                         });
                     } else if (item.type === 'checklist') {
@@ -13436,8 +13456,14 @@ const morningWizard = {
                             task.subtasks?.forEach(sub => {
                                 if (sub.id !== item._subtaskId) return;
                                 if (sub.checklist && sub.checklist[item._checklistIndex]) {
-                                    sub.checklist[item._checklistIndex].scheduledDate = today;
-                                    sub.checklist[item._checklistIndex].todayPriority = index;
+                                    const checkItem = sub.checklist[item._checklistIndex];
+                                    const wasAlreadyScheduledToday = checkItem.scheduledDate === today;
+                                    checkItem.scheduledDate = today;
+                                    checkItem.todayPriority = index;
+                                    // Only count if not already scheduled for today
+                                    if (!wasAlreadyScheduledToday) {
+                                        productivityTracker.logScheduledForDate(today);
+                                    }
                                 }
                             });
                         });
