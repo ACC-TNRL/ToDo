@@ -8490,6 +8490,14 @@ const crud = {
         const task = helpers.findTaskById(itemId);
         if (task) {
             const oldScheduledDate = task.scheduledDate;
+            
+            // Already scheduled for today - no action needed
+            if (oldScheduledDate === today) {
+                app.setStatus("Taak staat al ingepland voor vandaag", "info");
+                toastNotifications.show('info', 'Al ingepland', 'Dit item staat al ingepland voor vandaag');
+                return;
+            }
+            
             const isReschedule = oldScheduledDate && oldScheduledDate !== today;
             
             // If rescheduling, remove from old date first
@@ -8518,6 +8526,13 @@ const crud = {
                         const subtask = task.subtasks.find(sub => sub.id === itemId);
                         if (subtask) {
                             const oldScheduledDate = subtask.scheduledDate;
+                            
+                            // Already scheduled for today - skip
+                            if (oldScheduledDate === today) {
+                                itemFound = 'already';
+                                return;
+                            }
+                            
                             const isReschedule = oldScheduledDate && oldScheduledDate !== today;
                             
                             // If rescheduling, remove from old date first
@@ -8538,7 +8553,10 @@ const crud = {
             });
         });
         
-        if (itemFound) {
+        if (itemFound === 'already') {
+            app.setStatus("Subtaak staat al ingepland voor vandaag", "info");
+            toastNotifications.show('info', 'Al ingepland', 'Dit item staat al ingepland voor vandaag');
+        } else if (itemFound) {
             await app.save();
             app.render();
             app.setStatus("Subtaak ingepland voor vandaag", "success");
@@ -10573,6 +10591,9 @@ const insightsView = {
                     <button class="btn btn-sm btn-secondary" onclick="insightsView.scheduleForToday('${item.id}', '${itemData.type}')">
                         &#9728;&#65039; Vandaag doen
                     </button>
+                    <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissAttentionItem('${item.id}', '${itemData.type}')">
+                        &#10005; Verbergen
+                    </button>
                 </div>
             </div>
         `;
@@ -10875,6 +10896,36 @@ const insightsView = {
         await crud.setToday(itemId);
         this.render();
         toastNotifications.show('success', 'Ingepland', 'Item is ingepland voor vandaag');
+    },
+
+    async dismissAttentionItem(itemId, type) {
+        // Find the item and reset its procrastination data
+        let itemFound = false;
+        
+        const findAndDismiss = (item) => {
+            if (item && item.id === itemId && item.procrastinationData) {
+                delete item.procrastinationData;
+                delete item._procrastinationBackup;
+                itemFound = true;
+                return true;
+            }
+            return false;
+        };
+        
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (findAndDismiss(task)) return;
+                    task.subtasks?.forEach(sub => findAndDismiss(sub));
+                });
+            });
+        });
+        
+        if (itemFound) {
+            await app.save();
+            this.render();
+            toastNotifications.show('success', 'Weggedaan', 'Item verwijderd uit aandachtslijst');
+        }
     },
 
     showAllAttentionItems() {
