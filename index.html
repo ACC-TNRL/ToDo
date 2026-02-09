@@ -10223,6 +10223,10 @@ const productivityTracker = {
         // Update items record if current period beats it
         this.updateItemsRecord(days, totals.completed);
         
+        // Update ratio record if current period beats it
+        const ratioForRecord = totals.scheduled > 0 ? Math.round((totals.completed / totals.scheduled) * 100) : 0;
+        this.updateRatioRecord(days, ratioForRecord);
+        
         return totals;
     },
 
@@ -10234,11 +10238,13 @@ const productivityTracker = {
         const logs = this.getStatsForRange(periodStartDate, periodEndDate);
         
         let completed = 0;
+        let scheduled = 0;
         logs.forEach(log => {
             completed += log.completed || 0;
+            scheduled += log.scheduled || 0;
         });
         
-        return { completed };
+        return { completed, scheduled };
     },
 
     // Update items completed record for a period
@@ -10269,6 +10275,36 @@ const productivityTracker = {
         }
         const periodKey = `days${days}`;
         return state.db.productivityStats.itemsRecord[periodKey] || { count: 0, date: null };
+    },
+
+    // Update completion ratio record for a period
+    updateRatioRecord(days, completionRate) {
+        this.init();
+        if (completionRate <= 0) return;
+        
+        if (!state.db.productivityStats.ratioRecord) {
+            state.db.productivityStats.ratioRecord = {};
+        }
+        
+        const periodKey = `days${days}`;
+        const currentRecord = state.db.productivityStats.ratioRecord[periodKey] || { ratio: 0, date: null };
+        
+        if (completionRate > currentRecord.ratio) {
+            state.db.productivityStats.ratioRecord[periodKey] = {
+                ratio: completionRate,
+                date: Date.now()
+            };
+        }
+    },
+
+    // Get completion ratio record for a period
+    getRatioRecord(days) {
+        this.init();
+        if (!state.db.productivityStats.ratioRecord) {
+            return { ratio: 0, date: null };
+        }
+        const periodKey = `days${days}`;
+        return state.db.productivityStats.ratioRecord[periodKey] || { ratio: 0, date: null };
     },
 
     // Track item scheduling for procrastination data
@@ -10463,7 +10499,7 @@ const insightsView = {
                 <div class="insights-content">
                     <div class="insights-summary">
                         ${this.renderStatCard('&#9989;', todayStats.completed, 'Vandaag voltooid', `${stats.completed} in ${this.currentPeriod} dagen`)}
-                        ${this.renderStatCard('&#128200;', `${completionRate}%`, 'Voltooiingsratio', `${stats.completed}/${totalItems} items`)}
+                        ${this.renderCompletionRatioCard(stats, previousStats, this.currentPeriod)}
                         ${this.renderItemsCompletedCard(stats, previousStats, this.currentPeriod)}
                         ${this.renderStatCard('&#9201;', pomodoroDisplay, 'Pomodoro succes', pomodoroSub)}
                     </div>
@@ -10594,6 +10630,71 @@ const insightsView = {
                 <div class="insight-stat-value">${completed}</div>
                 <div class="insight-stat-label">items voltooid</div>
                 <div class="insight-stat-sub">${periodText}</div>
+                ${changeText ? `<div class="insight-stat-change ${changeClass}">${changeText}</div>` : ''}
+                ${recordText ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">${recordText}</div>` : ''}
+            </div>
+        `;
+    },
+
+    renderCompletionRatioCard(stats, previousStats, period) {
+        const totalItems = stats.scheduled || 0;
+        const completionRate = totalItems > 0 
+            ? Math.round((stats.completed / totalItems) * 100) 
+            : 0;
+        const record = productivityTracker.getRatioRecord(period);
+        
+        // Calculate previous period ratio for comparison
+        let changeText = '';
+        let changeClass = '';
+        const prevTotal = previousStats.scheduled || 0;
+        if (prevTotal > 0) {
+            const prevRate = Math.round((previousStats.completed / prevTotal) * 100);
+            const diff = completionRate - prevRate;
+            if (diff > 0) {
+                changeText = `+${diff}% vs vorige periode`;
+                changeClass = 'positive';
+            } else if (diff < 0) {
+                changeText = `${diff}% vs vorige periode`;
+                changeClass = 'negative';
+            } else {
+                changeText = 'Gelijk aan vorige periode';
+                changeClass = 'neutral';
+            }
+        } else if (totalItems > 0) {
+            changeText = 'Eerste periode met data!';
+            changeClass = 'positive';
+        }
+        
+        // Determine message and emoji based on performance
+        let emoji = '&#128200;'; // chart increasing
+        
+        if (totalItems === 0) {
+            emoji = '&#128161;'; // lightbulb
+        } else if (record.ratio > 0 && completionRate >= record.ratio) {
+            if (completionRate > record.ratio) {
+                emoji = '&#127881;'; // party
+            } else {
+                emoji = '&#128200;'; // chart
+            }
+        }
+        
+        // Format record with date
+        let recordText = '';
+        if (record.ratio > 0 && record.date) {
+            const recordDate = new Date(record.date);
+            const monthNames = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+            const monthYear = `${monthNames[recordDate.getMonth()]} '${String(recordDate.getFullYear()).slice(-2)}`;
+            recordText = `Record: ${record.ratio}% (${monthYear})`;
+        }
+        
+        const tooltipText = `Voltooiingsratio over de afgelopen ${period} dagen. Vergelijking met de ${period} dagen daarvoor.`;
+        
+        return `
+            <div class="insight-stat-card items-completed-tooltip" data-tooltip="${tooltipText}">
+                <div class="insight-stat-icon">${emoji}</div>
+                <div class="insight-stat-value">${completionRate}%</div>
+                <div class="insight-stat-label">Voltooiingsratio</div>
+                <div class="insight-stat-sub">${stats.completed}/${totalItems} items</div>
                 ${changeText ? `<div class="insight-stat-change ${changeClass}">${changeText}</div>` : ''}
                 ${recordText ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">${recordText}</div>` : ''}
             </div>
