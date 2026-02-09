@@ -13661,7 +13661,7 @@ const morningWizard = {
         message.textContent = 'Je dag is ingepland! Wil je ook je weekoverzicht bekijken?';
         btn.innerHTML = '👀 Ja, week bekijken';
         btn.onclick = () => {
-            reminderManager.dismiss();
+            reminders.dismiss();
             app.changeView('week');
         };
         
