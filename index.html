@@ -6354,6 +6354,15 @@ const app = {
                     if (task.recurring?.enabled && task.done) {
                         const r = task.recurring;
                         
+                        // GUARD: Don't reopen tasks that were completed today
+                        // They should stay done until the next scheduled day
+                        if (task.completedAt) {
+                            const completedDate = new Date(task.completedAt).setHours(0,0,0,0);
+                            if (completedDate === todayMs) {
+                                return; // Completed today, leave it done
+                            }
+                        }
+                        
                         // Check end conditions
                         if (r.endDate && todayMs > r.endDate) {
                             // Past end date - disable recurring
