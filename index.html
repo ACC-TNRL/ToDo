@@ -2858,6 +2858,57 @@
             opacity: 0.7;
         }
         
+        /* Worked-On (Aan Gewerkt) Styling */
+        .today-action-btn.worked-on {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+        
+        .today-action-btn.worked-on:hover {
+            background: #7c3aed;
+        }
+        
+        .today-item.worked-on {
+            opacity: 0.8;
+            border-left: 3px solid #8b5cf6;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), var(--bg-app));
+        }
+        
+        body.dark-mode .today-item.worked-on {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), var(--bg-app));
+        }
+        
+        .today-item.worked-on:hover {
+            opacity: 1;
+        }
+        
+        .today-item.worked-on .today-item-title {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        .today-item.worked-on .item-type-badge {
+            opacity: 0.8;
+        }
+        
+        .worked-on-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+        
+        body.dark-mode .worked-on-badge {
+            background: rgba(139, 92, 246, 0.25);
+            color: #a78bfa;
+        }
+        
         /* Celebration Animation */
         @keyframes celebrate {
             0% { transform: scale(1); }
@@ -4851,9 +4902,14 @@
                 <span>Checklist</span>
             </div>
             <div class="today-stat">
-                <span>✅</span>
+                <span>&#9989;</span>
                 <span id="todayCompletedCount">0</span>
                 <span>Voltooid</span>
+            </div>
+            <div class="today-stat">
+                <span>&#129513;</span>
+                <span id="todayWorkedOnCount">0</span>
+                <span>Dagdoel</span>
             </div>
         </div>
     </div>
@@ -8974,6 +9030,7 @@ const todayView = {
                 proj.tasks?.forEach(task => {
                     // Tasks scheduled for today
                     if (task.scheduledDate === today) {
+                        const isWorkedOn = (task.workedOnDates || []).includes(today);
                         items.push({
                             type: 'task',
                             item: task,
@@ -8982,7 +9039,8 @@ const todayView = {
                             projId: proj.id,
                             context: `${cat.name} → ${proj.name}`,
                             priority: task.todayPriority !== undefined ? task.todayPriority : 999,
-                            done: task.done || false
+                            done: task.done || false,
+                            workedOn: isWorkedOn
                         });
                     }
                     
@@ -8990,6 +9048,7 @@ const todayView = {
                     if (task.subtasks) {
                         task.subtasks.forEach(sub => {
                             if (sub.scheduledDate === today) {
+                                const isWorkedOn = (sub.workedOnDates || []).includes(today);
                                 items.push({
                                     type: 'subtask',
                                     item: sub,
@@ -8999,7 +9058,8 @@ const todayView = {
                                     taskId: task.id,
                                     context: `${cat.name} → ${proj.name} → ${task.name}`,
                                     priority: sub.todayPriority !== undefined ? sub.todayPriority : 999,
-                                    done: sub.done || false
+                                    done: sub.done || false,
+                                    workedOn: isWorkedOn
                                 });
                             }
                             
@@ -9007,6 +9067,7 @@ const todayView = {
                             if (sub.checklist) {
                                 sub.checklist.forEach((checkItem, idx) => {
                                     if (checkItem.scheduledDate === today) {
+                                        const isWorkedOn = (checkItem.workedOnDates || []).includes(today);
                                         items.push({
                                             type: 'checklist',
                                             item: checkItem,
@@ -9018,7 +9079,8 @@ const todayView = {
                                             checklistIndex: idx,
                                             context: `${cat.name} → ${proj.name} → ${task.name} → ${sub.name}`,
                                             priority: checkItem.todayPriority !== undefined ? checkItem.todayPriority : 999,
-                                            done: checkItem.done || false
+                                            done: checkItem.done || false,
+                                            workedOn: isWorkedOn
                                         });
                                     }
                                 });
@@ -9045,9 +9107,11 @@ const todayView = {
         const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
         dateEl.textContent = `${days[today.getDay()]} ${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
         
-        // Separate completed and active items
-        const activeItems = allItems.filter(i => !i.done);
+        // Separate completed, worked-on, and active items
+        const activeItems = allItems.filter(i => !i.done && !i.workedOn);
+        const workedOnItems = allItems.filter(i => !i.done && i.workedOn);
         const completedItems = allItems.filter(i => i.done);
+        const doneForTodayItems = [...completedItems, ...workedOnItems];
         
         // Sort completed items by completion time (most recent first)
         completedItems.sort((a, b) => {
@@ -9057,15 +9121,17 @@ const todayView = {
         });
         
         // Update stats
-        const taskCount = allItems.filter(i => i.type === 'task' && !i.done).length;
-        const subtaskCount = allItems.filter(i => i.type === 'subtask' && !i.done).length;
-        const checklistCount = allItems.filter(i => i.type === 'checklist' && !i.done).length;
+        const taskCount = allItems.filter(i => i.type === 'task' && !i.done && !i.workedOn).length;
+        const subtaskCount = allItems.filter(i => i.type === 'subtask' && !i.done && !i.workedOn).length;
+        const checklistCount = allItems.filter(i => i.type === 'checklist' && !i.done && !i.workedOn).length;
         const completedCount = completedItems.length;
+        const workedOnCount = workedOnItems.length;
         
         document.getElementById('todayTaskCount').textContent = taskCount;
         document.getElementById('todaySubtaskCount').textContent = subtaskCount;
         document.getElementById('todayChecklistCount').textContent = checklistCount;
         document.getElementById('todayCompletedCount').textContent = completedCount;
+        document.getElementById('todayWorkedOnCount').textContent = workedOnCount;
         
         // Clear list
         list.innerHTML = '';
@@ -9087,28 +9153,34 @@ const todayView = {
             list.appendChild(card);
         });
         
-        // Render completed section if there are completed items
-        if (completedItems.length > 0) {
-            const completedSection = this.createCompletedSection(completedItems, allItems.length);
+        // Render completed section if there are completed or worked-on items
+        if (doneForTodayItems.length > 0) {
+            const completedSection = this.createCompletedSection(completedItems, workedOnItems, allItems.length);
             list.appendChild(completedSection);
         }
     },
     
-    createCompletedSection(completedItems, totalItems) {
+    createCompletedSection(completedItems, workedOnItems, totalItems) {
         const section = document.createElement('div');
         section.className = 'today-completed-section';
         
-        const percentage = Math.round((completedItems.length / totalItems) * 100);
+        const doneCount = completedItems.length + workedOnItems.length;
+        const percentage = Math.round((doneCount / totalItems) * 100);
         const isCollapsed = localStorage.getItem('todayCompletedCollapsed') === 'true';
+        
+        // Build summary text
+        const summaryParts = [];
+        if (completedItems.length > 0) summaryParts.push(`${completedItems.length} voltooid`);
+        if (workedOnItems.length > 0) summaryParts.push(`${workedOnItems.length} dagdoel behaald`);
         
         section.innerHTML = `
             <div class="completed-header" onclick="todayView.toggleCompleted()">
                 <div class="completed-title">
-                    <span class="completed-toggle ${isCollapsed ? 'collapsed' : ''}">▼</span>
-                    <span>🎉 Voltooid!</span>
+                    <span class="completed-toggle ${isCollapsed ? 'collapsed' : ''}">&#9660;</span>
+                    <span>&#127881; Goed bezig!</span>
                     <div class="completed-badge">
-                        <span>✨</span>
-                        <span>${completedItems.length}</span>
+                        <span>&#10024;</span>
+                        <span>${doneCount}</span>
                     </div>
                 </div>
                 <div class="completed-progress">
@@ -9122,8 +9194,16 @@ const todayView = {
         `;
         
         const completedList = section.querySelector('#completedList');
+        
+        // Render completed items first
         completedItems.forEach((itemData, index) => {
             const card = this.createCard(itemData, index, true);
+            completedList.appendChild(card);
+        });
+        
+        // Render worked-on items
+        workedOnItems.forEach((itemData, index) => {
+            const card = this.createCard(itemData, index, false, true);
             completedList.appendChild(card);
         });
         
@@ -9146,10 +9226,10 @@ const todayView = {
         app.changeView('all');
     },
     
-    createCard(itemData, index, isCompleted) {
+    createCard(itemData, index, isCompleted, isWorkedOn = false) {
         const { type, item, context } = itemData;
         const card = document.createElement('div');
-        card.className = `today-item type-${type} ${itemData.done ? 'completed' : ''}`;
+        card.className = `today-item type-${type} ${itemData.done ? 'completed' : ''} ${isWorkedOn ? 'worked-on' : ''}`;
         card.dataset.id = itemData.id;
         card.dataset.type = type;
         card.dataset.catId = itemData.catId;
@@ -9159,51 +9239,68 @@ const todayView = {
         card.dataset.checklistIndex = itemData.checklistIndex || '';
         card.dataset.priority = index;
         
-        // Only make active items draggable
-        if (!isCompleted) {
+        // Only make active items draggable (not completed or worked-on)
+        if (!isCompleted && !isWorkedOn) {
             card.draggable = true;
         }
         
         // Type badges
         const typeBadges = {
-            task: '📄 Opdracht',
-            subtask: '✓ Subtaak',
-            checklist: '□ Checklist'
+            task: '&#128196; Opdracht',
+            subtask: '&#10003; Subtaak',
+            checklist: '&#9633; Checklist'
         };
         
-        // Actions based on type
+        // Actions based on state
         let actionButtons = '';
-        if (!isCompleted) {
-            // All types can be added to Pomodoro and completed
+        if (isWorkedOn) {
+            // Worked-on items: can upgrade to completed or reopen
             actionButtons = `
                 <button class="today-action-btn success" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
-                    ✅ ${itemData.done ? 'Heropen' : (type === 'checklist' ? 'Afvinken' : 'Voltooien')}
+                    &#9989; Alsnog voltooien
                 </button>
-                <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${item.name || item.text}')">
-                    ⏱ Pomodoro
+                <button class="today-action-btn" onclick="todayView.unmarkWorkedOn('${itemData.id}', '${type}')">
+                    &#8617;&#65039; Heropen
+                </button>
+            `;
+        } else if (!isCompleted) {
+            // Active items: complete, worked-on, pomodoro, remove
+            actionButtons = `
+                <button class="today-action-btn success" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
+                    &#9989; ${itemData.done ? 'Heropen' : (type === 'checklist' ? 'Afvinken' : 'Voltooien')}
+                </button>
+                <button class="today-action-btn worked-on" onclick="todayView.markWorkedOn('${itemData.id}', '${type}')">
+                    &#129513; Dagdoel behaald
+                </button>
+                <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${(item.name || item.text || '').replace(/'/g, "\\'")}')">
+                    &#9201; Pomodoro
                 </button>
                 <button class="today-action-btn danger" onclick="todayView.removeFromToday('${itemData.id}', '${type}')">
-                    🗑️ Verwijder
+                    &#128465;&#65039; Verwijder
                 </button>
             `;
         } else {
             // Completed items can only be reopened
             actionButtons = `
                 <button class="today-action-btn" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
-                    ↩️ Heropen
+                    &#8617;&#65039; Heropen
                 </button>
             `;
         }
         
+        // Status indicator for worked-on items
+        const statusBadge = isWorkedOn ? '<span class="worked-on-badge">&#129513; Dagdoel behaald</span>' : '';
+        
         card.innerHTML = `
             <div class="today-item-header">
-                ${!isCompleted ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">⋮⋮</div>' : ''}
+                ${!isCompleted && !isWorkedOn ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">&#8942;&#8942;</div>' : ''}
                 <div class="item-type-badge">${typeBadges[type]}</div>
+                ${statusBadge}
                 <div class="today-item-title">${item.name || item.text}</div>
                 <button class="today-navigate-btn" 
                         onclick="event.stopPropagation(); todayView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || itemData.id}');"
                         title="Ga naar deze taak in alles view">
-                    →
+                    &#8594;
                 </button>
             </div>
             <div class="today-item-context">${context}</div>
@@ -9212,8 +9309,8 @@ const todayView = {
             </div>
         `;
         
-        // Drag and drop handlers (only for active items)
-        if (!isCompleted) {
+        // Drag and drop handlers (only for active items, not completed or worked-on)
+        if (!isCompleted && !isWorkedOn) {
             card.addEventListener('dragstart', (e) => {
                 // Save undo state before reordering
                 undoRedo.saveState();
@@ -9483,11 +9580,25 @@ const todayView = {
         
         // Track previous state for stats
         const wasNotDone = !targetItem.done;
+        const wasWorkedOn = (targetItem.workedOnDates || []).includes(today);
         
         // Toggle the item
         targetItem.done = !targetItem.done;
         if (targetItem.done) {
             targetItem.completedAt = Date.now();
+            
+            // If upgrading from worked-on, reverse the workedOn stat first
+            if (wasWorkedOn) {
+                productivityTracker.logUnworkedOn();
+                // Remove today from workedOnDates
+                if (targetItem.workedOnDates) {
+                    targetItem.workedOnDates = targetItem.workedOnDates.filter(d => d !== today);
+                    if (targetItem.workedOnDates.length === 0) {
+                        delete targetItem.workedOnDates;
+                    }
+                }
+            }
+            
             // Track completion in productivity stats - all items in Today view are scheduled for today
             productivityTracker.logCompleted();
             productivityTracker.resetItemProcrastination(targetItem);
@@ -9554,6 +9665,113 @@ const todayView = {
             app.setStatus('Item verwijderd van vandaag', 'success');
             this.render();
         }
+    },
+    
+    async markWorkedOn(id, type) {
+        const today = new Date().setHours(0,0,0,0);
+        let targetItem = null;
+        
+        // Find the target item
+        outer:
+        for (const cat of state.db.categories) {
+            for (const proj of cat.projects || []) {
+                for (const task of proj.tasks || []) {
+                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                        targetItem = task;
+                        break outer;
+                    }
+                    for (const sub of task.subtasks || []) {
+                        if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                            targetItem = sub;
+                            break outer;
+                        }
+                        if (sub.checklist && type === 'checklist') {
+                            for (let idx = 0; idx < sub.checklist.length; idx++) {
+                                const checkItem = sub.checklist[idx];
+                                if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                    targetItem = checkItem;
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!targetItem) return;
+        
+        // Save undo state
+        undoRedo.saveState();
+        
+        // Add today to workedOnDates array
+        if (!targetItem.workedOnDates) {
+            targetItem.workedOnDates = [];
+        }
+        if (!targetItem.workedOnDates.includes(today)) {
+            targetItem.workedOnDates.push(today);
+        }
+        
+        // Track in productivity stats
+        productivityTracker.logWorkedOn();
+        
+        // Show positive feedback
+        toastNotifications.show('success', 'Dagdoel behaald!', `${targetItem.name || targetItem.text} - goed bezig!`, 2500);
+        
+        await app.save();
+        this.render();
+    },
+    
+    async unmarkWorkedOn(id, type) {
+        const today = new Date().setHours(0,0,0,0);
+        let targetItem = null;
+        
+        // Find the target item
+        outer:
+        for (const cat of state.db.categories) {
+            for (const proj of cat.projects || []) {
+                for (const task of proj.tasks || []) {
+                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                        targetItem = task;
+                        break outer;
+                    }
+                    for (const sub of task.subtasks || []) {
+                        if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                            targetItem = sub;
+                            break outer;
+                        }
+                        if (sub.checklist && type === 'checklist') {
+                            for (let idx = 0; idx < sub.checklist.length; idx++) {
+                                const checkItem = sub.checklist[idx];
+                                if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                    targetItem = checkItem;
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!targetItem) return;
+        
+        // Save undo state
+        undoRedo.saveState();
+        
+        // Remove today from workedOnDates
+        if (targetItem.workedOnDates) {
+            targetItem.workedOnDates = targetItem.workedOnDates.filter(d => d !== today);
+            if (targetItem.workedOnDates.length === 0) {
+                delete targetItem.workedOnDates;
+            }
+        }
+        
+        // Reverse the productivity stat
+        productivityTracker.logUnworkedOn();
+        
+        await app.save();
+        this.render();
     },
     
     addToPomodoro(id, type, itemName) {
@@ -10024,6 +10242,7 @@ const productivityTracker = {
                 date: normalizedDate,
                 scheduled: 0,
                 completed: 0,
+                workedOn: 0,
                 unscheduledCompleted: 0,
                 rescheduled: 0,
                 removed: 0,
@@ -10039,6 +10258,10 @@ const productivityTracker = {
         // Ensure unscheduledCompleted exists for older logs
         if (dateLog.unscheduledCompleted === undefined) {
             dateLog.unscheduledCompleted = 0;
+        }
+        // Ensure workedOn exists for older logs
+        if (dateLog.workedOn === undefined) {
+            dateLog.workedOn = 0;
         }
         return dateLog;
     },
@@ -10102,6 +10325,16 @@ const productivityTracker = {
         if (stats.unscheduledCompleted > 0) {
             stats.unscheduledCompleted--;
         }
+    },
+
+    // Log when item is marked as "worked on" - counts as completed in stats
+    logWorkedOn() {
+        this.logCompleted();
+    },
+
+    // Log when "worked on" is reversed
+    logUnworkedOn() {
+        this.logUncompleted();
     },
 
     // Log when item is rescheduled to different day
