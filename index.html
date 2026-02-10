@@ -6297,8 +6297,10 @@ const app = {
             const wizardDoneToday = state.db.productivityStats?.lastMorningWizardDate === today;
             
             if (wizardDoneToday) {
-                // Wizard al gedaan vandaag - direct opruimen
-                this.resetOverdueScheduledDates();
+                // Wizard al gedaan vandaag — niet-afgehandelde overdue items
+                // behouden hun scheduledDate zodat ze bij de volgende wizard terugkomen.
+                // Items die wél zijn afgehandeld hebben al een correcte date
+                // (today via moveToToday, of null via moveToLater).
             }
             // Anders: NIET resetten - wizard moet overdue items nog tonen
         }
@@ -6412,9 +6414,9 @@ const app = {
                             task.done = false;
                             task.status = 'planned';
                             
-                            // NOTE: We do NOT set scheduledDate here anymore
-                            // Recurring tasks are scheduled via the Morning Wizard
-                            // This allows users to control which recurring tasks they commit to each day
+                            // Clear old scheduledDate so it doesn't appear as overdue in the wizard
+                            // The Morning Wizard (step 0) will reschedule it for today
+                            task.scheduledDate = null;
                             
                             // Calculate next due date
                             const next = new Date(nextDue);
@@ -13977,8 +13979,10 @@ const morningWizard = {
         }
         state.db.productivityStats.lastMorningWizardDate = today;
         
-        // Clean up any remaining overdue scheduled dates the user didn't explicitly handle
-        app.resetOverdueScheduledDates();
+        // Don't call resetOverdueScheduledDates() here — items the user didn't
+        // explicitly handle (via "Vandaag" or "Later") should keep their scheduledDate
+        // so they reappear in the next wizard run. Handled items already have their
+        // dates updated by moveToToday() (→ today) or moveToLater() (→ null).
         
         app.save();
         this.close();
