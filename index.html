@@ -722,6 +722,7 @@
             background: var(--primary);
             border-radius: 1px;
             margin: 2px 0;
+            pointer-events: none;
         }
 
         .checklist-item input[type="checkbox"] {
@@ -14382,7 +14383,21 @@ const sessionReview = {
 };
 
 const dnd = {
+    // Document-level catch-all: always allow drop when any drag is active
+    // This prevents the no-drop cursor on ANY pixel (gaps, buttons, child elements, etc.)
+    _initialized: false,
+    initGlobalDragHandler() {
+        if (this._initialized) return;
+        this._initialized = true;
+        document.addEventListener('dragover', (e) => {
+            if (state.drag || state.checklistDrag) {
+                e.preventDefault();
+            }
+        });
+    },
+
     onDragStart(e, type, item) {
+        this.initGlobalDragHandler();
         state.drag = { type, item, sourceId: item.id };
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', JSON.stringify(item));
@@ -14571,6 +14586,7 @@ const dnd = {
     
     // Checklist item drag & drop
     onChecklistDragStart(e, subtaskId, index) {
+        this.initGlobalDragHandler();
         state.checklistDrag = { subtaskId, index };
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', index.toString());
