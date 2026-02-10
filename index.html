@@ -791,6 +791,16 @@
             pointer-events: none;
         }
 
+        .item.reparent-drop-target {
+            outline: 2px dashed var(--primary);
+            outline-offset: -2px;
+            background: rgba(99, 102, 241, 0.10) !important;
+            transition: outline 0.15s, background 0.15s;
+        }
+        body.dark-mode .item.reparent-drop-target {
+            background: rgba(99, 102, 241, 0.18) !important;
+        }
+
         .list-footer {
             margin-top: 4px;
             padding-bottom: 2px;
@@ -6855,6 +6865,64 @@ const renderer = {
             el.dataset.id = item.id;
             el.ondragstart = (e) => dnd.onDragStart(e, type, item);
             el.ondragend = (e) => dnd.onDragEnd(e, el);
+
+            // Reparent: parent items accept children from the column to the right
+            const childTypeMap = { cat: 'proj', proj: 'task', task: 'sub' };
+            const childType = childTypeMap[type];
+            if (childType) {
+                el.ondragover = (e) => {
+                    if (state.drag && state.drag.type === childType) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        el.classList.add('reparent-drop-target');
+                    }
+                };
+                el.ondragleave = (e) => {
+                    if (!el.contains(e.relatedTarget)) {
+                        el.classList.remove('reparent-drop-target');
+                    }
+                };
+                el.ondrop = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    el.classList.remove('reparent-drop-target');
+                    if (state.drag && state.drag.type === childType) {
+                        await dnd.onReparentDrop(childType, state.drag.sourceId, item.id, type);
+                    }
+                };
+            }
+
+            // Checklist cross-subtask: subtask items accept checklist items from other subtasks
+            if (type === 'sub') {
+                const origDragOver = el.ondragover;
+                const origDragLeave = el.ondragleave;
+                const origDrop = el.ondrop;
+                el.ondragover = (e) => {
+                    if (state.checklistDrag && state.checklistDrag.subtaskId !== item.id) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        el.classList.add('reparent-drop-target');
+                    } else if (origDragOver) {
+                        origDragOver(e);
+                    }
+                };
+                el.ondragleave = (e) => {
+                    if (!el.contains(e.relatedTarget)) {
+                        el.classList.remove('reparent-drop-target');
+                    }
+                    if (origDragLeave) origDragLeave(e);
+                };
+                el.ondrop = async (e) => {
+                    if (state.checklistDrag && state.checklistDrag.subtaskId !== item.id) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        el.classList.remove('reparent-drop-target');
+                        await dnd.onChecklistReparentDrop(state.checklistDrag.subtaskId, state.checklistDrag.index, item.id);
+                    } else if (origDrop) {
+                        await origDrop(e);
+                    }
+                };
+            }
 
             el.onclick = () => { if (onSelect) { onSelect(item.id); app.render(); } };
 
@@ -14309,10 +14377,13 @@ const dnd = {
     onDragEnd(e, el) {
         el.classList.remove('dragging');
         document.querySelectorAll('.drop-indicator').forEach(i => i.remove());
+        document.querySelectorAll('.reparent-drop-target').forEach(i => i.classList.remove('reparent-drop-target'));
         state.drag = null;
     },
 
     onDragOver(e) {
+        // Negeer kolom-level indicators bij checklist drag
+        if (state.checklistDrag) return;
         e.preventDefault();
         const container = e.currentTarget;
         
@@ -14383,6 +14454,73 @@ const dnd = {
         newCat.projects.push(proj);
         
         await app.save();
+        app.render();
+    },
+
+    // Cross-parent drag & drop: verplaats children naar een andere parent
+    async onReparentDrop(childType, childId, newParentId, parentType) {
+        if (!state.drag || state.drag.type !== childType) return;
+
+        // Bepaal bron- en doellijsten op basis van type
+        let sourceList, targetList, statusMsg;
+
+        if (childType === 'proj') {
+            // Project verplaatsen naar andere categorie
+            const oldCat = helpers.find('cat', state.sel.cat);
+            const newCat = state.db.categories.find(c => c.id === newParentId);
+            if (!oldCat || !newCat || oldCat.id === newCat.id) return;
+            sourceList = oldCat.projects;
+            targetList = newCat.projects;
+            statusMsg = 'Project verplaatst naar ' + (newCat.name || 'andere categorie');
+        } else if (childType === 'task') {
+            // Opdracht verplaatsen naar ander project
+            const cat = helpers.find('cat', state.sel.cat);
+            if (!cat) return;
+            const oldProj = cat.projects.find(p => p.id === state.sel.proj);
+            const newProj = cat.projects.find(p => p.id === newParentId);
+            if (!oldProj || !newProj || oldProj.id === newProj.id) return;
+            sourceList = oldProj.tasks;
+            targetList = newProj.tasks;
+            statusMsg = 'Opdracht verplaatst naar ' + (newProj.name || 'ander project');
+        } else if (childType === 'sub') {
+            // Subtaak verplaatsen naar andere opdracht
+            const proj = helpers.find('proj', state.sel.proj);
+            if (!proj) return;
+            const oldTask = proj.tasks.find(t => t.id === state.sel.task);
+            const newTask = proj.tasks.find(t => t.id === newParentId);
+            if (!oldTask || !newTask || oldTask.id === newTask.id) return;
+            sourceList = oldTask.subtasks;
+            targetList = newTask.subtasks;
+            statusMsg = 'Subtaak verplaatst naar ' + (newTask.name || 'andere opdracht');
+        } else {
+            return;
+        }
+
+        if (!sourceList || !targetList) return;
+
+        // Verwijder uit bronlijst
+        const idx = sourceList.findIndex(i => i.id === childId);
+        if (idx === -1) return;
+        const [movedItem] = sourceList.splice(idx, 1);
+
+        // Voeg toe aan doellijst
+        targetList.push(movedItem);
+
+        // Update selectie: selecteer de nieuwe parent
+        if (childType === 'proj') {
+            state.sel.cat = newParentId;
+            state.sel.proj = childId;
+            state.sel.task = null;
+        } else if (childType === 'task') {
+            state.sel.proj = newParentId;
+            state.sel.task = childId;
+        } else if (childType === 'sub') {
+            state.sel.task = newParentId;
+        }
+
+        state.drag = null;
+        await app.save();
+        app.setStatus(statusMsg, 'success');
         app.render();
     },
 
@@ -14493,6 +14631,31 @@ const dnd = {
                 return closest;
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+
+    // Checklist item verplaatsen naar andere subtaak
+    async onChecklistReparentDrop(sourceSubId, checklistIndex, targetSubId) {
+        const task = helpers.find('task', state.sel.task);
+        if (!task) return;
+
+        const sourceSub = task.subtasks?.find(s => s.id === sourceSubId);
+        const targetSub = task.subtasks?.find(s => s.id === targetSubId);
+        if (!sourceSub || !targetSub || !sourceSub.checklist) return;
+
+        // Verwijder uit bron
+        const [movedItem] = sourceSub.checklist.splice(checklistIndex, 1);
+        if (!movedItem) return;
+
+        // Voeg toe aan doel
+        if (!targetSub.checklist) targetSub.checklist = [];
+        targetSub.checklist.push(movedItem);
+
+        state.checklistDrag = null;
+        document.querySelectorAll('.reparent-drop-target').forEach(i => i.classList.remove('reparent-drop-target'));
+
+        await app.save();
+        app.setStatus('Checklist item verplaatst naar ' + (targetSub.name || 'andere subtaak'), 'success');
+        app.render();
     }
 };
 
