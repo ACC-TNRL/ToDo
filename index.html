@@ -6865,14 +6865,19 @@ const renderer = {
             el.dataset.id = item.id;
             el.ondragstart = (e) => dnd.onDragStart(e, type, item);
             el.ondragend = (e) => dnd.onDragEnd(e, el);
+            // Base: always preventDefault during any drag to prevent no-drop cursor
+            el.ondragover = (e) => { if (state.drag || state.checklistDrag) e.preventDefault(); };
 
             // Reparent: parent items accept children from the column to the right
             const childTypeMap = { cat: 'proj', proj: 'task', task: 'sub' };
             const childType = childTypeMap[type];
             if (childType) {
                 el.ondragover = (e) => {
-                    if (state.drag && state.drag.type === childType) {
+                    // Always preventDefault when dragging to prevent no-drop cursor
+                    if (state.drag || state.checklistDrag) {
                         e.preventDefault();
+                    }
+                    if (state.drag && state.drag.type === childType) {
                         e.stopPropagation();
                         el.classList.add('reparent-drop-target');
                     }
@@ -6903,6 +6908,9 @@ const renderer = {
                         e.preventDefault();
                         e.stopPropagation();
                         el.classList.add('reparent-drop-target');
+                    } else if (state.checklistDrag) {
+                        // Same-subtask checklist drag: preventDefault to avoid no-drop cursor
+                        e.preventDefault();
                     } else if (origDragOver) {
                         origDragOver(e);
                     }
@@ -7699,7 +7707,7 @@ const renderer = {
         
         // Checklist drag & drop
         const checklistContainer = el.querySelector('.checklist-items');
-        if (checklistContainer && item.checklist && item.checklist.length > 1) {
+        if (checklistContainer && item.checklist && item.checklist.length >= 1) {
             const subtaskId = checklistContainer.dataset.subtaskId;
             
             checklistContainer.ondragover = (e) => {
@@ -14390,7 +14398,11 @@ const dnd = {
 
     onDragOver(e) {
         // Negeer kolom-level indicators bij checklist drag
-        if (state.checklistDrag) return;
+        // maar wel preventDefault om no-drop cursor te voorkomen
+        if (state.checklistDrag) {
+            e.preventDefault();
+            return;
+        }
         e.preventDefault();
         const container = e.currentTarget;
         
