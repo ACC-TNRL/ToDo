@@ -14603,7 +14603,8 @@ const dnd = {
         
         // Cross-subtask: delegate to reparent handler
         if (state.checklistDrag.subtaskId !== subtaskId) {
-            await dnd.onChecklistReparentDrop(state.checklistDrag.subtaskId, state.checklistDrag.index, subtaskId);
+            const targetIndex = state.checklistDrag.dropAfterIndex;
+            await dnd.onChecklistReparentDrop(state.checklistDrag.subtaskId, state.checklistDrag.index, subtaskId, targetIndex);
             state.checklistDrag = null;
             container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
             return;
@@ -14662,7 +14663,7 @@ const dnd = {
     },
 
     // Checklist item verplaatsen naar andere subtaak
-    async onChecklistReparentDrop(sourceSubId, checklistIndex, targetSubId) {
+    async onChecklistReparentDrop(sourceSubId, checklistIndex, targetSubId, targetIndex) {
         const task = helpers.find('task', state.sel.task);
         if (!task) return;
 
@@ -14674,9 +14675,13 @@ const dnd = {
         const [movedItem] = sourceSub.checklist.splice(checklistIndex, 1);
         if (!movedItem) return;
 
-        // Voeg toe aan doel
+        // Voeg toe aan doel op de juiste positie
         if (!targetSub.checklist) targetSub.checklist = [];
-        targetSub.checklist.push(movedItem);
+        if (targetIndex !== null && targetIndex !== undefined && targetIndex >= 0 && targetIndex <= targetSub.checklist.length) {
+            targetSub.checklist.splice(targetIndex, 0, movedItem);
+        } else {
+            targetSub.checklist.push(movedItem);
+        }
 
         state.checklistDrag = null;
         document.querySelectorAll('.reparent-drop-target').forEach(i => i.classList.remove('reparent-drop-target'));
