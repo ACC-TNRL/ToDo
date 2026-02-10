@@ -435,7 +435,7 @@
         }
 
         .item.dragging {
-            opacity: 0.5;
+            opacity: 0.4;
             background: #e2e8f0;
             border: 1px dashed #94a3b8;
         }
@@ -6883,12 +6883,13 @@ const renderer = {
                     }
                 };
                 el.ondrop = async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
                     el.classList.remove('reparent-drop-target');
                     if (state.drag && state.drag.type === childType) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         await dnd.onReparentDrop(childType, state.drag.sourceId, item.id, type);
                     }
+                    // If not a reparent drop, let event bubble to container for reordering
                 };
             }
 
@@ -7702,12 +7703,18 @@ const renderer = {
             const subtaskId = checklistContainer.dataset.subtaskId;
             
             checklistContainer.ondragover = (e) => {
+                if (!state.checklistDrag) return;
                 e.preventDefault();
-                e.stopPropagation();
+                // Only stop propagation for same-subtask reordering
+                // Cross-subtask drags should bubble to subtask item handler
+                if (state.checklistDrag.subtaskId === subtaskId) {
+                    e.stopPropagation();
+                }
                 dnd.onChecklistDragOver(e, checklistContainer);
             };
             
             checklistContainer.ondrop = async (e) => {
+                if (!state.checklistDrag) return;
                 e.preventDefault();
                 e.stopPropagation();
                 await dnd.onChecklistDrop(e, subtaskId, checklistContainer);
@@ -14392,7 +14399,15 @@ const dnd = {
         if (state.drag.type !== targetType) return;
 
         const afterElement = this.getDragAfterElement(container, e.clientY);
-        container.querySelectorAll('.drop-indicator').forEach(i => i.remove());
+        
+        // Remove ALL indicators (including from other columns)
+        document.querySelectorAll('.drop-indicator').forEach(i => i.remove());
+        
+        // Store the target position so onDrop uses the exact visual indicator position
+        if (state.drag) {
+            state.drag.dropAfterElementId = afterElement ? afterElement.dataset.id : null;
+            state.drag.dropContainerId = container.id;
+        }
         
         const indicator = document.createElement('div');
         indicator.className = 'drop-indicator';
@@ -14414,7 +14429,10 @@ const dnd = {
 
         const list = helpers.getList(type);
         const draggedId = state.drag.sourceId;
-        const afterElement = this.getDragAfterElement(container, e.clientY);
+        
+        // Use the stored position from onDragOver instead of recalculating
+        // This ensures the item goes exactly where the visual indicator was shown
+        const dropAfterElementId = state.drag.dropAfterElementId;
         
         const oldIndex = list.findIndex(i => i.id === draggedId);
         if (oldIndex === -1) return;
@@ -14422,9 +14440,9 @@ const dnd = {
         const [movedItem] = list.splice(oldIndex, 1);
 
         let newIndex;
-        if (afterElement) {
-            const nextId = afterElement.dataset.id;
-            newIndex = list.findIndex(i => i.id === nextId);
+        if (dropAfterElementId) {
+            newIndex = list.findIndex(i => i.id === dropAfterElementId);
+            if (newIndex === -1) newIndex = list.length;
         } else {
             newIndex = list.length;
         }
@@ -14559,6 +14577,9 @@ const dnd = {
         const afterElement = this.getChecklistDragAfterElement(container, e.clientY);
         container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
         
+        // Store the target position so onChecklistDrop uses the exact visual position
+        state.checklistDrag.dropAfterIndex = afterElement ? parseInt(afterElement.dataset.checklistIndex) : null;
+        
         const indicator = document.createElement('div');
         indicator.className = 'checklist-drop-indicator';
         
@@ -14578,8 +14599,13 @@ const dnd = {
     },
     
     async onChecklistDrop(e, subtaskId, container) {
-        if (!state.checklistDrag || state.checklistDrag.subtaskId !== subtaskId) {
+        if (!state.checklistDrag) return;
+        
+        // Cross-subtask: delegate to reparent handler
+        if (state.checklistDrag.subtaskId !== subtaskId) {
+            await dnd.onChecklistReparentDrop(state.checklistDrag.subtaskId, state.checklistDrag.index, subtaskId);
             state.checklistDrag = null;
+            container.querySelectorAll('.checklist-drop-indicator').forEach(i => i.remove());
             return;
         }
         
@@ -14590,11 +14616,13 @@ const dnd = {
         if (!subtask || !subtask.checklist) return;
         
         const oldIndex = state.checklistDrag.index;
-        const afterElement = this.getChecklistDragAfterElement(container, e.clientY);
+        
+        // Use the stored position from onChecklistDragOver
+        const dropAfterIndex = state.checklistDrag.dropAfterIndex;
         
         let newIndex;
-        if (afterElement) {
-            newIndex = parseInt(afterElement.dataset.checklistIndex);
+        if (dropAfterIndex !== null && dropAfterIndex !== undefined) {
+            newIndex = dropAfterIndex;
             if (oldIndex < newIndex) newIndex--;
         } else {
             newIndex = subtask.checklist.length - 1;
