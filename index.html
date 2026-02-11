@@ -2920,6 +2920,62 @@
             color: #a78bfa;
         }
         
+        /* Worked-On Reflection Panel */
+        .worked-on-confirm {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 4px 0;
+        }
+        
+        .worked-on-confirm-question {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .worked-on-confirm-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .worked-on-confirm-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+        }
+        
+        .worked-on-confirm-btn:hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        
+        .worked-on-confirm-cancel {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        
+        .worked-on-confirm-cancel:hover {
+            color: var(--text-secondary);
+        }
+
         /* Celebration Animation */
         @keyframes celebrate {
             0% { transform: scale(1); }
@@ -9359,20 +9415,18 @@ const todayView = {
                 </button>
             `;
         } else if (!isCompleted) {
-            // Active items: complete, worked-on, pomodoro, remove
+            // Active items: complete, worked-on, pomodoro
             actionButtons = `
                 <button class="today-action-btn success" onclick="todayView.toggleDone('${itemData.id}', '${type}', event)">
                     &#9989; ${itemData.done ? 'Heropen' : (type === 'checklist' ? 'Afvinken' : 'Voltooien')}
                 </button>
-                <button class="today-action-btn worked-on" onclick="todayView.markWorkedOn('${itemData.id}', '${type}')">
+                <button class="today-action-btn worked-on" onclick="todayView.showWorkedOnConfirm('${itemData.id}', '${type}', this)">
                     &#129513; Dagdoel behaald
                 </button>
                 <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${(item.name || item.text || '').replace(/'/g, "\\'")}')">
                     &#9201; Pomodoro
                 </button>
-                <button class="today-action-btn danger" onclick="todayView.removeFromToday('${itemData.id}', '${type}')">
-                    &#128465;&#65039; Verwijder
-                </button>
+
             `;
         } else {
             // Completed items can only be reopened
@@ -9762,7 +9816,49 @@ const todayView = {
         }
     },
     
-    async markWorkedOn(id, type) {
+    showWorkedOnConfirm(id, type, buttonEl) {
+        // Find the actions container for this card
+        const card = buttonEl.closest('.today-item');
+        const actionsDiv = card.querySelector('.today-item-actions');
+        if (!actionsDiv) return;
+        
+        // Store original content for cancel
+        const originalContent = actionsDiv.innerHTML;
+        
+        // Replace with inline reflection options
+        actionsDiv.innerHTML = `
+            <div class="worked-on-confirm">
+                <div class="worked-on-confirm-question">&#129513; Hoe heb je hieraan gewerkt?</div>
+                <div class="worked-on-confirm-options">
+                    <button class="worked-on-confirm-btn" onclick="todayView.markWorkedOn('${id}', '${type}', 'step')">
+                        &#129462; Kleine stap gezet
+                    </button>
+                    <button class="worked-on-confirm-btn" onclick="todayView.markWorkedOn('${id}', '${type}', 'worked')">
+                        &#128295; Aan gewerkt
+                    </button>
+                    <button class="worked-on-confirm-btn" onclick="todayView.markWorkedOn('${id}', '${type}', 'prepared')">
+                        &#128173; Voorbereid / gepland
+                    </button>
+                </div>
+                <button class="worked-on-confirm-cancel" onclick="todayView.cancelWorkedOnConfirm(this)">
+                    &#8617; Annuleren
+                </button>
+            </div>
+        `;
+        
+        // Store original content on the element for restore
+        actionsDiv._originalContent = originalContent;
+    },
+    
+    cancelWorkedOnConfirm(cancelBtn) {
+        const actionsDiv = cancelBtn.closest('.today-item-actions');
+        if (actionsDiv && actionsDiv._originalContent) {
+            actionsDiv.innerHTML = actionsDiv._originalContent;
+            delete actionsDiv._originalContent;
+        }
+    },
+    
+    async markWorkedOn(id, type, workedOnType) {
         const today = new Date().setHours(0,0,0,0);
         let targetItem = null;
         
@@ -9799,7 +9895,7 @@ const todayView = {
         // Save undo state
         undoRedo.saveState();
         
-        // Add today to workedOnDates array
+        // Add today to workedOnDates array (backward compatible)
         if (!targetItem.workedOnDates) {
             targetItem.workedOnDates = [];
         }
@@ -9807,11 +9903,28 @@ const todayView = {
             targetItem.workedOnDates.push(today);
         }
         
+        // Add entry to workedOnLog with type (cumulative, never overwritten)
+        if (!targetItem.workedOnLog) {
+            targetItem.workedOnLog = [];
+        }
+        targetItem.workedOnLog.push({
+            date: today,
+            type: workedOnType || 'worked'
+        });
+        
+        // Feedback labels per type
+        const typeLabels = {
+            step: 'Kleine stap gezet',
+            worked: 'Aan gewerkt',
+            prepared: 'Voorbereid / gepland'
+        };
+        const feedbackLabel = typeLabels[workedOnType] || 'Dagdoel behaald';
+        
         // Track in productivity stats
         productivityTracker.logWorkedOn();
         
-        // Show positive feedback
-        toastNotifications.show('success', 'Dagdoel behaald!', `${targetItem.name || targetItem.text} - goed bezig!`, 2500);
+        // Show positive feedback with type
+        toastNotifications.show('success', 'Dagdoel behaald!', `${targetItem.name || targetItem.text} - ${feedbackLabel}`, 2500);
         
         await app.save();
         this.render();
@@ -9859,6 +9972,14 @@ const todayView = {
             targetItem.workedOnDates = targetItem.workedOnDates.filter(d => d !== today);
             if (targetItem.workedOnDates.length === 0) {
                 delete targetItem.workedOnDates;
+            }
+        }
+        
+        // Remove today's entries from workedOnLog
+        if (targetItem.workedOnLog) {
+            targetItem.workedOnLog = targetItem.workedOnLog.filter(entry => entry.date !== today);
+            if (targetItem.workedOnLog.length === 0) {
+                delete targetItem.workedOnLog;
             }
         }
         
