@@ -6386,20 +6386,30 @@ const app = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    // Reset alleen niet-voltooide items met oude scheduledDate
-                    if (!task.done && task.scheduledDate && task.scheduledDate < today) {
-                        task.scheduledDate = null;
-                        changed = true;
-                    }
-                    task.subtasks?.forEach(sub => {
-                        if (!sub.done && sub.scheduledDate && sub.scheduledDate < today) {
-                            sub.scheduledDate = null;
+                    // Reset niet-voltooide items met oude scheduledDate
+                    // Inclusief items waar dagdoel behaald is voor de ingeplande datum
+                    if (task.scheduledDate && task.scheduledDate < today) {
+                        const wasWorkedOn = task.workedOnDates && task.workedOnDates.includes(task.scheduledDate);
+                        if (!task.done || wasWorkedOn) {
+                            task.scheduledDate = null;
                             changed = true;
                         }
-                        sub.checklist?.forEach(c => {
-                            if (!c.done && c.scheduledDate && c.scheduledDate < today) {
-                                c.scheduledDate = null;
+                    }
+                    task.subtasks?.forEach(sub => {
+                        if (sub.scheduledDate && sub.scheduledDate < today) {
+                            const wasWorkedOn = sub.workedOnDates && sub.workedOnDates.includes(sub.scheduledDate);
+                            if (!sub.done || wasWorkedOn) {
+                                sub.scheduledDate = null;
                                 changed = true;
+                            }
+                        }
+                        sub.checklist?.forEach(c => {
+                            if (c.scheduledDate && c.scheduledDate < today) {
+                                const wasWorkedOn = c.workedOnDates && c.workedOnDates.includes(c.scheduledDate);
+                                if (!c.done || wasWorkedOn) {
+                                    c.scheduledDate = null;
+                                    changed = true;
+                                }
                             }
                         });
                     });
@@ -8033,28 +8043,41 @@ const crud = {
         const idx = list.findIndex(i => i.id === id);
         
         if (idx > -1) {
-            // Adjust scheduled counts for deleted item and its children
+            // Adjust stats for deleted item and its children
+            // Principe: voltooide prestaties behouden, alleen onvoltooide planning corrigeren
             const deletedItem = list[idx];
-            if (deletedItem && deletedItem.scheduledDate) {
-                productivityTracker.logUnscheduledFromDate(deletedItem.scheduledDate);
-            }
+            const today = new Date().setHours(0,0,0,0);
+            
+            // Helper: corrigeer stats voor een verwijderd item
+            // Voltooide/dagdoel-behaalde items behouden hun stats (prestatie is geleverd)
+            // Alleen onvoltooide items verliezen hun scheduled count
+            const reverseStatsForItem = (item) => {
+                if (!item) return;
+                const completedToday = item.done && item.completedAt && 
+                    new Date(item.completedAt).setHours(0,0,0,0) === today;
+                const workedOnToday = item.workedOnDates && item.workedOnDates.includes(today);
+                
+                // Als item vandaag voltooid of dagdoel behaald: stats behouden
+                if (completedToday || workedOnToday) return;
+                
+                // Alleen onvoltooide items: scheduled count corrigeren
+                if (item.scheduledDate) {
+                    productivityTracker.logUnscheduledFromDate(item.scheduledDate);
+                }
+            };
+            
+            reverseStatsForItem(deletedItem);
             if (type === 'task' && deletedItem) {
                 deletedItem.subtasks?.forEach(sub => {
-                    if (sub.scheduledDate) {
-                        productivityTracker.logUnscheduledFromDate(sub.scheduledDate);
-                    }
+                    reverseStatsForItem(sub);
                     sub.checklist?.forEach(c => {
-                        if (c.scheduledDate) {
-                            productivityTracker.logUnscheduledFromDate(c.scheduledDate);
-                        }
+                        reverseStatsForItem(c);
                     });
                 });
             }
             if (type === 'sub' && deletedItem) {
                 deletedItem.checklist?.forEach(c => {
-                    if (c.scheduledDate) {
-                        productivityTracker.logUnscheduledFromDate(c.scheduledDate);
-                    }
+                    reverseStatsForItem(c);
                 });
             }
             list.splice(idx, 1);
@@ -8113,22 +8136,32 @@ const crud = {
         
         const now = Date.now();
         
-        // Adjust scheduled counts for all items being archived
-        proj.tasks?.forEach(task => {
-            if (task.scheduledDate) {
-                productivityTracker.logUnscheduledFromDate(task.scheduledDate);
-            }
-            task.subtasks?.forEach(sub => {
-                if (sub.scheduledDate) {
-                    productivityTracker.logUnscheduledFromDate(sub.scheduledDate);
+        // Adjust stats voor items die gearchiveerd worden
+            // Voltooide prestaties behouden, alleen onvoltooide planning corrigeren
+            const today = new Date().setHours(0,0,0,0);
+            const reverseArchiveStats = (item) => {
+                if (!item) return;
+                const completedToday = item.done && item.completedAt && 
+                    new Date(item.completedAt).setHours(0,0,0,0) === today;
+                const workedOnToday = item.workedOnDates && item.workedOnDates.includes(today);
+                
+                // Voltooide/dagdoel-behaalde items: stats behouden
+                if (completedToday || workedOnToday) return;
+                
+                // Alleen onvoltooide items: scheduled count corrigeren
+                if (item.scheduledDate) {
+                    productivityTracker.logUnscheduledFromDate(item.scheduledDate);
                 }
-                sub.checklist?.forEach(c => {
-                    if (c.scheduledDate) {
-                        productivityTracker.logUnscheduledFromDate(c.scheduledDate);
-                    }
+            };
+            proj.tasks?.forEach(task => {
+                reverseArchiveStats(task);
+                task.subtasks?.forEach(sub => {
+                    reverseArchiveStats(sub);
+                    sub.checklist?.forEach(c => {
+                        reverseArchiveStats(c);
+                    });
                 });
             });
-        });
         
         // Archive ALL subtasks first
         proj.tasks?.forEach(task => {
@@ -12667,6 +12700,8 @@ const morningWizard = {
                 proj.tasks?.forEach(task => {
                     // 1. TASKS met scheduledDate < vandaag EN niet afgerond
                     if (task.scheduledDate && task.scheduledDate < todayTimestamp && !task.done) {
+                        // Skip items waar dagdoel behaald is voor de ingeplande datum
+                        if (task.workedOnDates && task.workedOnDates.includes(task.scheduledDate)) return;
                         const daysAgo = Math.floor((todayTimestamp - task.scheduledDate) / (1000 * 60 * 60 * 24));
                         
                         let period;
@@ -12699,6 +12734,8 @@ const morningWizard = {
                     if (task.subtasks) {
                         task.subtasks.forEach(sub => {
                             if (sub.scheduledDate && sub.scheduledDate < todayTimestamp && !sub.done) {
+                                // Skip items waar dagdoel behaald is voor de ingeplande datum
+                                if (sub.workedOnDates && sub.workedOnDates.includes(sub.scheduledDate)) return;
                                 const daysAgo = Math.floor((todayTimestamp - sub.scheduledDate) / (1000 * 60 * 60 * 24));
                                 
                                 let period;
@@ -12733,6 +12770,10 @@ const morningWizard = {
                             if (sub.checklist) {
                                 sub.checklist.forEach((checkItem, idx) => {
                                     if (checkItem.scheduledDate && checkItem.scheduledDate < todayTimestamp && !checkItem.done) {
+                                        // Skip items waar dagdoel behaald is voor de ingeplande datum
+                                        if (checkItem.workedOnDates && checkItem.workedOnDates.includes(checkItem.scheduledDate)) {
+                                            return;
+                                        }
                                         const daysAgo = Math.floor((todayTimestamp - checkItem.scheduledDate) / (1000 * 60 * 60 * 24));
                                         
                                         let period;
@@ -15436,11 +15477,31 @@ const modal = {
                 item.dueDate = dueDate ? new Date(dueDate).getTime() : null;
                 
                 const scheduledDate = document.getElementById('modalScheduledDate').value;
+                const oldScheduledDate = item.scheduledDate;
                 if (scheduledDate) {
                     // Fix timezone bug: parse lokaal ipv UTC
                     const [year, month, day] = scheduledDate.split('-').map(Number);
-                    item.scheduledDate = new Date(year, month - 1, day).setHours(0,0,0,0);
+                    const newScheduledDate = new Date(year, month - 1, day).setHours(0,0,0,0);
+                    
+                    // Track scheduling wijzigingen in productiviteit stats
+                    if (oldScheduledDate !== newScheduledDate) {
+                        if (oldScheduledDate) {
+                            productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                        }
+                        productivityTracker.logScheduledForDate(newScheduledDate);
+                        if (oldScheduledDate) {
+                            productivityTracker.logRescheduled();
+                        }
+                        productivityTracker.trackItemScheduled(item, !!oldScheduledDate);
+                    }
+                    
+                    item.scheduledDate = newScheduledDate;
                 } else {
+                    // Scheduling verwijderd via modal
+                    if (oldScheduledDate) {
+                        productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                        productivityTracker.logRemoved();
+                    }
                     item.scheduledDate = null;
                 }
                 
