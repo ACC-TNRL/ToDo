@@ -10524,7 +10524,13 @@ const productivityTracker = {
     },
 
     // Log when item is unscheduled from a specific date
+    // Past day stats are IMMUTABLE - they represent historical data.
+    // Only today's stats can be modified. This prevents morning wizard moves,
+    // deletes, and archives from retroactively corrupting past day ratios.
     logUnscheduledFromDate(dateTimestamp) {
+        const today = new Date().setHours(0,0,0,0);
+        if (dateTimestamp < today) return; // Past stats are frozen
+        
         const stats = this.getStatsForDate(dateTimestamp);
         if (stats && stats.scheduled > 0) {
             stats.scheduled--;
