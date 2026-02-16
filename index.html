@@ -7818,16 +7818,25 @@ const renderer = {
                 if (item.checklist && item.checklist[idx]) {
                     const today = new Date().setHours(0, 0, 0, 0);
                     const checkItem = item.checklist[idx];
-                    if (!checkItem.scheduledDate) {
-                        checkItem.scheduledDate = today;
-                        checkItem.todayPriority = 999;
-                        // Track scheduling for the target date (today)
-                        productivityTracker.logScheduledForDate(today);
-                        productivityTracker.trackItemScheduled(checkItem, false);
-                        await app.save();
-                        app.setStatus("Checklist item toegevoegd aan vandaag", "success");
-                        app.render();
+                    const oldScheduledDate = checkItem.scheduledDate;
+                    // Already scheduled for today - no action needed
+                    if (oldScheduledDate === today) {
+                        app.setStatus("Checklist item staat al ingepland voor vandaag", "info");
+                        return;
                     }
+                    const isReschedule = oldScheduledDate && oldScheduledDate !== today;
+                    // If rescheduling from old date, unschedule from that date first
+                    if (isReschedule) {
+                        productivityTracker.logUnscheduledFromDate(oldScheduledDate);
+                    }
+                    checkItem.scheduledDate = today;
+                    checkItem.todayPriority = 999;
+                    // Track scheduling for the target date (today)
+                    productivityTracker.logScheduledForDate(today);
+                    productivityTracker.trackItemScheduled(checkItem, isReschedule);
+                    await app.save();
+                    app.setStatus("Checklist item toegevoegd aan vandaag", "success");
+                    app.render();
                 }
             };
         });
@@ -9212,8 +9221,8 @@ const todayView = {
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 proj.tasks?.forEach(task => {
-                    // Tasks scheduled for today
-                    if (task.scheduledDate === today) {
+                    // Tasks scheduled for today OR worked on today (dagdoel behaald clears scheduledDate)
+                    if (task.scheduledDate === today || (!task.scheduledDate && (task.workedOnDates || []).includes(today))) {
                         const isWorkedOn = (task.workedOnDates || []).includes(today);
                         items.push({
                             type: 'task',
@@ -9231,7 +9240,7 @@ const todayView = {
                     // Subtasks scheduled for today
                     if (task.subtasks) {
                         task.subtasks.forEach(sub => {
-                            if (sub.scheduledDate === today) {
+                            if (sub.scheduledDate === today || (!sub.scheduledDate && (sub.workedOnDates || []).includes(today))) {
                                 const isWorkedOn = (sub.workedOnDates || []).includes(today);
                                 items.push({
                                     type: 'subtask',
@@ -9250,7 +9259,7 @@ const todayView = {
                             // Checklist items scheduled for today (independent of parent)
                             if (sub.checklist) {
                                 sub.checklist.forEach((checkItem, idx) => {
-                                    if (checkItem.scheduledDate === today) {
+                                    if (checkItem.scheduledDate === today || (!checkItem.scheduledDate && (checkItem.workedOnDates || []).includes(today))) {
                                         const isWorkedOn = (checkItem.workedOnDates || []).includes(today);
                                         items.push({
                                             type: 'checklist',
@@ -9593,18 +9602,21 @@ const todayView = {
         let targetTask = null;
         let targetItem = null;
         
+        // Helper: check if item is in today's scope (scheduled or worked-on today)
+        const isTodayItem = (item) => item.scheduledDate === today || (!item.scheduledDate && (item.workedOnDates || []).includes(today));
+        
         outer:
         for (const cat of state.db.categories) {
             for (const proj of cat.projects || []) {
                 for (const task of proj.tasks || []) {
-                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                    if (type === 'task' && task.id === id && isTodayItem(task)) {
                         targetTask = task;
                         targetItem = task;
                         break outer;
                     }
                     
                     for (const sub of task.subtasks || []) {
-                        if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                        if (type === 'subtask' && sub.id === id && isTodayItem(sub)) {
                             targetItem = sub;
                             break outer;
                         }
@@ -9612,7 +9624,7 @@ const todayView = {
                         if (sub.checklist && type === 'checklist') {
                             for (let idx = 0; idx < sub.checklist.length; idx++) {
                                 const checkItem = sub.checklist[idx];
-                                if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                if (id === `${sub.id}-check-${idx}` && isTodayItem(checkItem)) {
                                     targetItem = checkItem;
                                     break outer;
                                 }
@@ -9956,6 +9968,10 @@ const todayView = {
         // Track in productivity stats
         productivityTracker.logWorkedOn();
         
+        // Clear scheduledDate - dagdoel behaald means done for this day
+        delete targetItem.scheduledDate;
+        delete targetItem.todayPriority;
+        
         // Show positive feedback with type
         toastNotifications.show('success', 'Dagdoel behaald!', `${targetItem.name || targetItem.text} - ${feedbackLabel}`, 2500);
         
@@ -9967,24 +9983,24 @@ const todayView = {
         const today = new Date().setHours(0,0,0,0);
         let targetItem = null;
         
-        // Find the target item
+        // Find the target item by ID and workedOnDates (scheduledDate was cleared on mark)
         outer:
         for (const cat of state.db.categories) {
             for (const proj of cat.projects || []) {
                 for (const task of proj.tasks || []) {
-                    if (type === 'task' && task.id === id && task.scheduledDate === today) {
+                    if (type === 'task' && task.id === id && (task.workedOnDates || []).includes(today)) {
                         targetItem = task;
                         break outer;
                     }
                     for (const sub of task.subtasks || []) {
-                        if (type === 'subtask' && sub.id === id && sub.scheduledDate === today) {
+                        if (type === 'subtask' && sub.id === id && (sub.workedOnDates || []).includes(today)) {
                             targetItem = sub;
                             break outer;
                         }
                         if (sub.checklist && type === 'checklist') {
                             for (let idx = 0; idx < sub.checklist.length; idx++) {
                                 const checkItem = sub.checklist[idx];
-                                if (id === `${sub.id}-check-${idx}` && checkItem.scheduledDate === today) {
+                                if (id === `${sub.id}-check-${idx}` && (checkItem.workedOnDates || []).includes(today)) {
                                     targetItem = checkItem;
                                     break outer;
                                 }
@@ -10018,6 +10034,10 @@ const todayView = {
         
         // Reverse the productivity stat
         productivityTracker.logUnworkedOn();
+        
+        // Restore scheduledDate so item returns to today's list
+        targetItem.scheduledDate = today;
+        targetItem.todayPriority = 999;
         
         await app.save();
         this.render();
