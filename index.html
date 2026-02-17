@@ -11740,7 +11740,7 @@ const insightsView = {
                         Vandaag doen
                     </button>
                     <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
-                        Loslaten
+                        Niet meer tonen
                     </button>
                 </div>
             </div>
@@ -11774,7 +11774,7 @@ const insightsView = {
                         Vandaag doen
                     </button>
                     <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
-                        Loslaten
+                        Niet meer tonen
                     </button>
                 </div>
             </div>
@@ -11785,7 +11785,7 @@ const insightsView = {
         const item = itemData.item;
         const itemName = item.name || item.text || 'Naamloos item';
         const dataText = `${itemData.ageDays} dagen oud${itemData.timesScheduled > 0 ? ', ' + itemData.timesScheduled + 'x ingepland' : ''}`;
-        const tip = 'Dit item staat al een tijdje stil. Is het nog relevant, of mag het los?';
+        const tip = 'Dit item staat al een tijdje stil. Is het nog relevant?';
 
         return `
             <div class="pattern-item">
@@ -11803,7 +11803,7 @@ const insightsView = {
                         Inplannen
                     </button>
                     <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
-                        Loslaten
+                        Niet meer tonen
                     </button>
                 </div>
             </div>
