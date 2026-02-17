@@ -11180,6 +11180,10 @@ const productivityTracker = {
     // Central function to log scheduling events per item
     trackSchedulingEvent(item, action, extra = {}) {
         if (!item) return;
+        // Clear dismiss flag on new scheduling activity - item becomes trackable again
+        if (action === 'scheduled' && item._dismissedFromPatterns) {
+            delete item._dismissedFromPatterns;
+        }
         if (!item.schedulingHistory) {
             item.schedulingHistory = [];
         }
@@ -11199,7 +11203,7 @@ const productivityTracker = {
         const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
 
         const processItem = (item, type, context, catId, projId, taskId) => {
-            if (!item || item.done) return;
+            if (!item || item.done || item._dismissedFromPatterns) return;
             const id = item.id || `${taskId}-check-${item._checkIdx}`;
 
             // --- Pattern 1: Vaak ingepland (>=3 removed/rescheduled in 30 days) ---
@@ -11785,7 +11789,7 @@ const insightsView = {
         const item = itemData.item;
         const itemName = item.name || item.text || 'Naamloos item';
         const dataText = `${itemData.ageDays} dagen oud${itemData.timesScheduled > 0 ? ', ' + itemData.timesScheduled + 'x ingepland' : ''}`;
-        const tip = 'Dit item staat al een tijdje stil. Is het nog relevant?';
+        const tip = `Dit item is ${itemData.ageDays} dagen oud zonder voortgang. Inplannen, opsplitsen, of bewust loslaten?`;
 
         return `
             <div class="pattern-item">
@@ -11811,24 +11815,12 @@ const insightsView = {
     },
 
     async dismissPatternItem(itemId, type) {
-        // Reuse existing dismiss logic - resets procrastination data and scheduling history
+        // Set a flag to hide from patterns view instead of deleting all history
         let itemFound = false;
 
         const findAndDismiss = (item) => {
             if (item && item.id === itemId) {
-                if (item.procrastinationData) {
-                    delete item.procrastinationData;
-                    delete item._procrastinationBackup;
-                }
-                if (item.schedulingHistory) {
-                    delete item.schedulingHistory;
-                }
-                if (item.workedOnLog) {
-                    delete item.workedOnLog;
-                }
-                if (item.workedOnDates) {
-                    delete item.workedOnDates;
-                }
+                item._dismissedFromPatterns = true;
                 itemFound = true;
                 return true;
             }
@@ -11851,7 +11843,7 @@ const insightsView = {
 
         if (itemFound) {
             await app.save();
-            toastNotifications.show('success', 'Losgelaten', 'Item is verwijderd uit de patronen');
+            toastNotifications.show('success', 'Verborgen', 'Item wordt niet meer getoond bij patronen');
             this.render();
         }
     },
