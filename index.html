@@ -3597,6 +3597,223 @@
             color: #fed7aa;
         }
 
+        /* Procrastination Patterns Accordions */
+        .patterns-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pattern-accordion {
+            margin-bottom: 8px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--bg-panel);
+        }
+
+        .pattern-accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .pattern-accordion-header:hover {
+            background: var(--bg-app);
+        }
+
+        .pattern-accordion-header .acc-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        .pattern-accordion-header .acc-icon {
+            font-size: 16px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .pattern-accordion-header .acc-count {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .pattern-accordion-header .acc-toggle {
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .pattern-accordion-header .acc-toggle.open {
+            transform: rotate(90deg);
+        }
+
+        .pattern-accordion-body {
+            display: none;
+            padding: 0 16px 12px;
+        }
+
+        .pattern-accordion-body.open {
+            display: block;
+        }
+
+        /* Category: Vaak ingepland (amber) */
+        .pattern-accordion.vaak-ingepland .pattern-accordion-header {
+            border-left-color: #f59e0b;
+        }
+        .pattern-accordion.vaak-ingepland .acc-count {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        body.dark-mode .pattern-accordion.vaak-ingepland .acc-count {
+            background: #78350f;
+            color: #fef3c7;
+        }
+
+        /* Category: Preparation loop (paars) */
+        .pattern-accordion.preparation-loop .pattern-accordion-header {
+            border-left-color: #8b5cf6;
+        }
+        .pattern-accordion.preparation-loop .acc-count {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        body.dark-mode .pattern-accordion.preparation-loop .acc-count {
+            background: #4c1d95;
+            color: #ede9fe;
+        }
+
+        /* Category: Op de plank (grijs) */
+        .pattern-accordion.op-de-plank .pattern-accordion-header {
+            border-left-color: #6b7280;
+        }
+        .pattern-accordion.op-de-plank .acc-count {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        body.dark-mode .pattern-accordion.op-de-plank .acc-count {
+            background: #374151;
+            color: #d1d5db;
+        }
+
+        /* Pattern item cards */
+        .pattern-item {
+            background: var(--bg-app);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+
+        .pattern-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pattern-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+            gap: 12px;
+        }
+
+        .pattern-item-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 13px;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .pattern-item-data {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            background: var(--bg-panel);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .pattern-item-context {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .pattern-item-tip {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+        }
+
+        .vaak-ingepland .pattern-item-tip {
+            color: #92400e;
+            background: #fef3c7;
+        }
+        body.dark-mode .vaak-ingepland .pattern-item-tip {
+            background: #78350f;
+            color: #fef3c7;
+        }
+
+        .preparation-loop .pattern-item-tip {
+            color: #5b21b6;
+            background: #ede9fe;
+        }
+        body.dark-mode .preparation-loop .pattern-item-tip {
+            background: #4c1d95;
+            color: #ede9fe;
+        }
+
+        .op-de-plank .pattern-item-tip {
+            color: #374151;
+            background: #f3f4f6;
+        }
+        body.dark-mode .op-de-plank .pattern-item-tip {
+            background: #374151;
+            color: #d1d5db;
+        }
+
+        .pattern-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pattern-item-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .patterns-empty {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--text-muted);
+        }
+
+        .patterns-empty-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .patterns-empty p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         /* Streak tooltip styling */
         .streak-tooltip {
             position: relative;
@@ -7834,6 +8051,7 @@ const renderer = {
                     // Track scheduling for the target date (today)
                     productivityTracker.logScheduledForDate(today);
                     productivityTracker.trackItemScheduled(checkItem, isReschedule);
+                    productivityTracker.trackSchedulingEvent(checkItem, isReschedule ? 'rescheduled' : 'scheduled', isReschedule ? { fromDate: oldScheduledDate } : {});
                     await app.save();
                     app.setStatus("Checklist item toegevoegd aan vandaag", "success");
                     app.render();
@@ -7855,6 +8073,7 @@ const renderer = {
                     delete checkItem.todayPriority;
                     // Track removal for statistics
                     productivityTracker.logRemoved();
+                    productivityTracker.trackSchedulingEvent(checkItem, 'removed');
                     await app.save();
                     app.setStatus("Checklist item verwijderd uit vandaag", "success");
                     app.render();
@@ -8838,6 +9057,7 @@ const crud = {
             // Add to new date (today)
             productivityTracker.logScheduledForDate(today);
             productivityTracker.trackItemScheduled(task, isReschedule);
+            productivityTracker.trackSchedulingEvent(task, isReschedule ? 'rescheduled' : 'scheduled', isReschedule ? { fromDate: oldScheduledDate } : {});
             await app.save();
             app.render();
             app.setStatus("Taak ingepland voor vandaag", "success");
@@ -8873,6 +9093,7 @@ const crud = {
                             // Add to new date (today)
                             productivityTracker.logScheduledForDate(today);
                             productivityTracker.trackItemScheduled(subtask, isReschedule);
+                            productivityTracker.trackSchedulingEvent(subtask, isReschedule ? 'rescheduled' : 'scheduled', isReschedule ? { fromDate: oldScheduledDate } : {});
                         }
                     }
                 });
@@ -8904,6 +9125,7 @@ const crud = {
             delete task.todayPriority;
             itemFound = true;
             productivityTracker.logRemoved();
+            productivityTracker.trackSchedulingEvent(task, 'removed');
             await app.save();
             app.render();
             app.setStatus("Taak verwijderd uit vandaag", "success");
@@ -8925,6 +9147,7 @@ const crud = {
                             delete subtask.todayPriority;
                             itemFound = true;
                             productivityTracker.logRemoved();
+                            productivityTracker.trackSchedulingEvent(subtask, 'removed');
                         }
                     }
                 });
@@ -9826,6 +10049,7 @@ const todayView = {
                         delete task.scheduledDate;
                         delete task.todayPriority;
                         productivityTracker.logUnscheduledFromDate(today);
+                        productivityTracker.trackSchedulingEvent(task, 'removed');
                         itemFound = true;
                     }
                     
@@ -9835,6 +10059,7 @@ const todayView = {
                                 delete sub.scheduledDate;
                                 delete sub.todayPriority;
                                 productivityTracker.logUnscheduledFromDate(today);
+                                productivityTracker.trackSchedulingEvent(sub, 'removed');
                                 itemFound = true;
                             }
                             
@@ -9844,6 +10069,7 @@ const todayView = {
                                         delete checkItem.scheduledDate;
                                         delete checkItem.todayPriority;
                                         productivityTracker.logUnscheduledFromDate(today);
+                                        productivityTracker.trackSchedulingEvent(checkItem, 'removed');
                                         itemFound = true;
                                     }
                                 });
@@ -9967,6 +10193,7 @@ const todayView = {
         
         // Track in productivity stats
         productivityTracker.logWorkedOn();
+        productivityTracker.trackSchedulingEvent(targetItem, 'workedOn', { type: workedOnType || 'worked' });
         
         // Clear scheduledDate - dagdoel behaald means done for this day
         delete targetItem.scheduledDate;
@@ -10947,6 +11174,111 @@ const productivityTracker = {
         
         // Sort by score descending
         return items.sort((a, b) => b.score - a.score);
+    },
+
+    // ===== SCHEDULING HISTORY TRACKING =====
+    // Central function to log scheduling events per item
+    trackSchedulingEvent(item, action, extra = {}) {
+        if (!item) return;
+        if (!item.schedulingHistory) {
+            item.schedulingHistory = [];
+        }
+        const event = { date: Date.now(), action, ...extra };
+        item.schedulingHistory.push(event);
+        // Cap at 30 entries (FIFO)
+        if (item.schedulingHistory.length > 30) {
+            item.schedulingHistory = item.schedulingHistory.slice(-30);
+        }
+    },
+
+    // ===== PROCRASTINATION PATTERN ANALYSIS =====
+    analyzeProcrastinationPatterns() {
+        const patterns = { vaakIngepland: [], preparationLoop: [], opDePlank: [] };
+        const assignedIds = new Set();
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+
+        const processItem = (item, type, context, catId, projId, taskId) => {
+            if (!item || item.done) return;
+            const id = item.id || `${taskId}-check-${item._checkIdx}`;
+
+            // --- Pattern 1: Vaak ingepland (>=3 removed/rescheduled in 30 days) ---
+            if (item.schedulingHistory && item.schedulingHistory.length > 0) {
+                const recentEvents = item.schedulingHistory.filter(e => e.date >= thirtyDaysAgo);
+                const removals = recentEvents.filter(e => e.action === 'removed' || e.action === 'rescheduled');
+                if (removals.length >= 3) {
+                    const schedules = recentEvents.filter(e => e.action === 'scheduled' || e.action === 'rescheduled');
+                    patterns.vaakIngepland.push({
+                        type, item, context, catId, projId, taskId,
+                        removals: removals.length,
+                        schedules: schedules.length,
+                        daySpan: Math.floor((Date.now() - recentEvents[0].date) / (1000*60*60*24))
+                    });
+                    assignedIds.add(id);
+                }
+            }
+
+            // --- Pattern 2: Voorbereid maar niet afgerond (>=3 workedOn, min 1 prepared/step) ---
+            if (!assignedIds.has(id) && item.workedOnLog && item.workedOnLog.length >= 3) {
+                const hasPrepOrStep = item.workedOnLog.some(e => e.type === 'prepared' || e.type === 'step');
+                if (hasPrepOrStep) {
+                    const typeCounts = { step: 0, worked: 0, prepared: 0 };
+                    item.workedOnLog.forEach(e => { if (typeCounts[e.type] !== undefined) typeCounts[e.type]++; });
+                    patterns.preparationLoop.push({
+                        type, item, context, catId, projId, taskId,
+                        totalWorkedOn: item.workedOnLog.length,
+                        typeCounts
+                    });
+                    assignedIds.add(id);
+                }
+            }
+
+            // --- Pattern 3: Op de plank (>=14 days old, no workedOn, <=2 scheduling events) ---
+            if (!assignedIds.has(id)) {
+                const age = item.procrastinationData?.firstScheduledDate
+                    ? Date.now() - item.procrastinationData.firstScheduledDate
+                    : (item.createdAt ? Date.now() - item.createdAt : 0);
+                const ageDays = Math.floor(age / (1000*60*60*24));
+                const hasWorkedOn = item.workedOnLog && item.workedOnLog.length > 0;
+                const historyCount = item.schedulingHistory ? item.schedulingHistory.length : 0;
+
+                if (ageDays >= 14 && !hasWorkedOn && historyCount <= 2) {
+                    patterns.opDePlank.push({
+                        type, item, context, catId, projId, taskId,
+                        ageDays,
+                        timesScheduled: item.procrastinationData?.timesScheduled || historyCount
+                    });
+                    assignedIds.add(id);
+                }
+            }
+        };
+
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    processItem(task, 'task', `${cat.name} > ${proj.name}`, cat.id, proj.id, null);
+                    task.subtasks?.forEach(sub => {
+                        processItem(sub, 'subtask', `${cat.name} > ${proj.name} > ${task.name}`, cat.id, proj.id, task.id);
+                        // Checklist items
+                        if (sub.checklist) {
+                            sub.checklist.forEach((c, idx) => {
+                                if (!c.done) {
+                                    c._checkIdx = idx;
+                                    processItem(c, 'checklist', `${cat.name} > ${proj.name} > ${task.name} > ${sub.name}`, cat.id, proj.id, sub.id);
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+
+        // Sort each category
+        patterns.vaakIngepland.sort((a, b) => b.removals - a.removals);
+        patterns.preparationLoop.sort((a, b) => b.totalWorkedOn - a.totalWorkedOn);
+        patterns.opDePlank.sort((a, b) => b.ageDays - a.ageDays);
+
+        return patterns;
     }
 };
 
@@ -10961,7 +11293,7 @@ const insightsView = {
         const stats = productivityTracker.calculatePeriodStats(this.currentPeriod);
         const previousStats = productivityTracker.calculatePreviousPeriodStats(this.currentPeriod);
         const todayStats = productivityTracker.getTodayStats();
-        const attentionItems = productivityTracker.getItemsNeedingAttention();
+        const procrastinationPatterns = productivityTracker.analyzeProcrastinationPatterns();
         
         // Check if we have any data
         const hasData = state.db.productivityStats.dailyLogs.length > 0 && 
@@ -11018,7 +11350,7 @@ const insightsView = {
                             ${this.renderWeekChart()}
                         </div>
                         
-                        ${this.renderNeedsAttentionSection(attentionItems)}
+                        ${this.renderProcrastinationPatterns(procrastinationPatterns)}
                     </div>
                     
                     <div class="insights-section">
@@ -11285,6 +11617,251 @@ const insightsView = {
                 </div>
             </div>
         `;
+    },
+
+    // ===== PROCRASTINATION PATTERNS RENDERING =====
+    renderProcrastinationPatterns(patterns) {
+        const totalItems = patterns.vaakIngepland.length + patterns.preparationLoop.length + patterns.opDePlank.length;
+
+        if (totalItems === 0) {
+            return `
+                <div class="insights-section">
+                    <h3 class="insights-section-title">&#128269; Herken je deze patronen?</h3>
+                    <div class="patterns-empty">
+                        <div class="patterns-empty-icon">&#9989;</div>
+                        <p>Alles onder controle! Geen procrastinatie-patronen gedetecteerd.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Determine which accordion opens by default (most items)
+        const counts = [
+            { key: 'vaak', count: patterns.vaakIngepland.length },
+            { key: 'prep', count: patterns.preparationLoop.length },
+            { key: 'plank', count: patterns.opDePlank.length }
+        ];
+        const defaultOpen = counts.sort((a, b) => b.count - a.count)[0].key;
+
+        let html = `
+            <div class="insights-section">
+                <h3 class="insights-section-title">&#128269; Herken je deze patronen?</h3>
+        `;
+
+        // 1. Vaak ingepland
+        if (patterns.vaakIngepland.length > 0) {
+            html += this.renderPatternAccordion(
+                'vaak-ingepland', '&#8644;', 'Vaak ingepland',
+                patterns.vaakIngepland, defaultOpen === 'vaak',
+                (itemData) => this.renderVaakIngeplandItem(itemData)
+            );
+        }
+
+        // 2. Voorbereid maar niet afgerond
+        if (patterns.preparationLoop.length > 0) {
+            html += this.renderPatternAccordion(
+                'preparation-loop', '&#9881;', 'Voorbereid maar niet afgerond',
+                patterns.preparationLoop, defaultOpen === 'prep',
+                (itemData) => this.renderPreparationLoopItem(itemData)
+            );
+        }
+
+        // 3. Op de plank
+        if (patterns.opDePlank.length > 0) {
+            html += this.renderPatternAccordion(
+                'op-de-plank', '&#9203;', 'Al een tijdje op de plank',
+                patterns.opDePlank, defaultOpen === 'plank',
+                (itemData) => this.renderOpDePlankItem(itemData)
+            );
+        }
+
+        html += `</div>`;
+        return html;
+    },
+
+    renderPatternAccordion(cssClass, icon, title, items, isOpen, renderFn) {
+        const isExpanded = this._expandedPattern === cssClass;
+        const displayItems = isExpanded ? items : items.slice(0, 3);
+        const accId = cssClass.replace(/[^a-z]/g, '');
+
+        return `
+            <div class="pattern-accordion ${cssClass}">
+                <div class="pattern-accordion-header" onclick="insightsView.togglePatternAccordion('${accId}')">
+                    <div class="acc-left">
+                        <span class="acc-icon">${icon}</span>
+                        <span>${title}</span>
+                        <span class="acc-count">${items.length}</span>
+                    </div>
+                    <span class="acc-toggle ${isOpen ? 'open' : ''}" id="accToggle-${accId}">&#9654;</span>
+                </div>
+                <div class="pattern-accordion-body ${isOpen ? 'open' : ''}" id="accBody-${accId}">
+                    ${displayItems.map(item => renderFn(item)).join('')}
+                    ${!isExpanded && items.length > 3 ? `
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-size: 12px;"
+                                onclick="insightsView.showAllPatternItems('${cssClass}')">
+                            Bekijk alle ${items.length} items
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    togglePatternAccordion(accId) {
+        const body = document.getElementById('accBody-' + accId);
+        const toggle = document.getElementById('accToggle-' + accId);
+        if (body && toggle) {
+            body.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+    },
+
+    renderVaakIngeplandItem(itemData) {
+        const item = itemData.item;
+        const itemName = item.name || item.text || 'Naamloos item';
+        const dataText = `${itemData.schedules}x ingepland, ${itemData.removals}x verwijderd`;
+        const tip = itemData.removals >= 5
+            ? 'Dit item schuift vaak door je planning. Misschien opsplitsen in een kleinere eerste stap?'
+            : 'Dit item duikt regelmatig op. Wat maakt het lastig om het af te ronden?';
+
+        return `
+            <div class="pattern-item">
+                <div class="pattern-item-header">
+                    <span class="pattern-item-name">${this.escapeHtml(itemName)}</span>
+                    <span class="pattern-item-data">${dataText}</span>
+                </div>
+                <div class="pattern-item-context">${this.escapeHtml(itemData.context)}</div>
+                <div class="pattern-item-tip">&#128161; ${tip}</div>
+                <div class="pattern-item-actions">
+                    <button class="btn btn-sm btn-primary" onclick="insightsView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || item.id}')">
+                        &#9654; Bekijken
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="insightsView.scheduleForToday('${item.id}', '${itemData.type}')">
+                        Vandaag doen
+                    </button>
+                    <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
+                        Loslaten
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    renderPreparationLoopItem(itemData) {
+        const item = itemData.item;
+        const itemName = item.name || item.text || 'Naamloos item';
+        const tc = itemData.typeCounts;
+        const parts = [];
+        if (tc.prepared > 0) parts.push(`${tc.prepared}x voorbereid`);
+        if (tc.step > 0) parts.push(`${tc.step}x stap gezet`);
+        if (tc.worked > 0) parts.push(`${tc.worked}x aan gewerkt`);
+        const dataText = parts.join(', ');
+        const tip = 'Je hebt hier al meerdere keer aan gewerkt. Wat zou helpen om het af te ronden?';
+
+        return `
+            <div class="pattern-item">
+                <div class="pattern-item-header">
+                    <span class="pattern-item-name">${this.escapeHtml(itemName)}</span>
+                    <span class="pattern-item-data">${dataText}</span>
+                </div>
+                <div class="pattern-item-context">${this.escapeHtml(itemData.context)}</div>
+                <div class="pattern-item-tip">&#128161; ${tip}</div>
+                <div class="pattern-item-actions">
+                    <button class="btn btn-sm btn-primary" onclick="insightsView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || item.id}')">
+                        &#9654; Bekijken
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="insightsView.scheduleForToday('${item.id}', '${itemData.type}')">
+                        Vandaag doen
+                    </button>
+                    <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
+                        Loslaten
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    renderOpDePlankItem(itemData) {
+        const item = itemData.item;
+        const itemName = item.name || item.text || 'Naamloos item';
+        const dataText = `${itemData.ageDays} dagen oud${itemData.timesScheduled > 0 ? ', ' + itemData.timesScheduled + 'x ingepland' : ''}`;
+        const tip = 'Dit item staat al een tijdje stil. Is het nog relevant, of mag het los?';
+
+        return `
+            <div class="pattern-item">
+                <div class="pattern-item-header">
+                    <span class="pattern-item-name">${this.escapeHtml(itemName)}</span>
+                    <span class="pattern-item-data">${dataText}</span>
+                </div>
+                <div class="pattern-item-context">${this.escapeHtml(itemData.context)}</div>
+                <div class="pattern-item-tip">&#128161; ${tip}</div>
+                <div class="pattern-item-actions">
+                    <button class="btn btn-sm btn-primary" onclick="insightsView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || item.id}')">
+                        &#9654; Bekijken
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="insightsView.scheduleForToday('${item.id}', '${itemData.type}')">
+                        Inplannen
+                    </button>
+                    <button class="btn btn-sm" style="background: transparent; border: 1px solid #666; color: #999;" onclick="insightsView.dismissPatternItem('${item.id}', '${itemData.type}')">
+                        Loslaten
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    async dismissPatternItem(itemId, type) {
+        // Reuse existing dismiss logic - resets procrastination data and scheduling history
+        let itemFound = false;
+
+        const findAndDismiss = (item) => {
+            if (item && item.id === itemId) {
+                if (item.procrastinationData) {
+                    delete item.procrastinationData;
+                    delete item._procrastinationBackup;
+                }
+                if (item.schedulingHistory) {
+                    delete item.schedulingHistory;
+                }
+                if (item.workedOnLog) {
+                    delete item.workedOnLog;
+                }
+                if (item.workedOnDates) {
+                    delete item.workedOnDates;
+                }
+                itemFound = true;
+                return true;
+            }
+            return false;
+        };
+
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                proj.tasks?.forEach(task => {
+                    if (findAndDismiss(task)) return;
+                    task.subtasks?.forEach(sub => {
+                        if (findAndDismiss(sub)) return;
+                        if (sub.checklist) {
+                            sub.checklist.forEach(c => findAndDismiss(c));
+                        }
+                    });
+                });
+            });
+        });
+
+        if (itemFound) {
+            await app.save();
+            toastNotifications.show('success', 'Losgelaten', 'Item is verwijderd uit de patronen');
+            this.render();
+        }
+    },
+
+    showAllPatternItems(cssClass) {
+        // For now, expand the accordion and show a toast
+        toastNotifications.show('info', 'Alle items', 'Alle items worden getoond in de lijst');
+        // Re-render with higher limit - store expanded state
+        this._expandedPattern = cssClass;
+        this.render();
     },
 
     renderWeekChart() {
@@ -12273,6 +12850,7 @@ const weekView = {
                 
                 checkItem.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(checkItem, !!hadSchedule);
+                productivityTracker.trackSchedulingEvent(checkItem, hadSchedule ? 'rescheduled' : 'scheduled', hadSchedule ? { fromDate: hadSchedule } : {});
             } else if (itemType === 'subtask' && taskParentId) {
                 // Subtaak
                 const parentTask = proj.tasks?.find(t => t.id === taskParentId);
@@ -12294,6 +12872,7 @@ const weekView = {
                 
                 subtask.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(subtask, !!hadSchedule);
+                productivityTracker.trackSchedulingEvent(subtask, hadSchedule ? 'rescheduled' : 'scheduled', hadSchedule ? { fromDate: hadSchedule } : {});
             } else {
                 // Normale taak
                 const task = proj.tasks?.find(t => t.id === taskId);
@@ -12312,6 +12891,7 @@ const weekView = {
                 
                 task.scheduledDate = dayTimestamp;
                 productivityTracker.trackItemScheduled(task, !!hadSchedule);
+                productivityTracker.trackSchedulingEvent(task, hadSchedule ? 'rescheduled' : 'scheduled', hadSchedule ? { fromDate: hadSchedule } : {});
             }
             
             await app.save();
@@ -13096,6 +13676,7 @@ const morningWizard = {
                             if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                             realTask.scheduledDate = today;
                             productivityTracker.logScheduledForDate(today);
+                            productivityTracker.trackSchedulingEvent(realTask, 'scheduled');
                         }
                     } else if (item.type === 'subtask') {
                         proj.tasks?.forEach(task => {
@@ -13107,6 +13688,7 @@ const morningWizard = {
                                 if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                                 realSub.scheduledDate = today;
                                 productivityTracker.logScheduledForDate(today);
+                                productivityTracker.trackSchedulingEvent(realSub, 'scheduled');
                             }
                         });
                     } else if (item.type === 'checklist') {
@@ -13121,6 +13703,7 @@ const morningWizard = {
                                     if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                                     checkItem.scheduledDate = today;
                                     productivityTracker.logScheduledForDate(today);
+                                    productivityTracker.trackSchedulingEvent(checkItem, 'scheduled');
                                 }
                             });
                         });
@@ -13189,6 +13772,7 @@ const morningWizard = {
                             if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                             realTask.scheduledDate = today;
                             productivityTracker.logScheduledForDate(today);
+                            productivityTracker.trackSchedulingEvent(realTask, 'scheduled');
                         }
                     }
                 } else if (item.type === 'subtask') {
@@ -13202,6 +13786,7 @@ const morningWizard = {
                                 if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                                 realSub.scheduledDate = today;
                                 productivityTracker.logScheduledForDate(today);
+                                productivityTracker.trackSchedulingEvent(realSub, 'scheduled');
                             }
                         }
                     });
@@ -13218,6 +13803,7 @@ const morningWizard = {
                                     if (oldDate) productivityTracker.logUnscheduledFromDate(oldDate);
                                     checkItem.scheduledDate = today;
                                     productivityTracker.logScheduledForDate(today);
+                                    productivityTracker.trackSchedulingEvent(checkItem, 'scheduled');
                                 }
                             }
                         });
@@ -13241,6 +13827,7 @@ const morningWizard = {
                 if (item.type === 'task') {
                     const realTask = proj.tasks?.find(t => t.id === item._taskId);
                     if (realTask) {
+                        productivityTracker.trackSchedulingEvent(realTask, 'removed');
                         realTask.scheduledDate = null;
                     }
                 } else if (item.type === 'subtask') {
@@ -13248,6 +13835,7 @@ const morningWizard = {
                         if (task.id !== item._taskId) return;
                         const realSub = task.subtasks?.find(s => s.id === item._subtaskId);
                         if (realSub) {
+                            productivityTracker.trackSchedulingEvent(realSub, 'removed');
                             realSub.scheduledDate = null;
                         }
                     });
@@ -13257,6 +13845,7 @@ const morningWizard = {
                         task.subtasks?.forEach(sub => {
                             if (sub.id !== item._subtaskId) return;
                             if (sub.checklist && sub.checklist[item._checklistIndex]) {
+                                productivityTracker.trackSchedulingEvent(sub.checklist[item._checklistIndex], 'removed');
                                 sub.checklist[item._checklistIndex].scheduledDate = null;
                             }
                         });
