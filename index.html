@@ -16427,6 +16427,8 @@ const pomodoroDropdown = {
 const pomodoro = {
     duration: 25 * 60,
     timeLeft: 25 * 60,
+    endTime: null,
+    completionSoundPlayed: false,
     interval: null,
     isRunning: false,
 
@@ -16477,7 +16479,7 @@ const pomodoro = {
         overlay.classList.remove('show');
         setTimeout(() => {
             overlay.style.display = 'none';
-            this.stop();
+            this.pause();
         }, 300);
         
         // Open session review als er items in parking lot zijn
@@ -16526,19 +16528,29 @@ const pomodoro = {
         this.isRunning = true;
         document.getElementById('pomodoroStartBtn').innerHTML = '&#9208; Pause';
         
+        // Timestamp-gebaseerde timer: immuun voor browser achtergrond-throttling
+        this.endTime = Date.now() + (this.timeLeft * 1000);
+        this.completionSoundPlayed = false;
+        
         this.interval = setInterval(() => {
-            this.timeLeft--;
+            this.timeLeft = Math.round((this.endTime - Date.now()) / 1000);
             this.updateDisplay();
             
-            // Speel geluid af bij 0
-            if (this.timeLeft === 0) {
+            // Gebruik <= zodat geluid ook speelt als tick exact 0 mist door throttling
+            if (this.timeLeft <= 0 && !this.completionSoundPlayed) {
+                this.completionSoundPlayed = true;
                 this.playCompletionSound();
             }
-        }, 1000);
+        }, 250);
     },
 
     pause() {
+        if (this.isRunning && this.endTime) {
+            // Bewaar exacte resterende tijd bij pauze
+            this.timeLeft = Math.round((this.endTime - Date.now()) / 1000);
+        }
         this.isRunning = false;
+        this.endTime = null;
         clearInterval(this.interval);
         document.getElementById('pomodoroStartBtn').innerHTML = '&#9654; Start';
     },
@@ -16546,6 +16558,7 @@ const pomodoro = {
     reset() {
         this.pause();
         this.timeLeft = this.duration;
+        this.completionSoundPlayed = false;
         this.updateDisplay();
     },
 
