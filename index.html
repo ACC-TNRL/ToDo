@@ -5486,6 +5486,7 @@
 
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="modal.close()">Annuleren</button>
+            <button class="btn btn-secondary" id="modalMoveBtn" style="display: none;" onclick="modal.moveTask()">&#10231; Verplaatsen</button>
             <button class="btn btn-primary" onclick="modal.save()">Opslaan</button>
         </div>
     </div>
@@ -7575,6 +7576,8 @@ const renderer = {
             checklistHtml = `<div class="checklist-items" data-subtask-id="${item.id}">${checklistItems}</div>`;
         }
 
+        const editMenuHtml = `<button class="action-btn" data-action="edit" title="Bewerken">&#9999;</button>`;
+
         return `
             <div class="item-row">
                 <div class="drag-handle" title="Sleep om te sorteren">&#8801;</div>
@@ -7586,7 +7589,7 @@ const renderer = {
                 ${statusHtml}
                 <div class="item-actions">
                     ${actionButtons}
-                    <button class="action-btn" data-action="edit" title="Bewerken">&#9999;</button>
+                    ${editMenuHtml}
                     <button class="action-btn danger" data-action="delete" title="Verwijderen">&#128465;</button>
                 </div>
             </div>
@@ -9331,6 +9334,198 @@ const crud = {
         
         delete subtask.editingChecklistIndex;
         app.render();
+    },
+
+    async moveTask(taskId) {
+        const task = helpers.findTaskById(taskId);
+        if (!task) return;
+
+        // Find current category and project
+        let currentCat, currentProj;
+        for (const cat of state.db.categories) {
+            for (const proj of cat.projects || []) {
+                if (proj.tasks?.some(t => t.id === taskId)) {
+                    currentCat = cat;
+                    currentProj = proj;
+                    break;
+                }
+            }
+            if (currentCat) break;
+        }
+
+        if (!currentCat || !currentProj) return;
+
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay show';
+            overlay.style.display = 'flex';
+
+            // Build initial options
+            const categoryOptions = state.db.categories.map(cat => 
+                `<option value="${cat.id}" ${cat.id === currentCat.id ? 'selected' : ''}>${cat.icon} ${cat.name}</option>`
+            ).join('');
+
+            const projectOptions = currentCat.projects.map(proj => 
+                `<option value="${proj.id}" ${proj.id === currentProj.id ? 'selected' : ''}>${proj.icon} ${proj.name}</option>`
+            ).join('');
+
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Taak verplaatsen: ${task.name}</h2>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Nieuwe Categorie</label>
+                            <select id="moveCategorySelect" class="form-input">
+                                ${categoryOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nieuw Project</label>
+                            <select id="moveProjectSelect" class="form-input">
+                                <option value="" disabled selected>-- Bestaande projecten --</option>
+                                ${projectOptions}
+                                <option value="__new__">+ Nieuw project aanmaken</option>
+                            </select>
+                        </div>
+                        <div id="newProjectInput" class="form-group" style="display: none;">
+                            <label class="form-label">Projectnaam</label>
+                            <input type="text" id="newProjectName" class="form-input" placeholder="Voer projectnaam in...">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelMoveBtn">Annuleren</button>
+                        <button class="btn btn-primary" id="confirmMoveBtn">Verplaatsen</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const categorySelect = overlay.querySelector('#moveCategorySelect');
+            const projectSelect = overlay.querySelector('#moveProjectSelect');
+            const newProjectInput = overlay.querySelector('#newProjectInput');
+            const newProjectName = overlay.querySelector('#newProjectName');
+            const confirmBtn = overlay.querySelector('#confirmMoveBtn');
+            const cancelBtn = overlay.querySelector('#cancelMoveBtn');
+
+            // Update projects when category changes
+            categorySelect.onchange = () => {
+                const selectedCatId = categorySelect.value;
+                const selectedCat = state.db.categories.find(c => c.id === selectedCatId);
+                if (selectedCat && selectedCat.projects) {
+                    const newProjectOptions = selectedCat.projects.map(proj => 
+                        `<option value="${proj.id}">${proj.icon} ${proj.name}</option>`
+                    ).join('');
+                    projectSelect.innerHTML = `<option value="" disabled selected>-- Bestaande projecten --</option>${newProjectOptions}<option value="__new__">+ Nieuw project aanmaken</option>`;
+                    newProjectInput.style.display = 'none';
+                }
+            };
+
+            projectSelect.onchange = () => {
+                if (projectSelect.value === '__new__') {
+                    newProjectInput.style.display = 'block';
+                    newProjectName.focus();
+                } else {
+                    newProjectInput.style.display = 'none';
+                }
+            };
+
+            const cleanup = () => {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 200);
+            };
+
+            confirmBtn.onclick = async () => {
+                const newCatId = categorySelect.value;
+                let newProjId = projectSelect.value;
+                let newProj;
+
+                if (!newCatId) {
+                    toastNotifications.show('warning', 'Selectie nodig', 'Kies een categorie.');
+                    return;
+                }
+
+                const newCat = state.db.categories.find(c => c.id === newCatId);
+                if (!newCat) {
+                    toastNotifications.show('error', 'Fout', 'Categorie niet gevonden.');
+                    cleanup();
+                    resolve();
+                    return;
+                }
+
+                // Handle new project creation
+                if (newProjId === '__new__') {
+                    const projectName = newProjectName.value.trim();
+                    if (!projectName) {
+                        toastNotifications.show('warning', 'Naam nodig', 'Voer een projectnaam in.');
+                        return;
+                    }
+
+                    // Create new project
+                    const newProject = helpers.createItem(projectName, 'proj');
+                    newCat.projects = newCat.projects || [];
+                    newCat.projects.push(newProject);
+                    newProj = newProject;
+                    newProjId = newProject.id;
+                } else if (!newProjId) {
+                    toastNotifications.show('warning', 'Selectie nodig', 'Kies of maak een project aan.');
+                    return;
+                } else {
+                    newProj = newCat.projects?.find(p => p.id === newProjId);
+                    if (!newProj) {
+                        toastNotifications.show('error', 'Fout', 'Project niet gevonden.');
+                        cleanup();
+                        resolve();
+                        return;
+                    }
+                }
+
+                if (newCatId === currentCat.id && newProjId === currentProj.id) {
+                    toastNotifications.show('info', 'Geen wijziging', 'Taak blijft in hetzelfde project.');
+                    cleanup();
+                    resolve();
+                    return;
+                }
+
+                undoRedo.saveState();
+
+                // Remove from current project
+                const taskIndex = currentProj.tasks.findIndex(t => t.id === taskId);
+                if (taskIndex > -1) {
+                    currentProj.tasks.splice(taskIndex, 1);
+                }
+
+                // Add to new project
+                newProj.tasks = newProj.tasks || [];
+                newProj.tasks.push(task);
+
+                // Update selection if needed
+                if (state.sel.cat === currentCat.id && state.sel.proj === currentProj.id && state.sel.task === taskId) {
+                    state.sel.cat = newCatId;
+                    state.sel.proj = newProjId;
+                }
+
+                await app.save();
+                app.render();
+                toastNotifications.show('success', 'Verplaatst', `Taak "${task.name}" verplaatst naar ${newCat.name} > ${newProj.name}`);
+                cleanup();
+                resolve();
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve();
+            };
+
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    cleanup();
+                    resolve();
+                }
+            };
+        });
     }
 };
 
@@ -15647,6 +15842,14 @@ const modal = {
             categoryGroup.style.display = 'none';
         }
 
+        // Show move button only for tasks in edit mode, in 'all' view
+        const moveBtn = document.getElementById('modalMoveBtn');
+        if (type === 'task' && mode === 'edit' && state.currentView === 'all') {
+            moveBtn.style.display = 'block';
+        } else {
+            moveBtn.style.display = 'none';
+        }
+
         overlay.style.display = 'flex';
         requestAnimationFrame(() => overlay.classList.add('show'));
         
@@ -16147,6 +16350,12 @@ const modal = {
         } catch (error) {
             errorHandler.log(error, 'modal.save');
         }
+    },
+
+    async moveTask() {
+        if (!this.target || this.target.type !== 'task' || !this.target.item) return;
+        this.close();
+        crud.moveTask(this.target.item.id);
     }
 };
 
