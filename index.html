@@ -4999,6 +4999,331 @@
             outline: none;
         }
 
+        /* ===== FAVORIETEN STYLES ===== */
+        .favorites-container {
+            display: none;
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+
+        .favorites-container.active {
+            display: block;
+        }
+
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .favorites-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .favorites-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .favorites-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .favorites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .fav-section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 16px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fav-item {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .fav-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-border);
+        }
+
+        .fav-item.type-project {
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .fav-item.type-task {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .fav-item.type-subtask {
+            border-left: 4px solid #22c55e;
+        }
+
+        .fav-item-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .fav-item.type-project .fav-item-badge { background: #ede9fe; color: #5b21b6; }
+        .fav-item.type-task .fav-item-badge { background: #dbeafe; color: #1d4ed8; }
+        .fav-item.type-subtask .fav-item-badge { background: #dcfce7; color: #15803d; }
+        body.dark-mode .fav-item.type-project .fav-item-badge { background: #4c1d95; color: #c4b5fd; }
+        body.dark-mode .fav-item.type-task .fav-item-badge { background: #1e3a8a; color: #93c5fd; }
+        body.dark-mode .fav-item.type-subtask .fav-item-badge { background: #14532d; color: #86efac; }
+
+        .fav-item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .fav-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .fav-item-context {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .fav-item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .fav-action-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fav-action-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .fav-action-btn.edit-btn {
+            background: var(--bg-app);
+            color: var(--text-muted);
+            border-color: var(--border-color);
+        }
+        .fav-action-btn.edit-btn:hover {
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border-color: var(--text-muted);
+        }
+
+        .fav-action-btn.today-btn {
+            background: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+        .fav-action-btn.today-btn:hover { background: #d97706; border-color: #d97706; }
+
+        .fav-action-btn.today-remove-btn {
+            background: var(--bg-panel);
+            color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        .fav-action-btn.today-remove-btn:hover { background: #fef3c7; color: #d97706; border-color: #d97706; }
+        body.dark-mode .fav-action-btn.today-remove-btn:hover { background: #78350f; }
+
+        .fav-action-btn.pomodoro-btn {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .fav-action-btn.pomodoro-btn:hover { background: var(--primary-hover); }
+
+        .fav-action-btn.unfavorite {
+            background: var(--bg-panel);
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+        .fav-action-btn.unfavorite:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+        body.dark-mode .fav-action-btn.unfavorite { border-color: #7f1d1d; color: #fca5a5; }
+        body.dark-mode .fav-action-btn.unfavorite:hover { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
+
+        .fav-navigate-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+
+        .fav-navigate-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .favorites-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .favorites-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        .favorites-empty-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .favorites-empty-hint {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Favorite star indicator on items in main view */
+        .action-btn.favorite-active {
+            color: #f59e0b !important;
+            background: #fef3c7 !important;
+        }
+        body.dark-mode .action-btn.favorite-active {
+            background: #78350f !important;
+            color: #fbbf24 !important;
+        }
+
+        /* Always-visible pin on favorited items */
+        .fav-pin {
+            font-size: 12px;
+            flex-shrink: 0;
+            line-height: 1;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        /* Favorite group hierarchy in favorites view */
+        .fav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 16px;
+        }
+        .fav-group:last-child { margin-bottom: 0; }
+
+        .fav-children {
+            margin-left: 20px;
+            padding-left: 14px;
+            border-left: 2px solid #d1b96a;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-top: 6px;
+            padding-bottom: 2px;
+            margin-top: 4px;
+        }
+        body.dark-mode .fav-children { border-left-color: #8a7040; }
+
+        .fav-sub-children {
+            border-left-color: #6db88a;
+            margin-left: 16px;
+        }
+        body.dark-mode .fav-sub-children { border-left-color: #2d6b47; }
+
+        .fav-child-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .fav-parent-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-app);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-color);
+        }
+        .fav-parent-header-task { font-size: 11px; }
+        .fav-parent-cat { color: var(--text-light); font-weight: 400; }
+        .fav-parent-name { color: var(--text-main); }
+
     </style>
 </head>
 <body>
@@ -5028,6 +5353,7 @@
         <select id="viewSelector" class="btn btn-secondary" onchange="app.changeView(this.value)" style="padding: 6px 12px;">
             <option value="all">🏠 Alles</option>
             <option value="today">&#9728;&#65039; Vandaag</option>
+            <option value="favorites">⭐ Favorieten</option>
             <option value="overdue">⚠️ Achterstallig</option>
             <option value="week">📅 Week</option>
             <option value="insights">&#128200; Inzichten</option>
@@ -5306,6 +5632,35 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Favorieten View -->
+<div class="favorites-container" id="favoritesContainer">
+    <div class="favorites-header">
+        <div class="favorites-title">
+            ⭐ Favorieten
+        </div>
+        <div class="favorites-stats">
+            <div class="favorites-stat">
+                <span>📋</span>
+                <span id="favProjCount">0</span>
+                <span>Projecten</span>
+            </div>
+            <div class="favorites-stat">
+                <span>📄</span>
+                <span id="favTaskCount">0</span>
+                <span>Opdrachten</span>
+            </div>
+            <div class="favorites-stat">
+                <span>✓</span>
+                <span id="favSubCount">0</span>
+                <span>Subtaken</span>
+            </div>
+        </div>
+    </div>
+    <div class="favorites-list" id="favoritesList">
+        <!-- Populated by JavaScript -->
     </div>
 </div>
 
@@ -6505,12 +6860,14 @@ const app = {
         const todayContainer = document.getElementById('todayPriorityContainer');
         const archiveContainer = document.getElementById('archiveContainer');
         const insightsContainer = document.getElementById('insightsContainer');
+        const favoritesContainer = document.getElementById('favoritesContainer');
         
         // Hide all special containers first
         if (weekContainer) weekContainer.classList.remove('active');
         if (todayContainer) todayContainer.classList.remove('active');
         if (archiveContainer) archiveContainer.classList.remove('active');
         if (insightsContainer) insightsContainer.classList.remove('active');
+        if (favoritesContainer) favoritesContainer.classList.remove('active');
         
         if (view === 'week') {
             // Week view
@@ -6529,6 +6886,15 @@ const app = {
             if (todayContainer) {
                 todayContainer.classList.add('active');
                 todayView.render();
+            }
+        } else if (view === 'favorites') {
+            // Favorieten view
+            document.querySelectorAll('.column').forEach(col => {
+                col.style.display = 'none';
+            });
+            if (favoritesContainer) {
+                favoritesContainer.classList.add('active');
+                favoritesView.render();
             }
         } else if (view === 'archive') {
             // Archive view
@@ -7478,8 +7844,9 @@ const renderer = {
                 : `<button class="action-btn" data-action="set-today" title="Plan voor vandaag">&#9728;&#65039;</button>`;
             
             const pomodoroBtn = `<button class="action-btn" data-action="manage-task-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
+            const favoriteTaskBtn = `<button class="action-btn ${item.favorite ? 'favorite-active' : ''}" data-action="toggle-favorite" title="${item.favorite ? 'Favoriet verwijderen' : 'Markeer als favoriet'}">&#11088;</button>`;
             
-            actionButtons = timerBtn + todayBtn + pomodoroBtn;
+            actionButtons = timerBtn + todayBtn + pomodoroBtn + favoriteTaskBtn;
         }
         if (type === 'proj') {
             // Count completed items for cleanup button
@@ -7498,8 +7865,9 @@ const renderer = {
             
             // Archive button (entire project)
             const archiveBtn = `<button class="action-btn archive" data-action="archive" title="Archiveer heel project">&#128230;</button>`;
+            const favoriteProjBtn = `<button class="action-btn ${item.favorite ? 'favorite-active' : ''}" data-action="toggle-favorite" title="${item.favorite ? 'Favoriet verwijderen' : 'Markeer als favoriet'}">&#11088;</button>`;
             
-            actionButtons = cleanupBtn + archiveBtn;
+            actionButtons = cleanupBtn + archiveBtn + favoriteProjBtn;
         }
         if (type === 'sub') {
             const today = new Date().setHours(0,0,0,0);
@@ -7509,7 +7877,8 @@ const renderer = {
             
             const pomodoroBtn = `<button class="action-btn" data-action="manage-sub-sessions" title="Beheer Pomodoro Sessies">&#9201;</button>`;
             const checklistBtn = `<button class="action-btn" data-action="add-checklist" title="Voeg checklist item toe">✓</button>`;
-            actionButtons = todayBtn + pomodoroBtn + checklistBtn;
+            const favoriteSubBtn = `<button class="action-btn ${item.favorite ? 'favorite-active' : ''}" data-action="toggle-favorite" title="${item.favorite ? 'Favoriet verwijderen' : 'Markeer als favoriet'}">&#11088;</button>`;
+            actionButtons = todayBtn + pomodoroBtn + checklistBtn + favoriteSubBtn;
         }
 
         // Checklist items voor subtaken
@@ -7587,6 +7956,7 @@ const renderer = {
                     ${metaHtml}
                 </div>
                 ${statusHtml}
+                ${item.favorite ? '<span class="fav-pin" title="Favoriet">⭐</span>' : ''}
                 <div class="item-actions">
                     ${actionButtons}
                     ${editMenuHtml}
@@ -7815,6 +8185,16 @@ const renderer = {
                 if (action === 'add-checklist') crud.addChecklistItem(item.id);
                 if (action === 'manage-task-sessions') crud.manageItemSessions(item, 'task');
                 if (action === 'manage-sub-sessions') crud.manageItemSessions(item, 'sub');
+                if (action === 'toggle-favorite') {
+                    item.favorite = !item.favorite;
+                    await app.save();
+                    app.render();
+                    if (item.favorite) {
+                        toastNotifications.show('success', '⭐ Favoriet', `"${item.name}" toegevoegd aan favorieten`, 2000);
+                    } else {
+                        toastNotifications.show('info', '☆ Favoriet', `"${item.name}" verwijderd uit favorieten`, 2000);
+                    }
+                }
             };
         });
 
@@ -10504,6 +10884,237 @@ const todayView = {
 };
 
 // ===== ARCHIVE VIEW =====
+const favoritesView = {
+    render() {
+        const list = document.getElementById('favoritesList');
+        if (!list) return;
+
+        list.innerHTML = '';
+
+        // Build hierarchy: for each project build a map of favorited tasks/subtasks
+        // hierarchyMap: projId -> { proj, catName, catId, projFav, taskMap: Map<taskId, {task, taskFav, favSubs}> }
+        const hierarchyMap = new Map();
+        let totalProjects = 0, totalTasks = 0, totalSubtasks = 0;
+
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                const projFav = !!proj.favorite;
+                if (projFav) totalProjects++;
+
+                const taskMap = new Map();
+                proj.tasks?.forEach(task => {
+                    const taskFav = !!task.favorite;
+                    if (taskFav) totalTasks++;
+                    const favSubs = (task.subtasks || []).filter(s => s.favorite);
+                    totalSubtasks += favSubs.length;
+                    if (taskFav || favSubs.length > 0) {
+                        taskMap.set(task.id, { task, taskFav, favSubs });
+                    }
+                });
+
+                if (projFav || taskMap.size > 0) {
+                    hierarchyMap.set(proj.id, { proj, catName: cat.name, catId: cat.id, projFav, taskMap });
+                }
+            });
+        });
+
+        // Update stats
+        document.getElementById('favProjCount').textContent = totalProjects;
+        document.getElementById('favTaskCount').textContent = totalTasks;
+        document.getElementById('favSubCount').textContent = totalSubtasks;
+
+        const total = totalProjects + totalTasks + totalSubtasks;
+
+        if (total === 0) {
+            list.innerHTML = `
+                <div class="favorites-empty">
+                    <div class="favorites-empty-icon">⭐</div>
+                    <div class="favorites-empty-text">Geen favorieten gevonden</div>
+                    <div class="favorites-empty-hint">Klik op de ⭐ knop bij een project, opdracht of subtaak om het als favoriet te markeren</div>
+                </div>
+            `;
+            return;
+        }
+
+        // Render grouped hierarchy
+        const today = new Date().setHours(0,0,0,0);
+
+        hierarchyMap.forEach(({ proj, catName, catId, projFav, taskMap }) => {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'fav-group';
+
+            // Project header (if project itself is favorited)
+            if (projFav) {
+                const doneAttr = (proj.status === 'done') ? 'style="opacity:0.6; text-decoration: line-through;"' : '';
+                const navAct = `favoritesView.navigateTo('proj', '${catId}', '${proj.id}')`;
+                const projEl = document.createElement('div');
+                projEl.className = `fav-item type-project${taskMap.size > 0 ? ' has-fav-children' : ''}`;
+                projEl.innerHTML = `
+                    <div class="fav-item-badge">Project</div>
+                    <div class="fav-item-body">
+                        <div class="fav-item-title" ${doneAttr}>${proj.icon ? proj.icon + ' ' : ''}${proj.name}</div>
+                        <div class="fav-item-context"><span>${catName}</span></div>
+                        <div class="fav-item-actions">
+                            <button class="fav-action-btn unfavorite" onclick="favoritesView.removeFavorite(event, 'project', '${proj.id}')">&#9733; Favoriet verwijderen</button>
+                            <button class="fav-action-btn edit-btn" onclick="favoritesView.editItem('proj', '${proj.id}')" title="Bewerken">✏️ Bewerken</button>
+                            <button class="fav-navigate-btn" onclick="${navAct}">&#8594; Ga naar</button>
+                        </div>
+                    </div>
+                `;
+                groupEl.appendChild(projEl);
+            } else if (taskMap.size > 0) {
+                // Non-favorited project with favorited children: breadcrumb header
+                const headerEl = document.createElement('div');
+                headerEl.className = 'fav-parent-header';
+                headerEl.innerHTML = `<span>📋</span> <span class="fav-parent-name">${proj.icon ? proj.icon + ' ' : ''}${proj.name}</span><span class="fav-parent-cat"> · ${catName}</span>`;
+                groupEl.appendChild(headerEl);
+            }
+
+            // Children: favorited tasks & subtasks
+            if (taskMap.size > 0) {
+                const childrenEl = document.createElement('div');
+                childrenEl.className = 'fav-children';
+
+                taskMap.forEach(({ task, taskFav, favSubs }) => {
+                    const taskGroupEl = document.createElement('div');
+                    taskGroupEl.className = 'fav-child-group';
+
+                    if (taskFav) {
+                        const doneAttr = task.done ? 'style="opacity:0.6; text-decoration: line-through;"' : '';
+                        const navAct = `favoritesView.navigateTo('task', '${catId}', '${proj.id}', '${task.id}')`;
+                        const isToday = task.scheduledDate === today;
+                        const todayBtn = isToday
+                            ? `<button class="fav-action-btn today-remove-btn" onclick="favoritesView.removeTodayItem('${task.id}')" title="Verwijder uit vandaag">&#9728;&#65039; Vandaag verwijderen</button>`
+                            : `<button class="fav-action-btn today-btn" onclick="favoritesView.setTodayItem('${task.id}')" title="Plan voor vandaag">&#9728;&#65039; Vandaag</button>`;
+                        const taskEl = document.createElement('div');
+                        taskEl.className = `fav-item type-task${favSubs.length > 0 ? ' has-fav-children' : ''}`;
+                        taskEl.innerHTML = `
+                            <div class="fav-item-badge">Opdracht</div>
+                            <div class="fav-item-body">
+                                <div class="fav-item-title" ${doneAttr}>${task.icon ? task.icon + ' ' : ''}${task.name}</div>
+                                <div class="fav-item-context"><span>${proj.name}</span></div>
+                                <div class="fav-item-actions">
+                                    ${todayBtn}
+                                    <button class="fav-action-btn pomodoro-btn" onclick="favoritesView.pomodoroItem('task', '${task.id}')" title="Pomodoro sessie">&#9201; Pomodoro</button>
+                                    <button class="fav-action-btn unfavorite" onclick="favoritesView.removeFavorite(event, 'task', '${task.id}')">&#9733; Favoriet verwijderen</button>
+                                    <button class="fav-action-btn edit-btn" onclick="favoritesView.editItem('task', '${task.id}')" title="Bewerken">✏️ Bewerken</button>
+                                    <button class="fav-navigate-btn" onclick="${navAct}">&#8594; Ga naar</button>
+                                </div>
+                            </div>
+                        `;
+                        taskGroupEl.appendChild(taskEl);
+                    } else if (favSubs.length > 0) {
+                        // Non-favorited task with favorited subtasks: show as small header
+                        const taskHeaderEl = document.createElement('div');
+                        taskHeaderEl.className = 'fav-parent-header fav-parent-header-task';
+                        taskHeaderEl.innerHTML = `<span>📄</span> <span class="fav-parent-name">${task.icon ? task.icon + ' ' : ''}${task.name}</span>`;
+                        taskGroupEl.appendChild(taskHeaderEl);
+                    }
+
+                    // Favorited subtasks under this task
+                    if (favSubs.length > 0) {
+                        const subsEl = document.createElement('div');
+                        subsEl.className = 'fav-children fav-sub-children';
+                        favSubs.forEach(sub => {
+                            const doneAttr = sub.done ? 'style="opacity:0.6; text-decoration: line-through;"' : '';
+                            const navAct = `favoritesView.navigateTo('sub', '${catId}', '${proj.id}', '${task.id}')`;
+                            const isToday = sub.scheduledDate === today;
+                            const todayBtn = isToday
+                                ? `<button class="fav-action-btn today-remove-btn" onclick="favoritesView.removeTodayItem('${sub.id}')" title="Verwijder uit vandaag">&#9728;&#65039; Vandaag verwijderen</button>`
+                                : `<button class="fav-action-btn today-btn" onclick="favoritesView.setTodayItem('${sub.id}')" title="Plan voor vandaag">&#9728;&#65039; Vandaag</button>`;
+                            const subEl = document.createElement('div');
+                            subEl.className = 'fav-item type-subtask';
+                            subEl.innerHTML = `
+                                <div class="fav-item-badge">Subtaak</div>
+                                <div class="fav-item-body">
+                                    <div class="fav-item-title" ${doneAttr}>${sub.icon ? sub.icon + ' ' : ''}${sub.name}</div>
+                                    <div class="fav-item-context"><span>${task.name}</span></div>
+                                    <div class="fav-item-actions">
+                                        ${todayBtn}
+                                        <button class="fav-action-btn pomodoro-btn" onclick="favoritesView.pomodoroItem('sub', '${sub.id}')" title="Pomodoro sessie">&#9201; Pomodoro</button>
+                                        <button class="fav-action-btn unfavorite" onclick="favoritesView.removeFavorite(event, 'subtask', '${sub.id}')">&#9733; Favoriet verwijderen</button>
+                                        <button class="fav-action-btn edit-btn" onclick="favoritesView.editItem('sub', '${sub.id}')" title="Bewerken">✏️ Bewerken</button>
+                                        <button class="fav-navigate-btn" onclick="${navAct}">&#8594; Ga naar</button>
+                                    </div>
+                                </div>
+                            `;
+                            subsEl.appendChild(subEl);
+                        });
+                        taskGroupEl.appendChild(subsEl);
+                    }
+
+                    childrenEl.appendChild(taskGroupEl);
+                });
+
+                groupEl.appendChild(childrenEl);
+            }
+
+            list.appendChild(groupEl);
+        });
+    },
+
+    findItem(type, id) {
+        let found = null;
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                if (type === 'proj' && proj.id === id) found = proj;
+                proj.tasks?.forEach(task => {
+                    if (type === 'task' && task.id === id) found = task;
+                    task.subtasks?.forEach(sub => {
+                        if (type === 'sub' && sub.id === id) found = sub;
+                    });
+                });
+            });
+        });
+        return found;
+    },
+
+    editItem(type, id) {
+        const item = this.findItem(type, id);
+        if (item) modal.open(type, item);
+    },
+
+    async setTodayItem(id) {
+        await crud.setToday(id);
+        this.render();
+    },
+
+    async removeTodayItem(id) {
+        await crud.removeFromToday(id);
+        this.render();
+    },
+
+    pomodoroItem(type, id) {
+        const item = this.findItem(type, id);
+        if (item) crud.manageItemSessions(item, type);
+    },
+
+    async removeFavorite(e, type, itemId) {
+        e.stopPropagation();
+        state.db.categories.forEach(cat => {
+            cat.projects?.forEach(proj => {
+                if (type === 'project' && proj.id === itemId) { proj.favorite = false; }
+                proj.tasks?.forEach(task => {
+                    if (type === 'task' && task.id === itemId) { task.favorite = false; }
+                    task.subtasks?.forEach(sub => {
+                        if (type === 'subtask' && sub.id === itemId) { sub.favorite = false; }
+                    });
+                });
+            });
+        });
+        await app.save();
+        this.render();
+        toastNotifications.show('info', '☆ Favoriet', 'Verwijderd uit favorieten', 2000);
+    },
+
+    navigateTo(type, catId, projId, taskId) {
+        state.sel.cat = catId;
+        state.sel.proj = projId;
+        if (taskId) state.sel.task = taskId;
+        app.changeView('all');
+    }
+};
+
 const archiveView = {
     collapsedCategories: new Set(),
     collapsedProjects: new Set(),
