@@ -17492,15 +17492,19 @@ const sessions = {
         div.innerHTML = `
             <span class="session-icon">⚡</span>
             <input type="text" class="session-name-input new-session-input" placeholder="Naam voor nieuwe sessie..." autofocus>
-            <button class="action-btn" data-action="save-new" title="Opslaan">&#10003;</button>
-            <button class="action-btn danger" data-action="cancel-new" title="Annuleren">&#10006;</button>
+            <button class="action-btn" data-action="save-new" title="Opslaan (Enter)">&#10003;</button>
+            <button class="action-btn danger" data-action="cancel-new" title="Annuleren (Esc)">&#10006;</button>
         `;
         
         const input = div.querySelector('.new-session-input');
         const saveBtn = div.querySelector('[data-action="save-new"]');
         const cancelBtn = div.querySelector('[data-action="cancel-new"]');
         
+        let saved = false;
+        
         const saveNew = async () => {
+            if (saved) return;
+            saved = true;
             const name = input.value.trim();
             if (!name) {
                 div.remove();
@@ -17513,16 +17517,44 @@ const sessions = {
         };
         
         const cancel = () => {
+            if (saved) return;
             div.remove();
         };
         
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') saveNew();
-            if (e.key === 'Escape') cancel();
-        };
+        // Enter = opslaan, Escape = annuleren
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveNew();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                cancel();
+            }
+        });
         
-        saveBtn.onclick = saveNew;
-        cancelBtn.onclick = cancel;
+        // Bij wegklikken: opslaan als er tekst is, anders weggooien
+        input.addEventListener('blur', () => {
+            // Kleine vertraging zodat klik op save/cancel button eerst afgehandeld wordt
+            setTimeout(() => {
+                if (!saved && document.body.contains(div)) {
+                    if (input.value.trim()) {
+                        saveNew();
+                    } else {
+                        cancel();
+                    }
+                }
+            }, 150);
+        });
+        
+        saveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveNew();
+        });
+        cancelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            cancel();
+        });
         
         // Add to bottom of list
         container.appendChild(div);
