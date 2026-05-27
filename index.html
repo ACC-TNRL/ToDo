@@ -6858,6 +6858,24 @@ const app = {
         }
     },
 
+    async exportDatabase() {
+        const cleanData = JSON.parse(JSON.stringify(state.db, (key, value) => {
+            return value === undefined ? null : value;
+        }));
+        
+        const json = JSON.stringify(cleanData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        a.download = `todo-backup-${dateStr}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toastNotifications.show('success', 'Export gelukt', 'Database is geëxporteerd als JSON-bestand');
+    },
+
     toggleSettingsDropdown(event) {
         event.stopPropagation();
         const dropdown = document.getElementById('settingsDropdown');
@@ -19060,6 +19078,7 @@ app.init();
         </div>
         
         <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="app.exportDatabase()">📥 Exporteer JSON</button>
             <button class="btn btn-primary" onclick="app.hideSettings()">Sluiten</button>
         </div>
     </div>
