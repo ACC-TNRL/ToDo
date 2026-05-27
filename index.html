@@ -6223,6 +6223,62 @@ const firebaseAuth = {
     }
 };
 
+// ===== FILE-BASED STORAGE (File System Access API) =====
+const fileStorage = {
+    async pickFile() {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }],
+                startIn: 'documents'
+            });
+            state.fileHandle = handle;
+            await this.loadFromFile();
+            toastNotifications.show('success', 'Bestand geopend', 'Database geladen uit bestand');
+            return true;
+        } catch (e) {
+            console.log('File picker cancelled or failed:', e);
+            return false;
+        }
+    },
+
+    async loadFromFile() {
+        if (!state.fileHandle) return false;
+        try {
+            const file = await state.fileHandle.getFile();
+            const text = await file.text();
+            const loaded = JSON.parse(text);
+            if (loaded && loaded.categories) {
+                state.db = loaded;
+                app.render();
+                const sessionCount = loaded.pomodoroSessions?.length || 0;
+                const catCount = loaded.categories?.length || 0;
+                toastNotifications.show('success', 'JSON Geladen', `${catCount} categorieën, ${sessionCount} pomodoro sessies`);
+                return true;
+            }
+            toastNotifications.show('error', 'Ongeldig bestand', 'Bestand bevat geen geldige database');
+            return false;
+        } catch (e) {
+            console.error('Failed to read file:', e);
+            toastNotifications.show('error', 'Leesfout', 'Kon bestand niet lezen');
+            return false;
+        }
+    },
+
+    async saveToFile() {
+        if (!state.fileHandle) return false;
+        try {
+            const cleanData = JSON.parse(JSON.stringify(state.db, (k, v) => v === undefined ? null : v));
+            const writable = await state.fileHandle.createWritable();
+            await writable.write(JSON.stringify(cleanData, null, 2));
+            await writable.close();
+            return true;
+        } catch (e) {
+            console.error('Failed to write file:', e);
+            return false;
+        }
+    }
+};
+
 const CONSTANTS = {
     MAX_UNDO_HISTORY: 50,
     DEBOUNCE_SAVE: 1000,
@@ -6280,7 +6336,9 @@ const state = {
     lastOpenDate: null,
     activePomodoroSession: null,
     undoHistory: [],
-    redoHistory: []
+    redoHistory: [],
+    storageMode: 'firebase', // 'firebase' of 'json'
+    fileHandle: null
 };
 
 
@@ -6584,6 +6642,21 @@ const app = {
                 console.error('Firebase initialization failed:', error);
             }
             
+            // If storage mode is JSON, try to load from file (Firebase still runs)
+            const savedMode = localStorage.getItem('storageMode');
+            if (savedMode === 'json') {
+                state.storageMode = 'json';
+                console.log('✓ Storage mode: JSON (dual-write: Firebase + JSON)');
+                // Try loading from file without blocking
+                if (state.fileHandle) {
+                    await fileStorage.loadFromFile();
+                } else {
+                    this.setStatus("JSON - kies bestand", "");
+                }
+            } else {
+                localStorage.setItem('storageMode', 'firebase');
+            }
+            
             // Check for daily/weekly reminders
             setTimeout(() => {
                 reminders.check();
@@ -6822,14 +6895,20 @@ const app = {
         if (!modal) return;
         
         // Load current reminders setting
-        const remindersEnabled = localStorage.getItem('remindersEnabled') !== 'false'; // default true
+        const remindersEnabled = localStorage.getItem('remindersEnabled') !== 'false';
         const checkbox = document.getElementById('remindersEnabledCheck');
         if (checkbox) checkbox.checked = remindersEnabled;
         
-        // Load subtask completion setting (default: task-only)
+        // Load subtask completion setting
         const subtaskSetting = localStorage.getItem('subtaskCompletionSetting') || 'task-only';
         const select = document.getElementById('subtaskCompletionSetting');
         if (select) select.value = subtaskSetting;
+        
+        // Load storage mode setting
+        const storageMode = localStorage.getItem('storageMode') || 'firebase';
+        const storageSelect = document.getElementById('storageModeSelect');
+        if (storageSelect) storageSelect.value = storageMode;
+        this.updateJsonFileSection();
         
         modal.style.display = 'flex';
         requestAnimationFrame(() => modal.classList.add('show'));
@@ -6856,6 +6935,45 @@ const app = {
             };
             toastNotifications.show('success', 'Instelling opgeslagen', labels[select.value], 2000);
         }
+    },
+
+    toggleStorageMode() {
+        const select = document.getElementById('storageModeSelect');
+        if (!select) return;
+        state.storageMode = select.value;
+        localStorage.setItem('storageMode', select.value);
+        this.updateJsonFileSection();
+        
+        if (select.value === 'json') {
+            toastNotifications.show('info', 'JSON modus', 'Firebase blijft schrijven. Kies een JSON bestand om ook lokaal op te slaan.');
+        } else {
+            toastNotifications.show('info', 'Firebase modus', 'Alleen Firebase wordt gebruikt.');
+        }
+    },
+
+    updateJsonFileSection() {
+        const section = document.getElementById('jsonFileSection');
+        const status = document.getElementById('jsonFileStatus');
+        if (!section || !status) return;
+        
+        if (state.storageMode === 'json') {
+            section.style.display = 'block';
+            if (state.fileHandle) {
+                status.innerHTML = '✅ JSON-bestand geselecteerd';
+                status.style.color = '#22c55e';
+            } else {
+                status.innerHTML = '⚠️ Geen bestand geselecteerd — klik "Kies JSON Bestand"';
+                status.style.color = '#f59e0b';
+            }
+        } else {
+            section.style.display = 'none';
+        }
+    },
+
+    async pickDatabaseFile() {
+        const picked = await fileStorage.pickFile();
+        this.updateJsonFileSection();
+        if (picked) app.render();
     },
 
     async exportDatabase() {
@@ -7226,7 +7344,6 @@ const app = {
     },
     
     async performSave() {
-        // Firebase-only save
         try {
             this.setStatus("Opslaan...", "");
             
@@ -7236,6 +7353,11 @@ const app = {
             } else {
                 console.log('⚠️ Not logged in - changes stored in memory only');
                 this.setStatus("Niet ingelogd", "");
+            }
+            
+            // Dual-write: ook naar JSON bestand als die modus aan staat
+            if (state.storageMode === 'json' && state.fileHandle) {
+                await fileStorage.saveToFile();
             }
             
             // Check voor nieuwe dag bij activiteit
@@ -19073,6 +19195,21 @@ app.init();
                 </select>
                 <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
                     Bepaalt wat er gebeurt als je een item voltooit dat nog open subtaken of checklist items heeft. Je kunt dit ook aanpassen via "Onthoud mijn keuze" in de popup.
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 24px;">
+                <label class="form-label">🔧 Opslagmodus (Overgangsperiode)</label>
+                <select id="storageModeSelect" onchange="app.toggleStorageMode()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); font-size: 14px;">
+                    <option value="firebase">☁️ Firebase (huidige modus)</option>
+                    <option value="json">📁 Firebase + JSON bestand (dual-write)</option>
+                </select>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    Firebase modus: alles blijft zoals nu. JSON modus: leest van een lokaal JSON-bestand én schrijft naar Firebase. Ideaal voor overgang naar bestandsgebaseerde opslag.
+                </div>
+                <div id="jsonFileSection" style="margin-top: 12px; padding: 12px; background: var(--primary-light); border-radius: var(--radius-md); display: none;">
+                    <div id="jsonFileStatus" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;"></div>
+                    <button class="btn btn-primary btn-sm" onclick="app.pickDatabaseFile()" style="font-size: 12px; padding: 6px 12px;">📁 Kies JSON Bestand</button>
                 </div>
             </div>
         </div>
