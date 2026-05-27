@@ -2513,6 +2513,49 @@
             border-radius: var(--radius-md);
         }
         
+        .today-pomodoro-all-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            color: #92400e;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .today-pomodoro-all-btn:hover {
+            background: linear-gradient(135deg, #fde68a, #fcd34d);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+        .today-pomodoro-all-btn:active {
+            transform: translateY(0);
+        }
+        .today-pomodoro-all-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.4);
+        }
+        .today-pomodoro-all-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+        }
+        body.dark-mode .today-pomodoro-all-btn {
+            background: linear-gradient(135deg, #78350f, #92400e);
+            border-color: #f59e0b;
+            color: #fde68a;
+        }
+        body.dark-mode .today-pomodoro-all-btn:hover {
+            background: linear-gradient(135deg, #92400e, #b45309);
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+        
         .today-list {
             display: flex;
             flex-direction: column;
@@ -3012,9 +3055,6 @@
         }
 
         /* ===== INSIGHTS VIEW STYLES ===== */
-        .insights-container {
-            /* Outer container - geen max-width, zoals archive-container */
-        }
 
         .insights-header {
             display: flex;
@@ -5521,6 +5561,9 @@
                 <span id="todayWorkedOnCount">0</span>
                 <span>Dagdoel</span>
             </div>
+            <button class="today-pomodoro-all-btn" id="todayPomodoroAllBtn" onclick="todayView.addAllToPomodoro()" title="Voeg alle openstaande items toe aan een Pomodoro sessie">
+                &#9201; Alles naar Pomodoro
+            </button>
         </div>
     </div>
     
@@ -10124,6 +10167,21 @@ const todayView = {
         document.getElementById('todayCompletedCount').textContent = completedCount;
         document.getElementById('todayWorkedOnCount').textContent = workedOnCount;
         
+        // Update "Alles naar Pomodoro" button state
+        const activeCount = activeItems.length;
+        const pomodoroAllBtn = document.getElementById('todayPomodoroAllBtn');
+        if (pomodoroAllBtn) {
+            if (activeCount === 0) {
+                pomodoroAllBtn.disabled = true;
+                pomodoroAllBtn.style.opacity = '0.5';
+                pomodoroAllBtn.style.cursor = 'not-allowed';
+            } else {
+                pomodoroAllBtn.disabled = false;
+                pomodoroAllBtn.style.opacity = '1';
+                pomodoroAllBtn.style.cursor = 'pointer';
+            }
+        }
+        
         // Clear list
         list.innerHTML = '';
         
@@ -10880,6 +10938,266 @@ const todayView = {
             const itemType = type === 'task' ? 'task' : (type === 'subtask' ? 'sub' : 'checklist');
             crud.manageItemSessions(item, itemType);
         }
+    },
+    
+    async addAllToPomodoro() {
+        // Initialize pomodoroSessions array if needed
+        if (!state.db.pomodoroSessions) {
+            state.db.pomodoroSessions = [];
+        }
+        
+        // Get all active (not done, not workedOn) items in their current display order
+        const allItems = this.getAllTodayItems();
+        const activeItems = allItems.filter(i => !i.done && !i.workedOn);
+        
+        if (activeItems.length === 0) {
+            toastNotifications.show('info', 'Geen Items', 'Er zijn geen openstaande items in de Vandaag-weergave.');
+            return;
+        }
+        
+        // Generate today's session name (e.g., "27 mei 2026")
+        const todaySessionName = this.generateTodaySessionName();
+        
+        // Find existing today session (but don't create it yet!)
+        const todaySession = state.db.pomodoroSessions.find(s => s.name === todaySessionName);
+        
+        // Show session selection modal (today session pre-selected if exists, otherwise suggested)
+        const result = await this.showSessionPickerModal(
+            `Voeg ${activeItems.length} openstaande items toe aan een Pomodoro sessie`,
+            state.db.pomodoroSessions,
+            todaySession ? todaySession.id : null,
+            todaySession ? null : todaySessionName // Only pass suggested name if no existing session
+        );
+        
+        if (!result) return; // User cancelled
+        
+        let selectedSessionId = result;
+        
+        // Handle result types
+        if (result === '__today__') {
+            // User chose the suggested today session - create it now
+            const newSession = sessions.create(todaySessionName);
+            await app.save();
+            selectedSessionId = newSession.id;
+        } else if (typeof result === 'string' && result.startsWith('new:')) {
+            const newName = result.substring(4).trim();
+            if (newName) {
+                const newSession = sessions.create(newName);
+                await app.save();
+                selectedSessionId = newSession.id;
+            } else {
+                return;
+            }
+        }
+        
+        // Add each active item to the selected session, preserving order
+        for (let i = 0; i < activeItems.length; i++) {
+            const itemData = activeItems[i];
+            const item = itemData.item;
+            
+            if (!item.pomodoroSessions) {
+                item.pomodoroSessions = [];
+            }
+            
+            if (!item.pomodoroSessions.includes(selectedSessionId)) {
+                item.pomodoroSessions.push(selectedSessionId);
+                productivityTracker.logPomodoroPlanned();
+            }
+            
+            if (!item.pomodoroOrder) {
+                item.pomodoroOrder = {};
+            }
+            item.pomodoroOrder[selectedSessionId] = i;
+        }
+        
+        await app.save();
+        
+        const sessionName = state.db.pomodoroSessions.find(s => s.id === selectedSessionId)?.name || 'Onbekend';
+        toastNotifications.show(
+            'success', 
+            'Items Toegevoegd', 
+            `${activeItems.length} items toegevoegd aan sessie "${sessionName}"`
+        );
+        
+        // Activate the correct session before opening pomodoro
+        state.activePomodoroSession = selectedSessionId;
+        pomodoro.open();
+    },
+    
+    generateTodaySessionName() {
+        const today = new Date();
+        const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+        return `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+    },
+    
+    showSessionPickerModal(title, sessions, defaultSessionId, suggestedName) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay show';
+            overlay.style.display = 'flex';
+            
+            // Build existing sessions list
+            const sessionsList = sessions.map(session => {
+                const isDefault = session.id === defaultSessionId;
+                return `<label class="session-picker-label${isDefault ? ' session-picker-default' : ''}" data-session-id="${session.id}"
+                       style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.15s;${isDefault ? 'background: var(--primary-light);' : ''}">
+                    <input type="radio" name="sessionPicker" value="${session.id}" ${isDefault ? 'checked' : ''}>
+                    <span style="font-weight: 600;">${session.name}${isDefault ? ' <span style="font-size:10px;color:var(--primary);">(vandaag)</span>' : ''}</span>
+                </label>`;
+            }).join('');
+            
+            // Build suggested today option (only if no existing today session)
+            const hasDefault = !!defaultSessionId;
+            const suggestedOption = (!hasDefault && suggestedName) ? `
+                <label class="session-picker-label session-picker-default" data-session-id="__today__"
+                       style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.15s; background: var(--primary-light);">
+                    <input type="radio" name="sessionPicker" value="__today__" checked>
+                    <span style="font-weight: 600;">${suggestedName} <span style="font-size:10px;color:var(--primary);">(vandaag - wordt aangemaakt)</span></span>
+                </label>
+            ` : '';
+            
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">${title}</h2>
+                    </div>
+                    <div style="max-height: 200px; overflow-y: auto; padding: 8px 0;">
+                        ${suggestedOption}
+                        ${sessionsList}
+                    </div>
+                    <div style="border-top: 1px solid var(--border-color); margin: 8px 0; padding: 12px 16px;">
+                        <label id="newSessionLabel" style="display: flex; align-items: center; gap: 12px; cursor: pointer; border-radius: var(--radius-md); padding: 10px 4px; transition: background 0.15s;">
+                            <input type="radio" name="sessionPicker" value="__new__">
+                            <span style="font-weight: 600; color: var(--primary);">➕ Nieuwe sessie aanmaken</span>
+                        </label>
+                        <div style="margin-top: 8px; margin-left: 28px;">
+                            <input type="text" id="newSessionInput" class="form-input" placeholder="Naam voor nieuwe sessie..." 
+                                   style="width: 100%; padding: 10px 14px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 14px; display: none;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelSessionPickerBtn">Annuleren</button>
+                        <button class="btn btn-primary" id="confirmSessionPickerBtn">⏱ Toevoegen aan Sessie</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            const confirmBtn = overlay.querySelector('#confirmSessionPickerBtn');
+            const cancelBtn = overlay.querySelector('#cancelSessionPickerBtn');
+            const newSessionInput = overlay.querySelector('#newSessionInput');
+            const newSessionRadio = overlay.querySelector('input[value="__new__"]');
+            const newSessionLabel = overlay.querySelector('#newSessionLabel');
+            
+            // Add hover and click behavior for existing session labels
+            const sessionLabels = overlay.querySelectorAll('.session-picker-label');
+            sessionLabels.forEach(label => {
+                const radio = label.querySelector('input[type="radio"]');
+                const isDefault = label.classList.contains('session-picker-default');
+                
+                label.addEventListener('mouseenter', () => {
+                    if (!radio.checked) {
+                        label.style.background = 'var(--primary-light)';
+                    }
+                });
+                label.addEventListener('mouseleave', () => {
+                    if (!radio.checked) {
+                        label.style.background = isDefault ? 'var(--primary-light)' : '';
+                    }
+                });
+                label.addEventListener('click', (e) => {
+                    radio.checked = true;
+                    // Deselect new session option and hide its input
+                    newSessionRadio.checked = false;
+                    newSessionInput.style.display = 'none';
+                    newSessionLabel.style.background = 'transparent';
+                });
+            });
+            
+            // Auto-select "new" radio when typing in the input
+            newSessionInput.addEventListener('input', () => {
+                newSessionRadio.checked = true;
+            });
+            
+            // Toggle input visibility when "new" radio is selected
+            const toggleNewInput = () => {
+                if (newSessionRadio.checked) {
+                    newSessionInput.style.display = 'block';
+                    newSessionInput.focus();
+                    newSessionLabel.style.background = 'var(--primary-light)';
+                } else {
+                    newSessionInput.style.display = 'none';
+                    newSessionLabel.style.background = 'transparent';
+                }
+            };
+            
+            newSessionRadio.addEventListener('change', toggleNewInput);
+            newSessionLabel.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    newSessionRadio.checked = true;
+                    toggleNewInput();
+                }
+            });
+            
+            // Also show input when clicking the input itself
+            newSessionInput.addEventListener('focus', () => {
+                newSessionRadio.checked = true;
+                toggleNewInput();
+            });
+            
+            // Handle Enter key in input
+            newSessionInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    confirmBtn.click();
+                }
+            });
+            
+            const cleanup = () => {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 200);
+            };
+            
+            confirmBtn.onclick = () => {
+                const selected = overlay.querySelector('input[name="sessionPicker"]:checked');
+                if (!selected) {
+                    cleanup();
+                    resolve(null);
+                    return;
+                }
+                
+                if (selected.value === '__today__') {
+                    cleanup();
+                    resolve('__today__');
+                } else if (selected.value === '__new__') {
+                    const newName = newSessionInput.value.trim();
+                    if (!newName) {
+                        // Flash the input to indicate it's required
+                        newSessionInput.style.borderColor = '#ef4444';
+                        newSessionInput.focus();
+                        setTimeout(() => { newSessionInput.style.borderColor = 'var(--border-color)'; }, 1500);
+                        return;
+                    }
+                    cleanup();
+                    resolve('new:' + newName);
+                } else {
+                    cleanup();
+                    resolve(selected.value);
+                }
+            };
+            
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve(null);
+            };
+            
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    cleanup();
+                    resolve(null);
+                }
+            };
+        });
     }
 };
 
