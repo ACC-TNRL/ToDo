@@ -1499,6 +1499,7 @@
         .pomodoro-task-list {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -1519,7 +1520,6 @@
         }
         .pomodoro-task-item:hover {
             background: #f1f5f9;
-            transform: translateX(4px);
         }
         body.dark-mode .pomodoro-task-item:hover {
             background: #475569;
@@ -5994,7 +5994,7 @@
             <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center;">
                 <input type="number" id="customMinutes" class="form-input" placeholder="Aangepast" 
                        style="width: 120px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 13px;" 
-                       min="1" max="120">
+                       min="1" max="120" onkeydown="if(event.key==='Enter')pomodoro.setCustomDuration()">
                 <button class="preset-btn" onclick="pomodoro.setCustomDuration()">Set</button>
             </div>
 
@@ -11302,7 +11302,8 @@ const todayView = {
                 return `<label class="session-picker-label${isDefault ? ' session-picker-default' : ''}" data-session-id="${session.id}"
                        style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.15s;${isDefault ? 'background: var(--primary-light);' : ''}">
                     <input type="radio" name="sessionPicker" value="${session.id}" ${isDefault ? 'checked' : ''}>
-                    <span style="font-weight: 600;">${session.name}${isDefault ? ' <span style="font-size:10px;color:var(--primary);">(vandaag)</span>' : ''}</span>
+                    <span style="font-weight: 600; flex: 1;">${session.name}${isDefault ? ' <span style="font-size:10px;color:var(--primary);">(vandaag)</span>' : ''}</span>
+                    <button class="session-delete-btn" data-session-id="${session.id}" title="Verwijder sessie '${session.name}'" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; border-radius: 50%; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 14px; transition: all 0.2s; flex-shrink: 0;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)';">&#128465;</button>
                 </label>`;
             }).join('');
             
@@ -11367,11 +11368,65 @@ const todayView = {
                     }
                 });
                 label.addEventListener('click', (e) => {
+                    // Don't select session if clicking delete button
+                    if (e.target.closest('.session-delete-btn')) return;
                     radio.checked = true;
                     // Deselect new session option and hide its input
                     newSessionRadio.checked = false;
                     newSessionInput.style.display = 'none';
                     newSessionLabel.style.background = 'transparent';
+                });
+            });
+            
+            // Delete session buttons
+            const deleteButtons = overlay.querySelectorAll('.session-delete-btn');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const sessionId = btn.dataset.sessionId;
+                    const session = sessions.find(s => s.id === sessionId);
+                    if (!session) return;
+                    
+                    // Simple confirm
+                    const confirmed = confirm(`Weet je zeker dat je de sessie "${session.name}" wilt verwijderen?`);
+                    if (!confirmed) return;
+                    
+                    // Remove session
+                    state.db.pomodoroSessions = state.db.pomodoroSessions.filter(s => s.id !== sessionId);
+                    
+                    // Clean up all items that reference this session
+                    state.db.categories.forEach(cat => {
+                        cat.projects?.forEach(proj => {
+                            proj.tasks?.forEach(task => {
+                                if (task.pomodoroSessions) {
+                                    task.pomodoroSessions = task.pomodoroSessions.filter(sid => sid !== sessionId);
+                                    if (task.pomodoroOrder) delete task.pomodoroOrder[sessionId];
+                                }
+                                task.subtasks?.forEach(sub => {
+                                    if (sub.pomodoroSessions) {
+                                        sub.pomodoroSessions = sub.pomodoroSessions.filter(sid => sid !== sessionId);
+                                        if (sub.pomodoroOrder) delete sub.pomodoroOrder[sessionId];
+                                    }
+                                    if (sub.checklist) {
+                                        sub.checklist.forEach(checkItem => {
+                                            if (checkItem.pomodoroSessions) {
+                                                checkItem.pomodoroSessions = checkItem.pomodoroSessions.filter(sid => sid !== sessionId);
+                                                if (checkItem.pomodoroOrder) delete checkItem.pomodoroOrder[sessionId];
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+                        });
+                    });
+                    
+                    await app.save();
+                    
+                    // Rebuild the modal with updated sessions
+                    cleanup();
+                    const newResult = await todayView.showSessionPickerModal(title, state.db.pomodoroSessions, null, suggestedName);
+                    resolve(newResult);
                 });
             });
             
@@ -18113,6 +18168,12 @@ const pomodoro = {
             const orderB = b.item.pomodoroOrder?.[state.activePomodoroSession] ?? 999;
             return orderA - orderB;
         });
+        
+        // Separate active and completed items; completed go to bottom, most recent first
+        const activeItems = pomodoroItems.filter(p => !p.item.done);
+        const completedItems = pomodoroItems.filter(p => p.item.done);
+        completedItems.sort((a, b) => (b.item.completedAt || 0) - (a.item.completedAt || 0));
+        pomodoroItems = [...activeItems, ...completedItems];
         
         if (pomodoroItems.length === 0) {
             container.innerHTML = `
