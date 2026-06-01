@@ -6,10 +6,6 @@
     <link rel="icon" type="image/x-icon" href="config/Icon.ico">
     <title>ToDo Dashboard</title>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg-app: #f8fafc;
@@ -1936,21 +1932,6 @@
             margin-left: 4px;
         }
 
-        
-        /* Firebase UI */
-        #firebaseLoginBtn svg {
-            flex-shrink: 0;
-        }
-        
-        #firebaseUserInfo {
-            transition: all 0.2s ease;
-        }
-        
-        #firebaseUserInfo:hover {
-            background: var(--primary-light);
-            border-color: var(--primary);
-        }
-        
         #userInitial {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
@@ -2554,6 +2535,114 @@
         body.dark-mode .today-pomodoro-all-btn:hover {
             background: linear-gradient(135deg, #92400e, #b45309);
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+
+        .today-pomodoro-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .today-pomodoro-confirm-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            color: #166534;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .today-pomodoro-confirm-btn:hover {
+            background: linear-gradient(135deg, #bbf7d0, #86efac);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        }
+        .today-pomodoro-confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.4);
+        }
+        .today-pomodoro-confirm-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        }
+        body.dark-mode .today-pomodoro-confirm-btn {
+            background: linear-gradient(135deg, #14532d, #166534);
+            border-color: #22c55e;
+            color: #bbf7d0;
+        }
+        body.dark-mode .today-pomodoro-confirm-btn:hover {
+            background: linear-gradient(135deg, #166534, #15803d);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+        }
+        .today-pomodoro-cancel-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .today-pomodoro-cancel-btn:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #dc2626;
+            transform: translateY(-1px);
+        }
+        body.dark-mode .today-pomodoro-cancel-btn:hover {
+            background: #450a0a;
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        .today-pomodoro-select-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            margin-right: 10px;
+            flex-shrink: 0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-panel);
+            color: transparent;
+        }
+        .today-item.pomodoro-selected .today-pomodoro-select-indicator {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        .today-item.pomodoro-selecting {
+            cursor: pointer !important;
+        }
+        .today-item.pomodoro-selecting:hover .today-pomodoro-select-indicator {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+        .today-item.pomodoro-selected {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 2px var(--primary-border);
+        }
+        .today-item.pomodoro-selected:hover {
+            border-color: var(--primary-hover) !important;
+            box-shadow: 0 0 0 2px var(--primary-border), var(--shadow-md);
         }
         
         .today-list {
@@ -5436,29 +5525,6 @@
             <span>Toon Voltooid</span>
         </label>
         
-        
-        <!-- Firebase Login/User Info -->
-        <button id="firebaseLoginBtn" class="btn btn-primary" onclick="firebaseAuth.loginWithGoogle()" style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Inloggen met Google
-        </button>
-        
-        <div id="firebaseUserInfo" style="display: none; align-items: center; gap: 12px; padding: 6px 12px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
-                <span id="userInitial"></span>
-            </div>
-            <div style="display: flex; flex-direction: column;">
-                <span class="user-email" style="font-size: 12px; font-weight: 600; color: var(--text-main);"></span>
-                <button onclick="firebaseAuth.logout()" style="font-size: 10px; color: var(--text-muted); background: none; border: none; cursor: pointer; text-align: left; padding: 0;">
-                    Uitloggen
-                </button>
-            </div>
-        </div>
         <button id="keyboardShortcutsBtn" class="btn btn-secondary" onclick="app.showKeyboardShortcuts()" title="Sneltoetsen (Shift+?)" aria-label="Toon sneltoetsen">
             ⌨️  Shortcuts
         </button>
@@ -5561,9 +5627,17 @@
                 <span id="todayWorkedOnCount">0</span>
                 <span>Dagdoel</span>
             </div>
-            <button class="today-pomodoro-all-btn" id="todayPomodoroAllBtn" onclick="todayView.addAllToPomodoro()" title="Voeg alle openstaande items toe aan een Pomodoro sessie">
-                &#9201; Alles naar Pomodoro
-            </button>
+            <div class="today-pomodoro-btn-group" id="todayPomodoroBtnGroup">
+                <button class="today-pomodoro-all-btn" id="todayPomodoroSelectBtn" onclick="todayView.togglePomodoroSelection()" title="Selecteer items om toe te voegen aan een Pomodoro sessie">
+                    &#9201; Toevoegen aan Pomodoro
+                </button>
+                <button class="today-pomodoro-cancel-btn" id="todayPomodoroCancelBtn" onclick="todayView.cancelPomodoroSelection()" style="display:none;">
+                    &#10005; Annuleren
+                </button>
+                <button class="today-pomodoro-confirm-btn" id="todayPomodoroConfirmBtn" onclick="todayView.confirmPomodoroSelection()" style="display:none;">
+                    &#9989; Toevoegen (<span id="todayPomodoroSelectedCount">0</span>)
+                </button>
+            </div>
         </div>
     </div>
     
@@ -5976,255 +6050,103 @@
 
 <script>
 
-// ===== FIREBASE CONFIGURATION =====
-const firebaseConfig = {
-    apiKey: "AIzaSyCpikGbQ_rF3h6FT7Oszgs_zWp-y5HL-Xk",
-    authDomain: "rvstodo-5a499.firebaseapp.com",
-    projectId: "rvstodo-5a499",
-    storageBucket: "rvstodo-5a499.firebasestorage.app",
-    messagingSenderId: "681453933913",
-    appId: "1:681453933913:web:f7b9c2a921af48e06de848",
-    measurementId: "G-RX8TN3VETR"
-};
-
-// Initialize Firebase - with safety check
-let auth, db;
-if (typeof firebase !== 'undefined') {
-    try {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
-        console.log('✓ Firebase initialized successfully');
-    } catch (error) {
-        console.error('! Firebase initialization failed:', error);
-    }
-} else {
-    console.warn('⚠️ Firebase SDK not loaded - running in local-only mode');
-}
-
-// Firebase Authentication state
-const firebaseAuth = {
-    currentUser: null,
-    isEnabled: false,
-    
-    init() {
-        // Check if Firebase is available
-        if (typeof firebase === 'undefined' || !auth) {
-            console.warn('⚠️ Firebase not available - skipping auth initialization');
-            this.isEnabled = false;
-            return;
-        }
-        
-        this.isEnabled = true;
-        auth.onAuthStateChanged(async (user) => {
-            this.currentUser = user;
-            if (user) {
-                console.log('User logged in:', user.email);
-                await this.onUserLogin(user);
-            } else {
-                console.log('User logged out');
-                this.onUserLogout();
-            }
-        });
-    },
-    
-    async loginWithGoogle() {
-        if (!this.isEnabled) {
-            toastNotifications.show('warning', 'Firebase Niet Beschikbaar', 'Login is niet beschikbaar in deze modus');
-            return;
-        }
-        
-        try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            await auth.signInWithPopup(provider);
-            toastNotifications.show('success', 'Ingelogd', 'Je bent succesvol ingelogd met Google');
-        } catch (error) {
-            errorHandler.log(error, 'Google login');
-            toastNotifications.show('error', 'Login Mislukt', error.message);
-        }
-    },
-    
-    async logout() {
-        if (!this.isEnabled) return;
-        
-        try {
-            await auth.signOut();
-            toastNotifications.show('success', 'Uitgelogd', 'Je bent succesvol uitgelogd');
-        } catch (error) {
-            errorHandler.log(error, 'Logout');
-        }
-    },
-    
-    async onUserLogin(user) {
-        if (!this.isEnabled || !db) return;
-        
-        try {
-            const docRef = db.collection('users').doc(user.uid);
-            const doc = await docRef.get();
-            
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.database) {
-                    state.db = data.database;
-                    // Ensure archive array exists for backwards compatibility
-                    if (!state.db.archive) {
-                        state.db.archive = [];
-                    }
-                    // Ensure pomodoroSessions array exists
-                    if (!state.db.pomodoroSessions) {
-                        state.db.pomodoroSessions = [];
-                    }
-                    // Ensure productivityStats exists for backwards compatibility
-                    if (!state.db.productivityStats) {
-                        state.db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
-                    }
-                    // Process recurring tasks on data load
-                    await app.processRecurringTasks();
-                    await app.checkAndResetTodayTasks();
-                    app.render();
-                    toastNotifications.show('success', 'Data Geladen', 'Je data is geladen van de cloud');
-                }
-            } else {
-                await docRef.set({
-                    email: user.email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    database: state.db
-                });
-                toastNotifications.show('info', 'Welkom!', 'Je account is aangemaakt');
-            }
-            
-            this.updateUI();
-        } catch (error) {
-            errorHandler.log(error, 'Load user data');
-            
-            // Check for specific Firestore not setup error
-            if (error.message && error.message.includes('does not exist for project')) {
-                toastNotifications.show('warning', 'Firestore Database Nog Niet Actief', 
-                    'Ga naar Firebase Console om je database aan te maken. Check de FIRESTORE_SETUP_NOW.md guide.');
-                console.error('🔍´ FIRESTORE NOT SETUP - Volg deze link: https://console.cloud.google.com/datastore/setup?project=rvstodo-5a499');
-            } else if (error.message && error.message.includes('offline')) {
-                toastNotifications.show('warning', 'Offline Modus', 
-                    'Je werkt nu offline. Data wordt gesynchroniseerd zodra Firestore beschikbaar is.');
-            }
-        }
-    },
-    
-    onUserLogout() {
-        state.db = { categories: [], pomodoroSessions: [], archive: [], productivityStats: { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } } };
-        state.sel = { cat: null, proj: null, task: null };
-        app.render();
-        this.updateUI();
-    },
-    
-    async syncToCloud() {
-        if (!this.isEnabled || !db) {
-            console.log('⚠️ Cloud sync skipped - Firebase not available');
-            return;
-        }
-        
-        if (!this.currentUser) {
-            // Don't show notification - just silently skip
-            console.log('⚠️ Cloud sync skipped - User not logged in');
-            return;
-        }
-        
-        try {
-            // Firebase accepteert geen undefined values - clean ze op
-            const cleanForFirebase = (obj) => {
-                return JSON.parse(JSON.stringify(obj, (key, value) => {
-                    return value === undefined ? null : value;
-                }));
-            };
-            
-            const cleanDb = cleanForFirebase(state.db);
-            
-            const docRef = db.collection('users').doc(this.currentUser.uid);
-            
-            await docRef.set({
-                email: this.currentUser.email,
-                database: cleanDb,
-                lastSync: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            console.log('✓ Data synced to cloud');
-            // Don't show toast for every sync - too noisy
-        } catch (error) {
-            // Check if it's the "database doesn't exist" error
-            if (error.message && error.message.includes('does not exist for project')) {
-                console.warn('⚠️ Firestore database not setup yet - sync skipped');
-                // Don't show toast - user already knows from login
-            } else if (error.message && error.message.includes('offline')) {
-                console.warn('⚠️ Offline - sync will happen when connection restored');
-            } else {
-                // Only log real errors, don't spam user with toasts
-                console.error('! Cloud sync failed:', error);
-            }
-        }
-    },
-    
-    updateUI() {
-        const loginBtn = document.getElementById('firebaseLoginBtn');
-        const userInfo = document.getElementById('firebaseUserInfo');
-        
-        if (!loginBtn || !userInfo) return;
-        
-        // Hide login button if Firebase is not enabled
-        if (!this.isEnabled) {
-            loginBtn.style.display = 'none';
-            userInfo.style.display = 'none';
-            app.setStatus('Lokaal', 'info');
-            return;
-        }
-        
-        if (this.currentUser) {
-            loginBtn.style.display = 'none';
-            userInfo.style.display = 'flex';
-            const email = this.currentUser.email;
-            userInfo.querySelector('.user-email').textContent = email;
-            const initial = email.charAt(0).toUpperCase();
-            document.getElementById('userInitial').textContent = initial;
-            app.setStatus('Verbonden', 'success');
-        } else {
-            loginBtn.style.display = 'flex';
-            userInfo.style.display = 'none';
-            app.setStatus('Lokaal', 'info');
-        }
-    },
-    
-    // --- THIS FUNCTION WAS MISSING ---
-    async uploadLocalDatabase() { 
-    // --------------------------------
-
-        if (!this.currentUser) {
-            toastNotifications.show('error', 'Niet Ingelogd', 'Log eerst in met Google');
-            return;
-        }
-        
-        try {
-            const docRef = db.collection('users').doc(this.currentUser.uid);
-            
-            // Upload current state.db to Firestore
-            await docRef.set({
-                email: this.currentUser.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastSync: firebase.firestore.FieldValue.serverTimestamp(),
-                database: state.db
-            }, { merge: true });
-            
-            toastNotifications.show('success', 'Upload Gelukt!', 
-                `${state.db.categories.length} categorieën geüpload naar cloud`);
-            
-            console.log('✓ Local database uploaded to Firestore');
-        } catch (error) {
-            errorHandler.log(error, 'uploadLocalDatabase');
-            toastNotifications.show('error', 'Upload Mislukt', 
-                'Kon lokale database niet uploaden: ' + error.message);
-        }
-    }
-};
-
 // ===== FILE-BASED STORAGE (File System Access API) =====
 const fileStorage = {
+    // IndexedDB for persisting file handles + data cache across sessions
+    async _openDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('ToDoFileHandles', 2);
+            req.onupgradeneeded = (e) => {
+                const db = req.result;
+                if (!db.objectStoreNames.contains('handles')) {
+                    db.createObjectStore('handles');
+                }
+                if (!db.objectStoreNames.contains('cache')) {
+                    db.createObjectStore('cache');
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    },
+
+    async persistHandle(handle) {
+        try {
+            const db = await this._openDB();
+            const tx = db.transaction('handles', 'readwrite');
+            tx.objectStore('handles').put(handle, 'currentFile');
+            await new Promise((resolve, reject) => {
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+            db.close();
+            console.log('✓ File handle persisted to IndexedDB');
+        } catch (e) {
+            console.warn('Could not persist file handle:', e);
+        }
+    },
+
+    async restoreHandle() {
+        try {
+            const db = await this._openDB();
+            const handle = await new Promise((resolve, reject) => {
+                const tx = db.transaction('handles', 'readonly');
+                const req = tx.objectStore('handles').get('currentFile');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            db.close();
+            return handle || null;
+        } catch (e) {
+            console.warn('Could not restore file handle:', e);
+            return null;
+        }
+    },
+
+    async clearPersistedHandle() {
+        try {
+            const db = await this._openDB();
+            const tx = db.transaction('handles', 'readwrite');
+            tx.objectStore('handles').delete('currentFile');
+            db.close();
+        } catch (e) {
+            // ignore
+        }
+    },
+
+    // Cache the database data in IndexedDB for instant availability
+    async saveCache(data) {
+        try {
+            const db = await this._openDB();
+            const tx = db.transaction('cache', 'readwrite');
+            tx.objectStore('cache').put(data, 'dbSnapshot');
+            await new Promise((resolve, reject) => {
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+            db.close();
+        } catch (e) {
+            console.warn('Could not cache data:', e);
+        }
+    },
+
+    async loadCache() {
+        try {
+            const db = await this._openDB();
+            const data = await new Promise((resolve, reject) => {
+                const tx = db.transaction('cache', 'readonly');
+                const req = tx.objectStore('cache').get('dbSnapshot');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            db.close();
+            return data || null;
+        } catch (e) {
+            console.warn('Could not load cached data:', e);
+            return null;
+        }
+    },
+
     async pickFile() {
         try {
             const [handle] = await window.showOpenFilePicker({
@@ -6232,6 +6154,7 @@ const fileStorage = {
                 startIn: 'documents'
             });
             state.fileHandle = handle;
+            await this.persistHandle(handle);
             await this.loadFromFile();
             toastNotifications.show('success', 'Bestand geopend', 'Database geladen uit bestand');
             return true;
@@ -6244,11 +6167,22 @@ const fileStorage = {
     async loadFromFile() {
         if (!state.fileHandle) return false;
         try {
+            // Request read permission if needed
+            if (await state.fileHandle.queryPermission({ mode: 'read' }) !== 'granted') {
+                const granted = await state.fileHandle.requestPermission({ mode: 'read' });
+                if (!granted) {
+                    toastNotifications.show('warning', 'Geen toestemming', 'Kan bestand niet lezen zonder toestemming');
+                    await this.clearPersistedHandle();
+                    state.fileHandle = null;
+                    return false;
+                }
+            }
             const file = await state.fileHandle.getFile();
             const text = await file.text();
             const loaded = JSON.parse(text);
             if (loaded && loaded.categories) {
                 state.db = loaded;
+                await this.saveCache(loaded);
                 app.render();
                 const sessionCount = loaded.pomodoroSessions?.length || 0;
                 const catCount = loaded.categories?.length || 0;
@@ -6260,20 +6194,34 @@ const fileStorage = {
         } catch (e) {
             console.error('Failed to read file:', e);
             toastNotifications.show('error', 'Leesfout', 'Kon bestand niet lezen');
+            await this.clearPersistedHandle();
+            state.fileHandle = null;
             return false;
         }
     },
 
     async saveToFile() {
+        // Always save to cache first (fast, always works)
+        const cleanData = JSON.parse(JSON.stringify(state.db, (k, v) => v === undefined ? null : v));
+        await this.saveCache(cleanData);
+
         if (!state.fileHandle) return false;
         try {
-            const cleanData = JSON.parse(JSON.stringify(state.db, (k, v) => v === undefined ? null : v));
+            // Request write permission if needed
+            if (await state.fileHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+                const granted = await state.fileHandle.requestPermission({ mode: 'readwrite' });
+                if (!granted) {
+                    // Cache is saved, file write can be retried later
+                    console.warn('Write permission denied, data saved to cache only');
+                    return false;
+                }
+            }
             const writable = await state.fileHandle.createWritable();
             await writable.write(JSON.stringify(cleanData, null, 2));
             await writable.close();
             return true;
         } catch (e) {
-            console.error('Failed to write file:', e);
+            console.error('Failed to write file, data is in cache:', e);
             return false;
         }
     }
@@ -6337,7 +6285,7 @@ const state = {
     activePomodoroSession: null,
     undoHistory: [],
     redoHistory: [],
-    storageMode: 'firebase', // 'firebase' of 'json'
+    storageMode: 'json',
     fileHandle: null
 };
 
@@ -6635,26 +6583,46 @@ const app = {
             parkingLot.init();
             parkingLot.load();
             
-            // Initialize Firebase Authentication
-            try {
-                firebaseAuth.init();
-            } catch (error) {
-                console.error('Firebase initialization failed:', error);
+            // Determine storage mode
+            const savedMode = localStorage.getItem('storageMode') || 'json';
+            state.storageMode = savedMode;
+
+            // Step 1: Load from IndexedDB cache (instant, always works)
+            const cachedData = await fileStorage.loadCache();
+            if (cachedData && cachedData.categories) {
+                state.db = cachedData;
+                app.render();
+                console.log('✓ Data loaded from IndexedDB cache');
             }
-            
-            // If storage mode is JSON, try to load from file (Firebase still runs)
-            const savedMode = localStorage.getItem('storageMode');
-            if (savedMode === 'json') {
-                state.storageMode = 'json';
-                console.log('✓ Storage mode: JSON (dual-write: Firebase + JSON)');
-                // Try loading from file without blocking
-                if (state.fileHandle) {
-                    await fileStorage.loadFromFile();
+
+            // Step 2: Try to restore file handle + sync from real file
+            const restoredHandle = await fileStorage.restoreHandle();
+            if (restoredHandle) {
+                state.fileHandle = restoredHandle;
+                const perm = await restoredHandle.queryPermission({ mode: 'read' });
+                if (perm === 'granted') {
+                    try {
+                        const file = await restoredHandle.getFile();
+                        const text = await file.text();
+                        const loaded = JSON.parse(text);
+                        if (loaded && loaded.categories) {
+                            state.db = loaded;
+                            await fileStorage.saveCache(loaded);
+                            app.render();
+                            this.setStatus('JSON', 'success');
+                            console.log('✓ Synced from file handle');
+                        }
+                    } catch (e) {
+                        console.warn('Could not read file silently, using cache:', e);
+                        this.setStatus('JSON', cachedData ? 'success' : '');
+                    }
                 } else {
-                    this.setStatus("JSON - kies bestand", "");
+                    // Keep handle for reconnect button, data is already from cache
+                    this.setStatus('JSON', cachedData ? 'success' : '');
+                    console.log('⚠️ File handle needs user gesture to reconnect');
                 }
             } else {
-                localStorage.setItem('storageMode', 'firebase');
+                this.setStatus(cachedData ? 'JSON' : 'JSON - kies bestand', cachedData ? 'success' : '');
             }
             
             // Check for daily/weekly reminders
@@ -6662,7 +6630,7 @@ const app = {
                 reminders.check();
             }, 1000);
             
-            // Process recurring tasks on app init (for non-Firebase users)
+            // Process recurring tasks on app init
             setTimeout(() => {
                 this.processRecurringTasks();
                 this.checkAndResetTodayTasks();
@@ -6905,7 +6873,7 @@ const app = {
         if (select) select.value = subtaskSetting;
         
         // Load storage mode setting
-        const storageMode = localStorage.getItem('storageMode') || 'firebase';
+        const storageMode = localStorage.getItem('storageMode') || 'json';
         const storageSelect = document.getElementById('storageModeSelect');
         if (storageSelect) storageSelect.value = storageMode;
         this.updateJsonFileSection();
@@ -6945,9 +6913,7 @@ const app = {
         this.updateJsonFileSection();
         
         if (select.value === 'json') {
-            toastNotifications.show('info', 'JSON modus', 'Firebase blijft schrijven. Kies een JSON bestand om ook lokaal op te slaan.');
-        } else {
-            toastNotifications.show('info', 'Firebase modus', 'Alleen Firebase wordt gebruikt.');
+            toastNotifications.show('info', 'JSON modus', 'Kies een JSON bestand om lokaal op te slaan.');
         }
     },
 
@@ -6959,14 +6925,55 @@ const app = {
         if (state.storageMode === 'json') {
             section.style.display = 'block';
             if (state.fileHandle) {
-                status.innerHTML = '✅ JSON-bestand geselecteerd';
-                status.style.color = '#22c55e';
+                // Check if data is loaded (from cache or file)
+                const hasData = state.db && state.db.categories && state.db.categories.length > 0;
+                status.innerHTML = hasData
+                    ? '✅ JSON-bestand — data beschikbaar'
+                    : '⚠️ Bestand bekend maar niet verbonden — klik hieronder om te herstellen';
+                status.style.color = hasData ? '#22c55e' : '#f59e0b';
             } else {
                 status.innerHTML = '⚠️ Geen bestand geselecteerd — klik "Kies JSON Bestand"';
                 status.style.color = '#f59e0b';
             }
         } else {
             section.style.display = 'none';
+        }
+    },
+
+    async reconnectFile() {
+        if (!state.fileHandle) {
+            toastNotifications.show('warning', 'Geen bestand', 'Kies eerst een JSON-bestand');
+            return;
+        }
+        try {
+            // User gesture allows requestPermission
+            const perm = await state.fileHandle.queryPermission({ mode: 'read' });
+            if (perm !== 'granted') {
+                const granted = await state.fileHandle.requestPermission({ mode: 'read' });
+                if (!granted) {
+                    toastNotifications.show('warning', 'Geen toestemming', 'Kan bestand niet lezen zonder toestemming');
+                    return;
+                }
+            }
+            const file = await state.fileHandle.getFile();
+            const text = await file.text();
+            const loaded = JSON.parse(text);
+            if (loaded && loaded.categories) {
+                state.db = loaded;
+                await fileStorage.saveCache(loaded);
+                app.render();
+                this.setStatus('JSON', 'success');
+                this.updateJsonFileSection();
+                toastNotifications.show('success', 'Bestand verbonden', 'Database geladen uit bestand');
+            } else {
+                toastNotifications.show('error', 'Ongeldig bestand', 'Bestand bevat geen geldige database');
+            }
+        } catch (e) {
+            console.error('Failed to reconnect file:', e);
+            toastNotifications.show('error', 'Leesfout', 'Kon bestand niet lezen. Kies opnieuw.');
+            await fileStorage.clearPersistedHandle();
+            state.fileHandle = null;
+            this.updateJsonFileSection();
         }
     },
 
@@ -7347,17 +7354,13 @@ const app = {
         try {
             this.setStatus("Opslaan...", "");
             
-            if (firebaseAuth.currentUser && firebaseAuth.isEnabled) {
-                await firebaseAuth.syncToCloud();
+            // Always save to cache (fileStorage.saveToFile does this first)
+            await fileStorage.saveToFile();
+            
+            if (state.fileHandle) {
                 this.setStatus("Opgeslagen", "success");
             } else {
-                console.log('⚠️ Not logged in - changes stored in memory only');
-                this.setStatus("Niet ingelogd", "");
-            }
-            
-            // Dual-write: ook naar JSON bestand als die modus aan staat
-            if (state.storageMode === 'json' && state.fileHandle) {
-                await fileStorage.saveToFile();
+                this.setStatus("Geen bestand", "");
             }
             
             // Check voor nieuwe dag bij activiteit
@@ -7375,15 +7378,10 @@ const app = {
                        `<span>&#8505;</span> ${msg}`;
         el.className = `status-pill ${type}`;
         
-        // Tijdelijke statussen keren terug naar status gebaseerd op Firebase connectie
-        if (msg !== 'Verbonden' && msg !== 'Lokaal') {
+        // Tijdelijke statussen keren terug naar status gebaseerd op opslagmodus
+        if (msg !== 'Verbonden' && msg !== 'Lokaal' && msg !== 'JSON') {
             setTimeout(() => {
-                // Alleen "Verbonden" tonen als daadwerkelijk ingelogd bij Firebase
-                if (firebaseAuth.currentUser && firebaseAuth.isEnabled) {
-                    this.setStatus('Verbonden', 'success');
-                } else {
-                    this.setStatus('Lokaal', 'info');
-                }
+                this.setStatus('JSON', state.fileHandle ? 'success' : '');
             }, 5000);
         }
     },
@@ -10195,6 +10193,9 @@ const views = {
 };
 
 const todayView = {
+    pomodoroSelectionMode: false,
+    selectedPomodoroItems: new Set(),
+    
     getAllTodayItems() {
         const items = [];
         const today = new Date().setHours(0,0,0,0);
@@ -10307,19 +10308,34 @@ const todayView = {
         document.getElementById('todayCompletedCount').textContent = completedCount;
         document.getElementById('todayWorkedOnCount').textContent = workedOnCount;
         
-        // Update "Alles naar Pomodoro" button state
+        // Update Pomodoro button state
         const activeCount = activeItems.length;
-        const pomodoroAllBtn = document.getElementById('todayPomodoroAllBtn');
-        if (pomodoroAllBtn) {
-            if (activeCount === 0) {
-                pomodoroAllBtn.disabled = true;
-                pomodoroAllBtn.style.opacity = '0.5';
-                pomodoroAllBtn.style.cursor = 'not-allowed';
-            } else {
-                pomodoroAllBtn.disabled = false;
-                pomodoroAllBtn.style.opacity = '1';
-                pomodoroAllBtn.style.cursor = 'pointer';
+        const selectBtn = document.getElementById('todayPomodoroSelectBtn');
+        const confirmBtn = document.getElementById('todayPomodoroConfirmBtn');
+        const cancelBtn = document.getElementById('todayPomodoroCancelBtn');
+        
+        if (this.pomodoroSelectionMode) {
+            // In selection mode: show confirm/cancel, hide select button
+            if (selectBtn) selectBtn.style.display = 'none';
+            if (confirmBtn) confirmBtn.style.display = 'flex';
+            if (cancelBtn) cancelBtn.style.display = 'flex';
+            this.updateSelectedCount();
+        } else {
+            // Normal mode: show select button, hide confirm/cancel
+            if (selectBtn) {
+                selectBtn.style.display = 'flex';
+                if (activeCount === 0) {
+                    selectBtn.disabled = true;
+                    selectBtn.style.opacity = '0.5';
+                    selectBtn.style.cursor = 'not-allowed';
+                } else {
+                    selectBtn.disabled = false;
+                    selectBtn.style.opacity = '1';
+                    selectBtn.style.cursor = 'pointer';
+                }
             }
+            if (confirmBtn) confirmBtn.style.display = 'none';
+            if (cancelBtn) cancelBtn.style.display = 'none';
         }
         
         // Clear list
@@ -10478,8 +10494,23 @@ const todayView = {
         // Status indicator for worked-on items
         const statusBadge = isWorkedOn ? '<span class="worked-on-badge">&#129513; Dagdoel behaald</span>' : '';
         
+        // Selection indicator for pomodoro selection mode (only for active items)
+        const isSelected = this.pomodoroSelectionMode && this.selectedPomodoroItems.has(itemData.id);
+        const selectionIndicator = (!isCompleted && !isWorkedOn && this.pomodoroSelectionMode) ? `
+            <div class="today-pomodoro-select-indicator">&#10003;</div>
+        ` : '';
+        
+        // Add selection classes
+        if (!isCompleted && !isWorkedOn && this.pomodoroSelectionMode) {
+            card.classList.add('pomodoro-selecting');
+            if (isSelected) {
+                card.classList.add('pomodoro-selected');
+            }
+        }
+        
         card.innerHTML = `
             <div class="today-item-header">
+                ${selectionIndicator}
                 ${!isCompleted && !isWorkedOn ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">&#8942;&#8942;</div>' : ''}
                 <div class="item-type-badge">${typeBadges[type]}</div>
                 ${statusBadge}
@@ -10529,6 +10560,24 @@ const todayView = {
                     } else {
                         list.insertBefore(dragging, afterElement);
                     }
+                }
+            });
+            
+            // Click handler for pomodoro selection mode
+            card.addEventListener('click', (e) => {
+                if (!todayView.pomodoroSelectionMode) return;
+                // Don't intercept clicks on buttons or the navigate arrow
+                if (e.target.closest('button')) return;
+                
+                const itemId = card.dataset.id;
+                const isSelected = todayView.selectedPomodoroItems.has(itemId);
+                todayView.togglePomodoroItem(itemId, !isSelected);
+                
+                // Update visual state
+                if (!isSelected) {
+                    card.classList.add('pomodoro-selected');
+                } else {
+                    card.classList.remove('pomodoro-selected');
                 }
             });
         }
@@ -11080,42 +11129,109 @@ const todayView = {
         }
     },
     
-    async addAllToPomodoro() {
+    togglePomodoroSelection() {
+        // Enter or exit pomodoro selection mode
+        if (!this.pomodoroSelectionMode) {
+            // Enter selection mode: pre-select all active items
+            const allItems = this.getAllTodayItems();
+            const activeItems = allItems.filter(i => !i.done && !i.workedOn);
+            
+            if (activeItems.length === 0) {
+                toastNotifications.show('info', 'Geen Items', 'Er zijn geen openstaande items in de Vandaag-weergave.');
+                return;
+            }
+            
+            this.pomodoroSelectionMode = true;
+            this.selectedPomodoroItems = new Set(activeItems.map(i => i.id));
+            this.render();
+        } else {
+            // Already in selection mode - exit
+            this.cancelPomodoroSelection();
+        }
+    },
+    
+    cancelPomodoroSelection() {
+        this.pomodoroSelectionMode = false;
+        this.selectedPomodoroItems = new Set();
+        this.render();
+    },
+    
+    togglePomodoroItem(itemId, checked) {
+        if (checked) {
+            this.selectedPomodoroItems.add(itemId);
+        } else {
+            this.selectedPomodoroItems.delete(itemId);
+        }
+        this.updateSelectedCount();
+    },
+    
+    updateSelectedCount() {
+        const countEl = document.getElementById('todayPomodoroSelectedCount');
+        const confirmBtn = document.getElementById('todayPomodoroConfirmBtn');
+        if (countEl) {
+            countEl.textContent = this.selectedPomodoroItems.size;
+        }
+        if (confirmBtn) {
+            if (this.selectedPomodoroItems.size === 0) {
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.style.cursor = 'not-allowed';
+            } else {
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = '1';
+                confirmBtn.style.cursor = 'pointer';
+            }
+        }
+    },
+    
+    async confirmPomodoroSelection() {
+        if (this.selectedPomodoroItems.size === 0) {
+            toastNotifications.show('info', 'Geen Selectie', 'Selecteer ten minste één item om toe te voegen.');
+            return;
+        }
+        
         // Initialize pomodoroSessions array if needed
         if (!state.db.pomodoroSessions) {
             state.db.pomodoroSessions = [];
         }
         
-        // Get all active (not done, not workedOn) items in their current display order
+        // Get all active items and filter to selected ones
         const allItems = this.getAllTodayItems();
         const activeItems = allItems.filter(i => !i.done && !i.workedOn);
+        const selectedItems = activeItems.filter(i => this.selectedPomodoroItems.has(i.id));
         
-        if (activeItems.length === 0) {
-            toastNotifications.show('info', 'Geen Items', 'Er zijn geen openstaande items in de Vandaag-weergave.');
+        if (selectedItems.length === 0) {
+            toastNotifications.show('info', 'Geen Items', 'Er zijn geen geselecteerde items om toe te voegen.');
             return;
         }
         
-        // Generate today's session name (e.g., "27 mei 2026")
+        // Exit selection mode immediately for better UX
+        this.pomodoroSelectionMode = false;
+        this.selectedPomodoroItems = new Set();
+        
+        // Generate today's session name
         const todaySessionName = this.generateTodaySessionName();
         
-        // Find existing today session (but don't create it yet!)
+        // Find existing today session
         const todaySession = state.db.pomodoroSessions.find(s => s.name === todaySessionName);
         
-        // Show session selection modal (today session pre-selected if exists, otherwise suggested)
+        // Show session selection modal
         const result = await this.showSessionPickerModal(
-            `Voeg ${activeItems.length} openstaande items toe aan een Pomodoro sessie`,
+            `Voeg ${selectedItems.length} geselecteerde item${selectedItems.length !== 1 ? 's' : ''} toe aan een Pomodoro sessie`,
             state.db.pomodoroSessions,
             todaySession ? todaySession.id : null,
-            todaySession ? null : todaySessionName // Only pass suggested name if no existing session
+            todaySession ? null : todaySessionName
         );
         
-        if (!result) return; // User cancelled
+        if (!result) {
+            this.render();
+            return;
+        }
         
         let selectedSessionId = result;
         
         // Handle result types
         if (result === '__today__') {
-            // User chose the suggested today session - create it now
             const newSession = sessions.create(todaySessionName);
             await app.save();
             selectedSessionId = newSession.id;
@@ -11126,13 +11242,14 @@ const todayView = {
                 await app.save();
                 selectedSessionId = newSession.id;
             } else {
+                this.render();
                 return;
             }
         }
         
-        // Add each active item to the selected session, preserving order
-        for (let i = 0; i < activeItems.length; i++) {
-            const itemData = activeItems[i];
+        // Add each selected item to the session, preserving order
+        for (let i = 0; i < selectedItems.length; i++) {
+            const itemData = selectedItems[i];
             const item = itemData.item;
             
             if (!item.pomodoroSessions) {
@@ -11156,12 +11273,15 @@ const todayView = {
         toastNotifications.show(
             'success', 
             'Items Toegevoegd', 
-            `${activeItems.length} items toegevoegd aan sessie "${sessionName}"`
+            `${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''} toegevoegd aan sessie "${sessionName}"`
         );
         
         // Activate the correct session before opening pomodoro
         state.activePomodoroSession = selectedSessionId;
         pomodoro.open();
+        
+        // Re-render to reflect updated state
+        this.render();
     },
     
     generateTodaySessionName() {
@@ -18873,16 +18993,11 @@ const feedbackSystem = {
         submitBtn.innerHTML = '⏳ Versturen...';
         
         try {
-            // Use uploaded/pasted screenshot if available
-            let screenshot = this.screenshotData;
-            
-            // Prepare feedback data
+            // Save feedback locally since Firebase is removed
             const feedbackData = {
                 type: this.selectedType,
                 message: sanitizer.sanitize(message),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                userEmail: firebaseAuth.currentUser?.email || 'anonymous',
-                userId: firebaseAuth.currentUser?.uid || 'anonymous',
+                timestamp: new Date().toISOString(),
                 browserInfo: {
                     userAgent: navigator.userAgent,
                     platform: navigator.platform,
@@ -18896,18 +19011,15 @@ const feedbackSystem = {
                     totalCategories: state.db.categories?.length || 0,
                     totalProjects: state.db.categories?.reduce((acc, cat) => acc + (cat.projects?.length || 0), 0) || 0
                 },
-                screenshot: screenshot,
+                screenshot: this.screenshotData,
                 status: 'new',
                 read: false
             };
             
-            // Check if Firebase is available
-            if (!firebaseAuth.isEnabled || !db) {
-                throw new Error('Firebase is niet beschikbaar. Feedback kan niet worden verstuurd.');
-            }
-            
-            // Save to Firestore
-            await db.collection('feedback').add(feedbackData);
+            // Store feedback in localStorage
+            const existingFeedback = JSON.parse(localStorage.getItem('localFeedback') || '[]');
+            existingFeedback.push(feedbackData);
+            localStorage.setItem('localFeedback', JSON.stringify(existingFeedback));
             
             // Increment rate limit
             this.incrementRateLimit();
@@ -19199,17 +19311,19 @@ app.init();
             </div>
             
             <div class="form-group" style="margin-top: 24px;">
-                <label class="form-label">🔧 Opslagmodus (Overgangsperiode)</label>
+                <label class="form-label">� Opslagmodus</label>
                 <select id="storageModeSelect" onchange="app.toggleStorageMode()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); font-size: 14px;">
-                    <option value="firebase">☁️ Firebase (huidige modus)</option>
-                    <option value="json">📁 Firebase + JSON bestand (dual-write)</option>
+                    <option value="json">📁 JSON Bestand (lokaal)</option>
                 </select>
                 <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
-                    Firebase modus: alles blijft zoals nu. JSON modus: leest van een lokaal JSON-bestand én schrijft naar Firebase. Ideaal voor overgang naar bestandsgebaseerde opslag.
+                    Alle data wordt lokaal opgeslagen in een JSON-bestand.
                 </div>
-                <div id="jsonFileSection" style="margin-top: 12px; padding: 12px; background: var(--primary-light); border-radius: var(--radius-md); display: none;">
+                <div id="jsonFileSection" style="margin-top: 12px; padding: 12px; background: var(--primary-light); border-radius: var(--radius-md);">
                     <div id="jsonFileStatus" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;"></div>
-                    <button class="btn btn-primary btn-sm" onclick="app.pickDatabaseFile()" style="font-size: 12px; padding: 6px 12px;">📁 Kies JSON Bestand</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="app.pickDatabaseFile()" style="font-size: 12px; padding: 6px 12px;">📁 Kies JSON Bestand</button>
+                        <button class="btn btn-secondary btn-sm" onclick="app.reconnectFile()" style="font-size: 12px; padding: 6px 12px;">🔄 Herstel Verbinding</button>
+                    </div>
                 </div>
             </div>
         </div>
