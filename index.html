@@ -1529,6 +1529,24 @@
             opacity: 0.5;
         }
         
+        .pomodoro-task-item.worked-on {
+            opacity: 0.75;
+            border-left: 3px solid #8b5cf6;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), #f8fafc);
+        }
+        body.dark-mode .pomodoro-task-item.worked-on {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), #334155);
+        }
+        .pomodoro-task-item.worked-on:hover {
+            opacity: 1;
+        }
+        
+        .pomodoro-task-item.worked-on .pomodoro-task-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
         .pomodoro-task-item.dragging {
             opacity: 0.5;
             transform: scale(1.02);
@@ -1559,6 +1577,153 @@
         .pomodoro-task-item.completed .pomodoro-task-name {
             text-decoration: line-through;
             color: var(--text-muted);
+        }
+
+        /* Pomodoro actieknoppen */
+        .pomodoro-item-actions {
+            display: none;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .pomodoro-task-item:hover .pomodoro-item-actions {
+            display: flex;
+        }
+
+        .pomodoro-action-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .pomodoro-action-btn:hover {
+            transform: translateY(-1px);
+        }
+        .pomodoro-action-btn.success {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+        .pomodoro-action-btn.success:hover {
+            background: #16a34a;
+        }
+        .pomodoro-action-btn.dagdoel {
+            background: rgba(139, 92, 246, 0.1);
+            color: #7c3aed;
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+        body.dark-mode .pomodoro-action-btn.dagdoel {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+        .pomodoro-action-btn.dagdoel:hover {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+        .pomodoro-action-btn.reopen {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary-border);
+        }
+        .pomodoro-action-btn.reopen:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .pomodoro-action-btn.remove-btn {
+            background: transparent;
+            border-color: transparent;
+            color: var(--text-muted);
+            padding: 4px 6px;
+            font-size: 14px;
+        }
+        .pomodoro-action-btn.remove-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+        body.dark-mode .pomodoro-action-btn.remove-btn:hover {
+            background: #991b1b;
+            color: #fca5a5;
+            border-color: #7f1d1d;
+        }
+
+        .pomodoro-worked-on-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        body.dark-mode .pomodoro-worked-on-badge {
+            background: rgba(139, 92, 246, 0.25);
+            color: #a78bfa;
+        }
+
+        /* Pomodoro worked-on confirm paneel */
+        .pomodoro-worked-on-confirm {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 4px 0;
+            width: 100%;
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-question {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-btn:hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-cancel {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 10px;
+            cursor: pointer;
+            width: fit-content;
+        }
+        .pomodoro-worked-on-confirm .worked-on-confirm-cancel:hover {
+            color: var(--text-main);
         }
 
         .pomodoro-add-task {
@@ -18169,11 +18334,18 @@ const pomodoro = {
             return orderA - orderB;
         });
         
-        // Separate active and completed items; completed go to bottom, most recent first
-        const activeItems = pomodoroItems.filter(p => !p.item.done);
+        // Separate: active, worked-on, completed
+        const today = new Date().setHours(0, 0, 0, 0);
+        const activeItems = pomodoroItems.filter(p => !p.item.done && !(p.item.workedOnDates || []).includes(today));
+        const workedOnItems = pomodoroItems.filter(p => !p.item.done && (p.item.workedOnDates || []).includes(today));
         const completedItems = pomodoroItems.filter(p => p.item.done);
         completedItems.sort((a, b) => (b.item.completedAt || 0) - (a.item.completedAt || 0));
-        pomodoroItems = [...activeItems, ...completedItems];
+        workedOnItems.sort((a, b) => {
+            const aLog = (a.item.workedOnLog || []).filter(e => e.date === today);
+            const bLog = (b.item.workedOnLog || []).filter(e => e.date === today);
+            return (bLog[bLog.length - 1]?.date || 0) - (aLog[aLog.length - 1]?.date || 0);
+        });
+        pomodoroItems = [...activeItems, ...workedOnItems, ...completedItems];
         
         if (pomodoroItems.length === 0) {
             container.innerHTML = `
@@ -18187,9 +18359,17 @@ const pomodoro = {
 
         container.innerHTML = '';
         pomodoroItems.forEach((pomItem, index) => {
+            const isDone = pomItem.item.done;
+            const isWorkedOn = !isDone && (pomItem.item.workedOnDates || []).includes(today);
+            const isActive = !isDone && !isWorkedOn;
+            
+            let stateClass = '';
+            if (isDone) stateClass = 'completed';
+            else if (isWorkedOn) stateClass = 'worked-on';
+            
             const div = document.createElement('div');
-            div.className = `pomodoro-task-item ${pomItem.item.done ? 'completed' : ''}`;
-            div.draggable = true;
+            div.className = `pomodoro-task-item ${stateClass}`;
+            div.draggable = isActive; // Only active items are draggable
             div.setAttribute('data-pomodoro-index', index);
             
             // Type badge
@@ -18199,52 +18379,79 @@ const pomodoro = {
             else if (pomItem.type === 'checklist') typeBadge = '□';
             
             // Item name/text
-            const itemText = pomItem.item.name || pomItem.item.text;
+            const itemText = pomItem.item.name || pomItem.item.text || '';
+            
+            // Build action buttons based on state
+            // Checkbox is de primaire "voltooien"-actie (links) — geen dubbele ✅ knop rechts
+            let actionButtonsHTML = '';
+            if (isActive) {
+                actionButtonsHTML = `
+                    <button class="pomodoro-action-btn dagdoel" data-action="pomodoro-worked-on" title="Markeer als dagdoel behaald (niet voltooid, wel klaar voor vandaag)">🎯 Dagdoel</button>
+                `;
+            } else if (isWorkedOn) {
+                actionButtonsHTML = `
+                    <span class="pomodoro-worked-on-badge">🎯 Dagdoel behaald</span>
+                    <button class="pomodoro-action-btn success" data-action="pomodoro-done" title="Alsnog voltooien">✅ Voltooien</button>
+                    <button class="pomodoro-action-btn reopen" data-action="pomodoro-reopen" title="Heropen">↩️</button>
+                `;
+            } else if (isDone) {
+                actionButtonsHTML = `
+                    <button class="pomodoro-action-btn reopen" data-action="pomodoro-reopen" title="Heropen">↩️ Heropen</button>
+                `;
+            }
             
             div.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
                     <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${pomItem.context}</div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="drag-handle" style="cursor: move; color: var(--text-muted); font-size: 16px; user-select: none;" title="Sleep om te herordenen">⋮⋮</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${isActive ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); font-size: 16px; user-select: none;" title="Sleep om te herordenen">⋮⋮</div>' : ''}
                         <span style="font-size: 14px;">${typeBadge}</span>
-                        <input type="checkbox" class="task-checkbox" ${pomItem.item.done ? 'checked' : ''}>
+                        ${isActive ? '<input type="checkbox" class="task-checkbox" title="Voltooien">' : ''}
+                        ${isWorkedOn ? '<span style="font-size: 14px;">🎯</span>' : ''}
+                        ${isDone ? '<span style="font-size: 14px;">✅</span>' : ''}
                         <span class="pomodoro-task-name" style="flex: 1;">${itemText}</span>
-                        <button class="action-btn danger" data-action="remove-from-session" title="Verwijder uit deze sessie" style="display: flex;">&#10006;</button>
+                        <div class="pomodoro-item-actions">
+                            ${actionButtonsHTML}
+                            <button class="pomodoro-action-btn remove-btn" data-action="remove-from-session" title="Verwijder uit deze sessie">✖</button>
+                        </div>
                     </div>
                 </div>
             `;
             
-            // Drag and drop handlers
-            div.addEventListener('dragstart', (e) => {
-                div.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', index);
-            });
-            
-            div.addEventListener('dragend', () => {
-                div.classList.remove('dragging');
-                // Save new order
-                this.savePomodoroOrder(pomodoroItems);
-            });
-            
-            div.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const afterElement = this.getDragAfterElement(container, e.clientY);
-                const dragging = container.querySelector('.dragging');
-                if (dragging) {
-                    if (afterElement == null) {
-                        container.appendChild(dragging);
-                    } else {
-                        container.insertBefore(dragging, afterElement);
+            // Drag and drop handlers (only for active items)
+            if (isActive) {
+                div.addEventListener('dragstart', (e) => {
+                    div.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', index);
+                });
+                
+                div.addEventListener('dragend', () => {
+                    div.classList.remove('dragging');
+                    this.savePomodoroOrder(pomodoroItems);
+                });
+                
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterElement = this.getDragAfterElement(container, e.clientY);
+                    const dragging = container.querySelector('.dragging');
+                    if (dragging) {
+                        if (afterElement == null) {
+                            container.appendChild(dragging);
+                        } else {
+                            container.insertBefore(dragging, afterElement);
+                        }
                     }
-                }
-            });
+                });
+            }
             
             div.onclick = (e) => {
-                // Prevent clicking on checkbox, remove button, or drag handle
-                if (e.target.closest('.task-checkbox') || 
+                // Prevent clicking on action buttons, checkbox, drag handle
+                if (e.target.closest('.pomodoro-action-btn') || 
+                    e.target.closest('.task-checkbox') || 
                     e.target.closest('[data-action="remove-from-session"]') ||
-                    e.target.closest('.drag-handle')) {
+                    e.target.closest('.drag-handle') ||
+                    e.target.closest('.pomodoro-worked-on-confirm')) {
                     return;
                 }
                 
@@ -18282,68 +18489,93 @@ const pomodoro = {
                 });
                 
                 if (foundCatId && foundProjId && foundTaskId) {
-                    // Close pomodoro overlay
                     pomodoro.close();
-                    
-                    // Select the item in the main dashboard
                     state.sel.cat = foundCatId;
                     state.sel.proj = foundProjId;
                     state.sel.task = foundTaskId;
-                    
-                    // Switch to all view
                     state.currentView = 'all';
                     document.getElementById('viewSelector').value = 'all';
-                    
-                    // Render
                     app.render();
                 }
             };
             
+            // Checkbox handler (only for active items)
             const checkbox = div.querySelector('.task-checkbox');
-            checkbox.onclick = async (e) => {
-                e.stopPropagation();
-                const wasNotDone = !pomItem.item.done;
-                const today = new Date().setHours(0, 0, 0, 0);
-                const wasScheduledForToday = pomItem.item.scheduledDate === today;
-                pomItem.item.done = checkbox.checked;
-                if (pomItem.item.done) {
+            if (checkbox) {
+                checkbox.onclick = async (e) => {
+                    e.stopPropagation();
+                    await pomodoro.toggleDone(pomItem);
+                };
+            }
+            
+            // Action button handlers
+            const doneBtn = div.querySelector('[data-action="pomodoro-done"]');
+            if (doneBtn) {
+                doneBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (isWorkedOn) {
+                        // Unmark worked-on first, then complete
+                        await pomodoro.unmarkWorkedOn(pomItem);
+                    }
+                    pomItem.item.done = true;
                     pomItem.item.completedAt = Date.now();
                     productivityTracker.logPomodoroCompleted();
-                    // Use appropriate log based on whether item was scheduled
+                    const wasScheduledForToday = pomItem.item.scheduledDate === today;
                     if (wasScheduledForToday) {
                         productivityTracker.logCompleted();
                     } else {
                         productivityTracker.logUnscheduledCompleted();
                     }
                     productivityTracker.resetItemProcrastination(pomItem.item);
-                    if (wasNotDone) {
-                        const itemName = pomItem.item.name || pomItem.item.text;
-                        celebration.show(itemName);
-                    }
-                } else {
-                    // Unchecking - always correct stats if completed today
-                    const completedToday = pomItem.item.completedAt && 
-                        new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
-                    productivityTracker.restoreItemProcrastination(pomItem.item);
-                    if (completedToday) {
-                        if (wasScheduledForToday) {
-                            productivityTracker.logUncompleted();
-                        } else {
-                            productivityTracker.logUnscheduledUncompleted();
+                    const itemName = pomItem.item.name || pomItem.item.text;
+                    celebration.show(itemName);
+                    await app.save();
+                    this.renderTasks();
+                    app.render();
+                };
+            }
+            
+            const workedOnBtn = div.querySelector('[data-action="pomodoro-worked-on"]');
+            if (workedOnBtn) {
+                workedOnBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    pomodoro.showWorkedOnConfirm(pomItem, div);
+                };
+            }
+            
+            const reopenBtn = div.querySelector('[data-action="pomodoro-reopen"]');
+            if (reopenBtn) {
+                reopenBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (isDone) {
+                        // Reopen completed item
+                        pomItem.item.done = false;
+                        const completedToday = pomItem.item.completedAt && 
+                            new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
+                        productivityTracker.restoreItemProcrastination(pomItem.item);
+                        if (completedToday) {
+                            const wasScheduledForToday = pomItem.item.scheduledDate === today;
+                            if (wasScheduledForToday) {
+                                productivityTracker.logUncompleted();
+                            } else {
+                                productivityTracker.logUnscheduledUncompleted();
+                            }
                         }
+                        delete pomItem.item.completedAt;
+                    } else if (isWorkedOn) {
+                        // Reopen worked-on item
+                        await pomodoro.unmarkWorkedOn(pomItem);
                     }
-                    delete pomItem.item.completedAt;
-                }
-                await app.save();
-                this.renderTasks();
-                app.render();
-            };
+                    await app.save();
+                    this.renderTasks();
+                    app.render();
+                };
+            }
             
             const removeBtn = div.querySelector('[data-action="remove-from-session"]');
             if (removeBtn) {
                 removeBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    // Verwijder alleen uit deze sessie
                     if (pomItem.item.pomodoroSessions) {
                         pomItem.item.pomodoroSessions = pomItem.item.pomodoroSessions.filter(
                             sid => sid !== state.activePomodoroSession
@@ -18358,6 +18590,145 @@ const pomodoro = {
             
             container.appendChild(div);
         });
+    },
+
+    async toggleDone(pomItem) {
+        const today = new Date().setHours(0, 0, 0, 0);
+        const wasNotDone = !pomItem.item.done;
+        const wasScheduledForToday = pomItem.item.scheduledDate === today;
+        pomItem.item.done = !pomItem.item.done;
+        if (pomItem.item.done) {
+            pomItem.item.completedAt = Date.now();
+            productivityTracker.logPomodoroCompleted();
+            if (wasScheduledForToday) {
+                productivityTracker.logCompleted();
+            } else {
+                productivityTracker.logUnscheduledCompleted();
+            }
+            productivityTracker.resetItemProcrastination(pomItem.item);
+            if (wasNotDone) {
+                const itemName = pomItem.item.name || pomItem.item.text;
+                celebration.show(itemName);
+            }
+        } else {
+            const completedToday = pomItem.item.completedAt && 
+                new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
+            productivityTracker.restoreItemProcrastination(pomItem.item);
+            if (completedToday) {
+                if (wasScheduledForToday) {
+                    productivityTracker.logUncompleted();
+                } else {
+                    productivityTracker.logUnscheduledUncompleted();
+                }
+            }
+            delete pomItem.item.completedAt;
+        }
+        await app.save();
+        this.renderTasks();
+        app.render();
+    },
+
+    showWorkedOnConfirm(pomItem, itemDiv) {
+        // Find the inner content div and replace with confirm panel
+        const innerDiv = itemDiv.querySelector('div[style]');
+        if (!innerDiv) return;
+        
+        // Store original HTML
+        itemDiv._originalHTML = itemDiv.innerHTML;
+        
+        const itemText = pomItem.item.name || pomItem.item.text || '';
+        
+        itemDiv.innerHTML = `
+            <div class="pomodoro-worked-on-confirm">
+                <div class="worked-on-confirm-question">🎯 Hoe heb je aan "${itemText}" gewerkt?</div>
+                <div class="worked-on-confirm-options">
+                    <button class="worked-on-confirm-btn" data-type="step">🧲 Kleine stap</button>
+                    <button class="worked-on-confirm-btn" data-type="worked">🔧 Aan gewerkt</button>
+                    <button class="worked-on-confirm-btn" data-type="prepared">💭 Voorbereid</button>
+                </div>
+                <button class="worked-on-confirm-cancel" data-action="cancel-worked-on">↩ Annuleren</button>
+            </div>
+        `;
+        
+        // Add event listeners
+        itemDiv.querySelectorAll('.worked-on-confirm-btn').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                const type = btn.getAttribute('data-type');
+                await pomodoro.markWorkedOn(pomItem, type);
+            };
+        });
+        
+        itemDiv.querySelector('[data-action="cancel-worked-on"]').onclick = (e) => {
+            e.stopPropagation();
+            if (itemDiv._originalHTML) {
+                itemDiv.innerHTML = itemDiv._originalHTML;
+                delete itemDiv._originalHTML;
+                // Re-attach event listeners by re-rendering
+                pomodoro.renderTasks();
+            }
+        };
+    },
+
+    async markWorkedOn(pomItem, workedOnType) {
+        const today = new Date().setHours(0,0,0,0);
+        const item = pomItem.item;
+        
+        if (!item.workedOnDates) {
+            item.workedOnDates = [];
+        }
+        if (!item.workedOnDates.includes(today)) {
+            item.workedOnDates.push(today);
+        }
+        
+        if (!item.workedOnLog) {
+            item.workedOnLog = [];
+        }
+        item.workedOnLog.push({
+            date: today,
+            type: workedOnType || 'worked'
+        });
+        
+        const typeLabels = {
+            step: 'Kleine stap gezet',
+            worked: 'Aan gewerkt',
+            prepared: 'Voorbereid / gepland'
+        };
+        const feedbackLabel = typeLabels[workedOnType] || 'Dagdoel behaald';
+        
+        productivityTracker.logWorkedOn();
+        productivityTracker.trackSchedulingEvent(item, 'workedOn', { type: workedOnType || 'worked' });
+        
+        toastNotifications.show('success', 'Dagdoel behaald!', `${item.name || item.text} - ${feedbackLabel}`, 2500);
+        
+        await app.save();
+        this.renderTasks();
+        app.render();
+    },
+
+    async unmarkWorkedOn(pomItem) {
+        const today = new Date().setHours(0,0,0,0);
+        const item = pomItem.item;
+        
+        if (item.workedOnDates) {
+            item.workedOnDates = item.workedOnDates.filter(d => d !== today);
+            if (item.workedOnDates.length === 0) {
+                delete item.workedOnDates;
+            }
+        }
+        
+        if (item.workedOnLog) {
+            item.workedOnLog = item.workedOnLog.filter(entry => entry.date !== today);
+            if (item.workedOnLog.length === 0) {
+                delete item.workedOnLog;
+            }
+        }
+        
+        productivityTracker.logUnworkedOn();
+        
+        await app.save();
+        this.renderTasks();
+        app.render();
     },
     
     getDragAfterElement(container, y) {
