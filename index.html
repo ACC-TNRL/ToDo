@@ -126,6 +126,10 @@
             transition: all 0.3s ease;
         }
         .status-pill.success { background: #dcfce7; color: #166534; }
+        .status-pill.warning { background: #fef3c7; color: #92400e; }
+        body.dark-mode .status-pill.warning { background: #451a03; color: #fcd34d; }
+        .status-pill.clickable { cursor: pointer; }
+        .status-pill.clickable:hover { filter: brightness(0.95); text-decoration: underline; }
         .status-pill.error { background: #fee2e2; color: #991b1b; }
 
         .toggle-filter {
@@ -1499,7 +1503,6 @@
         .pomodoro-task-list {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -1520,6 +1523,7 @@
         }
         .pomodoro-task-item:hover {
             background: #f1f5f9;
+            transform: translateX(4px);
         }
         body.dark-mode .pomodoro-task-item:hover {
             background: #475569;
@@ -1527,24 +1531,6 @@
 
         .pomodoro-task-item.completed {
             opacity: 0.5;
-        }
-        
-        .pomodoro-task-item.worked-on {
-            opacity: 0.75;
-            border-left: 3px solid #8b5cf6;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), #f8fafc);
-        }
-        body.dark-mode .pomodoro-task-item.worked-on {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), #334155);
-        }
-        .pomodoro-task-item.worked-on:hover {
-            opacity: 1;
-        }
-        
-        .pomodoro-task-item.worked-on .pomodoro-task-name {
-            text-decoration: line-through;
-            color: var(--text-muted);
-            font-style: italic;
         }
         
         .pomodoro-task-item.dragging {
@@ -1577,153 +1563,6 @@
         .pomodoro-task-item.completed .pomodoro-task-name {
             text-decoration: line-through;
             color: var(--text-muted);
-        }
-
-        /* Pomodoro actieknoppen */
-        .pomodoro-item-actions {
-            display: none;
-            gap: 4px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .pomodoro-task-item:hover .pomodoro-item-actions {
-            display: flex;
-        }
-
-        .pomodoro-action-btn {
-            padding: 4px 10px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-panel);
-            border-radius: var(--radius-sm);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-        }
-        .pomodoro-action-btn:hover {
-            transform: translateY(-1px);
-        }
-        .pomodoro-action-btn.success {
-            background: #22c55e;
-            color: white;
-            border-color: #22c55e;
-        }
-        .pomodoro-action-btn.success:hover {
-            background: #16a34a;
-        }
-        .pomodoro-action-btn.dagdoel {
-            background: rgba(139, 92, 246, 0.1);
-            color: #7c3aed;
-            border-color: rgba(139, 92, 246, 0.3);
-        }
-        body.dark-mode .pomodoro-action-btn.dagdoel {
-            background: rgba(139, 92, 246, 0.2);
-            color: #c4b5fd;
-            border-color: rgba(139, 92, 246, 0.4);
-        }
-        .pomodoro-action-btn.dagdoel:hover {
-            background: #8b5cf6;
-            color: white;
-            border-color: #8b5cf6;
-        }
-        .pomodoro-action-btn.reopen {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-color: var(--primary-border);
-        }
-        .pomodoro-action-btn.reopen:hover {
-            background: var(--primary);
-            color: white;
-        }
-        .pomodoro-action-btn.remove-btn {
-            background: transparent;
-            border-color: transparent;
-            color: var(--text-muted);
-            padding: 4px 6px;
-            font-size: 14px;
-        }
-        .pomodoro-action-btn.remove-btn:hover {
-            background: #fee2e2;
-            color: #dc2626;
-            border-color: #fecaca;
-        }
-        body.dark-mode .pomodoro-action-btn.remove-btn:hover {
-            background: #991b1b;
-            color: #fca5a5;
-            border-color: #7f1d1d;
-        }
-
-        .pomodoro-worked-on-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            padding: 2px 7px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            background: rgba(139, 92, 246, 0.15);
-            color: #8b5cf6;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-        body.dark-mode .pomodoro-worked-on-badge {
-            background: rgba(139, 92, 246, 0.25);
-            color: #a78bfa;
-        }
-
-        /* Pomodoro worked-on confirm paneel */
-        .pomodoro-worked-on-confirm {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 4px 0;
-            width: 100%;
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-question {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            background: rgba(139, 92, 246, 0.1);
-            color: #a78bfa;
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-btn:hover {
-            background: rgba(139, 92, 246, 0.25);
-            border-color: rgba(139, 92, 246, 0.5);
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-cancel {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            padding: 3px 6px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 10px;
-            cursor: pointer;
-            width: fit-content;
-        }
-        .pomodoro-worked-on-confirm .worked-on-confirm-cancel:hover {
-            color: var(--text-main);
         }
 
         .pomodoro-add-task {
@@ -2700,114 +2539,6 @@
         body.dark-mode .today-pomodoro-all-btn:hover {
             background: linear-gradient(135deg, #92400e, #b45309);
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
-        }
-
-        .today-pomodoro-btn-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .today-pomodoro-confirm-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            border: 2px solid #22c55e;
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 700;
-            color: #166534;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .today-pomodoro-confirm-btn:hover {
-            background: linear-gradient(135deg, #bbf7d0, #86efac);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
-        }
-        .today-pomodoro-confirm-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(0.4);
-        }
-        .today-pomodoro-confirm-btn:disabled:hover {
-            transform: none;
-            box-shadow: none;
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-        }
-        body.dark-mode .today-pomodoro-confirm-btn {
-            background: linear-gradient(135deg, #14532d, #166534);
-            border-color: #22c55e;
-            color: #bbf7d0;
-        }
-        body.dark-mode .today-pomodoro-confirm-btn:hover {
-            background: linear-gradient(135deg, #166534, #15803d);
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
-        }
-        .today-pomodoro-cancel-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: var(--bg-panel);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .today-pomodoro-cancel-btn:hover {
-            background: #fee2e2;
-            border-color: #ef4444;
-            color: #dc2626;
-            transform: translateY(-1px);
-        }
-        body.dark-mode .today-pomodoro-cancel-btn:hover {
-            background: #450a0a;
-            border-color: #ef4444;
-            color: #fca5a5;
-        }
-
-        .today-pomodoro-select-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-            margin-right: 10px;
-            flex-shrink: 0;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: var(--bg-panel);
-            color: transparent;
-        }
-        .today-item.pomodoro-selected .today-pomodoro-select-indicator {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        .today-item.pomodoro-selecting {
-            cursor: pointer !important;
-        }
-        .today-item.pomodoro-selecting:hover .today-pomodoro-select-indicator {
-            border-color: var(--primary);
-            transform: scale(1.1);
-        }
-        .today-item.pomodoro-selected {
-            border-color: var(--primary) !important;
-            box-shadow: 0 0 0 2px var(--primary-border);
-        }
-        .today-item.pomodoro-selected:hover {
-            border-color: var(--primary-hover) !important;
-            box-shadow: 0 0 0 2px var(--primary-border), var(--shadow-md);
         }
         
         .today-list {
@@ -5325,6 +5056,8 @@
 
         .favorites-stats {
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 16px;
             font-size: 13px;
             font-weight: 600;
@@ -5490,6 +5223,15 @@
             border-color: var(--primary);
         }
         .fav-action-btn.pomodoro-btn:hover { background: var(--primary-hover); }
+
+        .fav-clear-all-btn { white-space: nowrap; }
+        .fav-clear-all-btn:disabled,
+        .fav-clear-all-btn:disabled:hover {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: var(--bg-panel);
+        }
+        .favorites-header { flex-wrap: wrap; gap: 12px; }
 
         .fav-action-btn.unfavorite {
             background: var(--bg-panel);
@@ -5681,7 +5423,7 @@
             &#9974;
         </div>
 
-        <div id="statusIndicator" class="status-pill">
+        <div id="statusIndicator" class="status-pill" onclick="app.onStatusClick()" role="status" aria-live="polite">
             <span>&#9898;</span> Systeem klaar
         </div>
         
@@ -5792,17 +5534,9 @@
                 <span id="todayWorkedOnCount">0</span>
                 <span>Dagdoel</span>
             </div>
-            <div class="today-pomodoro-btn-group" id="todayPomodoroBtnGroup">
-                <button class="today-pomodoro-all-btn" id="todayPomodoroSelectBtn" onclick="todayView.togglePomodoroSelection()" title="Selecteer items om toe te voegen aan een Pomodoro sessie">
-                    &#9201; Toevoegen aan Pomodoro
-                </button>
-                <button class="today-pomodoro-cancel-btn" id="todayPomodoroCancelBtn" onclick="todayView.cancelPomodoroSelection()" style="display:none;">
-                    &#10005; Annuleren
-                </button>
-                <button class="today-pomodoro-confirm-btn" id="todayPomodoroConfirmBtn" onclick="todayView.confirmPomodoroSelection()" style="display:none;">
-                    &#9989; Toevoegen (<span id="todayPomodoroSelectedCount">0</span>)
-                </button>
-            </div>
+            <button class="today-pomodoro-all-btn" id="todayPomodoroAllBtn" onclick="todayView.addAllToPomodoro()" title="Voeg alle openstaande items toe aan een Pomodoro sessie">
+                &#9201; Alles naar Pomodoro
+            </button>
         </div>
     </div>
     
@@ -5939,6 +5673,7 @@
                 <span id="favSubCount">0</span>
                 <span>Subtaken</span>
             </div>
+            <button class="fav-action-btn unfavorite fav-clear-all-btn" id="favClearAllBtn" onclick="favoritesView.clearAll()" title="Alle favorieten in één keer uitzetten (Ctrl+Z maakt ongedaan)">&#9734; Alle favorieten wissen</button>
         </div>
     </div>
     <div class="favorites-list" id="favoritesList">
@@ -6159,7 +5894,7 @@
             <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center;">
                 <input type="number" id="customMinutes" class="form-input" placeholder="Aangepast" 
                        style="width: 120px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 13px;" 
-                       min="1" max="120" onkeydown="if(event.key==='Enter')pomodoro.setCustomDuration()">
+                       min="1" max="120">
                 <button class="preset-btn" onclick="pomodoro.setCustomDuration()">Set</button>
             </div>
 
@@ -6215,180 +5950,434 @@
 
 <script>
 
+// ===== HTML / JS ESCAPING =====
+// Alle gebruikerstekst (namen, notities, checklist-items) gaat via esc() voordat het in innerHTML komt.
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Voor tekst binnen een JS-string met enkele quotes in een onclick-attribuut: eerst jsq(), dan esc().
+const jsq = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
+
+// ===== DATABASE SCHEMA / MIGRATIE =====
+const SCHEMA_VERSION = 2;
+
+// Voltooide items verliezen automatisch hun favorietstatus, zodat ze uit de Favorieten-weergave verdwijnen.
+// Uitzondering: herhalende opdrachten, want die komen terug en moeten favoriet blijven.
+function clearCompletedFavorites(db) {
+    let n = 0;
+    const clear = (item) => { item.favorite = false; n++; };
+    (db?.categories || []).forEach(cat => (cat.projects || []).forEach(proj => {
+        if (proj.favorite && proj.status === 'done') clear(proj);
+        (proj.tasks || []).forEach(task => {
+            if (task.favorite && task.done && !task.recurring?.enabled) clear(task);
+            (task.subtasks || []).forEach(sub => {
+                if (sub.favorite && sub.done) clear(sub);
+                (sub.checklist || []).forEach(c => { if (c.favorite && c.done) clear(c); });
+            });
+        });
+    }));
+    return n;
+}
+
+function migrateDb(db) {
+    if (!db || typeof db !== 'object') return db;
+    if (!Array.isArray(db.categories)) db.categories = [];
+    if (!Array.isArray(db.pomodoroSessions)) db.pomodoroSessions = [];
+    if (!db.productivityStats || typeof db.productivityStats !== 'object') {
+        db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
+    }
+    if (!Array.isArray(db.productivityStats.dailyLogs)) db.productivityStats.dailyLogs = [];
+    if (!db.productivityStats.streaks) db.productivityStats.streaks = { current: 0, longest: 0, lastActiveDate: null };
+
+    // Categorieën zonder createdAt krijgen er alsnog een (consistent schema)
+    db.categories.forEach(cat => {
+        if (!cat.createdAt) cat.createdAt = Number(cat.id) || Date.now();
+        if (!Array.isArray(cat.projects)) cat.projects = [];
+    });
+
+    clearCompletedFavorites(db);
+    db.meta = { ...(db.meta || {}), schemaVersion: SCHEMA_VERSION };
+    return db;
+}
+
 // ===== FILE-BASED STORAGE (File System Access API) =====
+// Principes:
+//  - Elke save schrijft eerst naar de IndexedDB-cache, daarna (indien toegestaan) naar het bestand.
+//  - db.meta.savedAt markeert de versie. Bij laden wint de NIEUWSTE versie (cache of bestand),
+//    zodat een verouderd bestand nooit meer stil nieuwere wijzigingen overschrijft.
+//  - Schrijfacties lopen via één wachtrij, zodat twee saves elkaar niet kunnen inhalen.
+//  - Er worden automatisch roterende back-ups bijgehouden in IndexedDB.
 const fileStorage = {
-    // IndexedDB for persisting file handles + data cache across sessions
-    async _openDB() {
+    DB_NAME: 'ToDoFileHandles',
+    DB_VERSION: 2,              // NIET verhogen: de vorige app-versie opent deze database met versie 2
+    BACKUP_DB_NAME: 'ToDoBackups', // back-ups in een aparte database, zodat de oude versie compatibel blijft
+    BACKUP_INTERVAL_MS: 30 * 60 * 1000, // max. 1 automatische back-up per 30 min
+    BACKUP_KEEP: 20,
+
+    needsReconnect: false,   // bestand gekoppeld maar geen schrijfrechten
+    _writeChain: Promise.resolve(),
+    _pending: 0,
+    _lastBackupAt: null,
+
+    _open(name, version, stores) {
         return new Promise((resolve, reject) => {
-            const req = indexedDB.open('ToDoFileHandles', 2);
-            req.onupgradeneeded = (e) => {
+            const req = version ? indexedDB.open(name, version) : indexedDB.open(name);
+            req.onupgradeneeded = () => {
                 const db = req.result;
-                if (!db.objectStoreNames.contains('handles')) {
-                    db.createObjectStore('handles');
-                }
-                if (!db.objectStoreNames.contains('cache')) {
-                    db.createObjectStore('cache');
-                }
+                (stores || []).forEach(st => { if (!db.objectStoreNames.contains(st)) db.createObjectStore(st); });
             };
             req.onsuccess = () => resolve(req.result);
             req.onerror = () => reject(req.error);
         });
     },
 
-    async persistHandle(handle) {
+    _openDB() {
+        return this._open(this.DB_NAME, this.DB_VERSION, ['handles', 'cache']);
+    },
+
+    _openBackupDB() {
+        return this._open(this.BACKUP_DB_NAME, 1, ['backups']);
+    },
+
+    async _tx(store, mode, fn) {
+        const db = store === 'backups' ? await this._openBackupDB() : await this._openDB();
         try {
-            const db = await this._openDB();
-            const tx = db.transaction('handles', 'readwrite');
-            tx.objectStore('handles').put(handle, 'currentFile');
-            await new Promise((resolve, reject) => {
-                tx.oncomplete = resolve;
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(store, mode);
+                const os = tx.objectStore(store);
+                let result;
+                const req = fn(os);
+                if (req) req.onsuccess = () => { result = req.result; };
+                tx.oncomplete = () => resolve(result);
                 tx.onerror = () => reject(tx.error);
+                tx.onabort = () => reject(tx.error);
             });
+        } finally {
             db.close();
-            console.log('✓ File handle persisted to IndexedDB');
-        } catch (e) {
-            console.warn('Could not persist file handle:', e);
         }
+    },
+
+    // Herstelt compatibiliteit met de vorige app-versie: een eerdere build van deze versie
+    // verhoogde de database naar versie 3, waardoor de oude app zijn cache niet meer kon openen.
+    // Zet de database terug naar versie 2 en verhuist eventuele back-ups naar een eigen database.
+    async ensureCompatibleDb() {
+        try {
+            const current = await this._open(this.DB_NAME, null, []);
+            const version = current.version;
+            if (version <= this.DB_VERSION) { current.close(); return; }
+
+            const readAll = (store) => new Promise((resolve) => {
+                if (!current.objectStoreNames.contains(store)) return resolve([]);
+                const tx = current.transaction(store, 'readonly');
+                const os = tx.objectStore(store);
+                const keysReq = os.getAllKeys();
+                const valsReq = os.getAll();
+                tx.oncomplete = () => resolve(keysReq.result.map((k, i) => [k, valsReq.result[i]]));
+                tx.onerror = () => resolve([]);
+            });
+            const handles = await readAll('handles');
+            const cache = await readAll('cache');
+            const backups = await readAll('backups');
+            current.close();
+
+            await new Promise((resolve) => {
+                const del = indexedDB.deleteDatabase(this.DB_NAME);
+                del.onsuccess = del.onerror = del.onblocked = () => resolve();
+            });
+
+            await this._tx('handles', 'readwrite', os => { handles.forEach(([k, v]) => os.put(v, k)); return null; });
+            await this._tx('cache', 'readwrite', os => { cache.forEach(([k, v]) => os.put(v, k)); return null; });
+            if (backups.length) {
+                await this._tx('backups', 'readwrite', os => { backups.forEach(([k, v]) => os.put(v, k)); return null; });
+            }
+            console.log(`✓ Database teruggezet van versie ${version} naar ${this.DB_VERSION} (compatibel met vorige app-versie)`);
+        } catch (e) {
+            console.warn('Could not check database version:', e);
+        }
+    },
+
+    async persistHandle(handle) {
+        try { await this._tx('handles', 'readwrite', os => os.put(handle, 'currentFile')); }
+        catch (e) { console.warn('Could not persist file handle:', e); }
     },
 
     async restoreHandle() {
-        try {
-            const db = await this._openDB();
-            const handle = await new Promise((resolve, reject) => {
-                const tx = db.transaction('handles', 'readonly');
-                const req = tx.objectStore('handles').get('currentFile');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-            db.close();
-            return handle || null;
-        } catch (e) {
-            console.warn('Could not restore file handle:', e);
-            return null;
-        }
+        try { return (await this._tx('handles', 'readonly', os => os.get('currentFile'))) || null; }
+        catch (e) { console.warn('Could not restore file handle:', e); return null; }
     },
 
     async clearPersistedHandle() {
-        try {
-            const db = await this._openDB();
-            const tx = db.transaction('handles', 'readwrite');
-            tx.objectStore('handles').delete('currentFile');
-            db.close();
-        } catch (e) {
-            // ignore
-        }
+        try { await this._tx('handles', 'readwrite', os => os.delete('currentFile')); } catch (e) { /* ignore */ }
     },
 
-    // Cache the database data in IndexedDB for instant availability
     async saveCache(data) {
-        try {
-            const db = await this._openDB();
-            const tx = db.transaction('cache', 'readwrite');
-            tx.objectStore('cache').put(data, 'dbSnapshot');
-            await new Promise((resolve, reject) => {
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error);
-            });
-            db.close();
-        } catch (e) {
-            console.warn('Could not cache data:', e);
-        }
+        try { await this._tx('cache', 'readwrite', os => os.put(data, 'dbSnapshot')); }
+        catch (e) { console.warn('Could not cache data:', e); }
     },
 
     async loadCache() {
+        try { return (await this._tx('cache', 'readonly', os => os.get('dbSnapshot'))) || null; }
+        catch (e) { console.warn('Could not load cached data:', e); return null; }
+    },
+
+    // ----- Back-ups -----
+    _hasContent(data) {
+        return !!(data && Array.isArray(data.categories) && data.categories.length > 0);
+    },
+
+    async addBackup(data, { force = false, reason = 'Automatisch' } = {}) {
+        if (!this._hasContent(data)) return;
         try {
-            const db = await this._openDB();
-            const data = await new Promise((resolve, reject) => {
-                const tx = db.transaction('cache', 'readonly');
-                const req = tx.objectStore('cache').get('dbSnapshot');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-            db.close();
-            return data || null;
+            if (this._lastBackupAt === null) {
+                const keys = await this._tx('backups', 'readonly', os => os.getAllKeys());
+                this._lastBackupAt = keys && keys.length ? Math.max(...keys) : 0;
+            }
+            const now = Date.now();
+            if (!force && now - this._lastBackupAt < this.BACKUP_INTERVAL_MS) return;
+            const copy = JSON.parse(JSON.stringify(data));
+            await this._tx('backups', 'readwrite', os => os.put({ createdAt: now, reason, data: copy }, now));
+            this._lastBackupAt = now;
+            // Oudste back-ups opruimen
+            const keys = (await this._tx('backups', 'readonly', os => os.getAllKeys())) || [];
+            const sorted = keys.slice().sort((a, b) => a - b);
+            const excess = sorted.slice(0, Math.max(0, sorted.length - this.BACKUP_KEEP));
+            if (excess.length) {
+                await this._tx('backups', 'readwrite', os => { excess.forEach(k => os.delete(k)); return null; });
+            }
         } catch (e) {
-            console.warn('Could not load cached data:', e);
-            return null;
+            console.warn('Could not create backup:', e);
         }
     },
 
-    async pickFile() {
+    async listBackups() {
         try {
-            const [handle] = await window.showOpenFilePicker({
+            const all = (await this._tx('backups', 'readonly', os => os.getAll())) || [];
+            return all.sort((a, b) => b.createdAt - a.createdAt);
+        } catch (e) {
+            console.warn('Could not list backups:', e);
+            return [];
+        }
+    },
+
+    async getBackup(key) {
+        try { return await this._tx('backups', 'readonly', os => os.get(key)); }
+        catch (e) { return null; }
+    },
+
+    // ----- Versies vergelijken -----
+    _contentKey(db) {
+        try {
+            const { meta, ...rest } = db || {};
+            return JSON.stringify(rest);
+        } catch (e) {
+            return '';
+        }
+    },
+
+    // Korte samenvatting van een database, om twee versies te kunnen vergelijken
+    summarize(db) {
+        const today = new Date().setHours(0, 0, 0, 0);
+        let open = 0, lastActivity = 0;
+        const todayNames = [];
+        const seen = (ts) => { if (typeof ts === 'number' && ts > lastActivity && ts <= Date.now() + 60000) lastActivity = ts; };
+        const visit = (item, name) => {
+            seen(item.createdAt); seen(item.completedAt); seen(item._completedTimestamp);
+            (item.schedulingHistory || []).forEach(h => seen(h.date ?? h.timestamp));
+            if (item.scheduledDate === today) todayNames.push(name + (item.done ? ' ✓' : ''));
+        };
+        (db?.categories || []).forEach(c => (c.projects || []).forEach(p => (p.tasks || []).forEach(t => {
+            if (!t.done) open++;
+            visit(t, t.name);
+            (t.subtasks || []).forEach(sub => {
+                visit(sub, sub.name);
+                (sub.checklist || []).forEach(ch => visit(ch, ch.text ?? ch.name));
+            });
+        })));
+        (db?.archive || []).forEach(a => seen(a.archivedAt));
+        return { open, todayNames, lastActivity };
+    },
+
+    async _askVersion(local, localTime, fileData, fileTime, fileName) {
+        const fmt = (ms) => ms ? new Date(ms).toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' }) : 'onbekend';
+        const L = this.summarize(local);
+        const F = this.summarize(fileData);
+        const lTime = Math.max(localTime, L.lastActivity);
+        const fTime = Math.max(fileData.meta?.savedAt || 0, F.lastActivity);
+        const recommendLocal = lTime >= fTime;
+        const block = (title, sum, when, recommended) => `
+            <div style="flex:1; min-width:220px; padding:10px 12px; border:2px solid ${recommended ? 'var(--primary)' : 'var(--border-color)'}; border-radius:var(--radius-md); text-align:left;">
+                <div style="font-weight:700; margin-bottom:6px;">${title}${recommended ? ' <span style="color:var(--primary); font-size:11px;">(lijkt nieuwst)</span>' : ''}</div>
+                <div style="font-size:12px;">Laatste activiteit: <strong>${esc(when)}</strong></div>
+                <div style="font-size:12px;">Open opdrachten: <strong>${sum.open}</strong></div>
+                <div style="font-size:12px;">Vandaag ingepland: <strong>${sum.todayNames.length}</strong></div>
+                ${sum.todayNames.length ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${sum.todayNames.slice(0, 6).map(n => '• ' + esc(n)).join('<br>')}${sum.todayNames.length > 6 ? '<br>…' : ''}</div>` : ''}
+            </div>`;
+        return customDialog.choice(
+            'Welke versie wil je gebruiken?',
+            `De data in de app verschilt van het bestand <strong>${esc(fileName || 'JSON')}</strong>. ` +
+            `Kies welke versie je wilt houden. Van de andere versie wordt eerst een back-up gemaakt (Instellingen → Back-ups).` +
+            `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">` +
+            block('In de app', L, fmt(lTime), recommendLocal) +
+            block('In het bestand', F, fmt(fTime), !recommendLocal) +
+            `</div>`,
+            [
+                { text: 'Bestand gebruiken', value: 'file', class: recommendLocal ? 'secondary' : 'primary' },
+                { text: 'App-data houden', value: 'local', class: recommendLocal ? 'primary' : 'secondary' }
+            ]
+        );
+    },
+
+    // ----- Rechten -----
+    async _ensurePermission(handle, mode, interactive) {
+        let perm = await handle.queryPermission({ mode });
+        if (perm === 'granted') return true;
+        // requestPermission werkt alleen met een recente gebruikersactie (klik/toets)
+        const hasActivation = interactive || (navigator.userActivation && navigator.userActivation.isActive);
+        if (!hasActivation) return false;
+        try {
+            perm = await handle.requestPermission({ mode });
+        } catch (e) {
+            return false;
+        }
+        return perm === 'granted';
+    },
+
+    // ----- Bestand kiezen / synchroniseren -----
+    async pickFile() {
+        let handle;
+        try {
+            [handle] = await window.showOpenFilePicker({
                 types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }],
                 startIn: 'documents'
             });
-            state.fileHandle = handle;
-            await this.persistHandle(handle);
-            await this.loadFromFile();
-            toastNotifications.show('success', 'Bestand geopend', 'Database geladen uit bestand');
-            return true;
         } catch (e) {
-            console.log('File picker cancelled or failed:', e);
+            console.log('File picker cancelled:', e);
             return false;
         }
+        const previousHandle = state.fileHandle;
+        state.fileHandle = handle;
+        const ok = await this.syncWithFile({ interactive: true, picked: true });
+        if (ok) {
+            await this.persistHandle(handle);
+        } else {
+            state.fileHandle = previousHandle;
+        }
+        return ok;
     },
 
-    async loadFromFile() {
-        if (!state.fileHandle) return false;
-        try {
-            // Request read permission if needed
-            if (await state.fileHandle.queryPermission({ mode: 'read' }) !== 'granted') {
-                const granted = await state.fileHandle.requestPermission({ mode: 'read' });
-                if (!granted) {
-                    toastNotifications.show('warning', 'Geen toestemming', 'Kan bestand niet lezen zonder toestemming');
-                    await this.clearPersistedHandle();
-                    state.fileHandle = null;
-                    return false;
-                }
-            }
-            const file = await state.fileHandle.getFile();
-            const text = await file.text();
-            const loaded = JSON.parse(text);
-            if (loaded && loaded.categories) {
-                state.db = loaded;
-                await this.saveCache(loaded);
-                app.render();
-                const sessionCount = loaded.pomodoroSessions?.length || 0;
-                const catCount = loaded.categories?.length || 0;
-                toastNotifications.show('success', 'JSON Geladen', `${catCount} categorieën, ${sessionCount} pomodoro sessies`);
-                return true;
-            }
-            toastNotifications.show('error', 'Ongeldig bestand', 'Bestand bevat geen geldige database');
+    // Kiest tussen de huidige (cache)data en de data in het bestand; de nieuwste wint.
+    async syncWithFile({ interactive = false, picked = false } = {}) {
+        const handle = state.fileHandle;
+        if (!handle) return false;
+
+        const canRead = await this._ensurePermission(handle, 'read', interactive);
+        if (!canRead) {
+            this.needsReconnect = true;
             return false;
+        }
+        // Bij een gebruikersactie meteen ook schrijfrechten vragen, zodat latere saves slagen
+        if (interactive) await this._ensurePermission(handle, 'readwrite', true);
+
+        let file, fileData;
+        try {
+            file = await handle.getFile();
+            fileData = JSON.parse(await file.text());
         } catch (e) {
             console.error('Failed to read file:', e);
-            toastNotifications.show('error', 'Leesfout', 'Kon bestand niet lezen');
-            await this.clearPersistedHandle();
-            state.fileHandle = null;
+            toastNotifications.show('error', 'Leesfout', 'Het bestand kon niet gelezen worden of is geen geldige JSON. Je huidige data is ongewijzigd.');
             return false;
         }
+        if (!fileData || !Array.isArray(fileData.categories)) {
+            toastNotifications.show('error', 'Ongeldig bestand', 'Dit bestand bevat geen ToDo-database. Je huidige data is ongewijzigd.');
+            return false;
+        }
+
+        const local = this._hasContent(state.db) ? state.db : null;
+        const localTime = local?.meta?.savedAt || 0;
+        const fileTime = Math.max(fileData.meta?.savedAt || 0, file.lastModified || 0);
+        const differs = !!local && this._contentKey(local) !== this._contentKey(fileData);
+
+        // Standaard: de nieuwste versie wint, maar alleen als we dat zeker weten (beide met versiestempel)
+        let useLocal = !!local && localTime > fileTime;
+        // Onzeker of expliciet gekozen bestand met andere inhoud: altijd de gebruiker laten kiezen
+        const mustAsk = differs && (picked || !localTime || !fileData.meta?.savedAt);
+
+        if (mustAsk) {
+            const choice = await this._askVersion(local, localTime, fileData, fileTime, handle.name);
+            if (choice !== 'local' && choice !== 'file') {
+                // Geen keuze gemaakt: niets overschrijven, app-data blijft staan, bestand niet gekoppeld
+                this.needsReconnect = true;
+                return false;
+            }
+            useLocal = choice === 'local';
+        }
+
+        if (useLocal) {
+            if (differs) {
+                // Bestandsversie bewaren voordat we er de app-data overheen schrijven
+                await this.addBackup(fileData, { force: true, reason: `Bestandsversie (${handle.name || 'JSON'}) vóór overschrijven` });
+                const res = await this.saveToFile();
+                toastNotifications.show(
+                    'info',
+                    'App-data behouden',
+                    res.file
+                        ? 'Je app-data is naar het bestand geschreven. De oude bestandsversie staat bij Instellingen → Back-ups.'
+                        : 'Je app-data is behouden. Klik op de status rechtsboven om ook het bestand bij te werken.',
+                    7000
+                );
+            }
+        } else {
+            if (differs) {
+                // App-data ALTIJD eerst veiligstellen voordat het bestand eroverheen komt
+                await this.addBackup(local, { force: true, reason: 'App-data vóór laden bestand' });
+            }
+            state.db = migrateDb(fileData);
+            await this.saveCache(state.db);
+            if (interactive || differs) {
+                const sessionCount = state.db.pomodoroSessions?.length || 0;
+                toastNotifications.show('success', 'Bestand geladen',
+                    `${state.db.categories.length} categorieën, ${sessionCount} pomodoro sessies` +
+                    (differs ? '. De vorige app-data staat bij Instellingen → Back-ups.' : ''), 6000);
+            }
+        }
+
+        const writePerm = await handle.queryPermission({ mode: 'readwrite' });
+        this.needsReconnect = writePerm !== 'granted';
+        return true;
     },
 
-    async saveToFile() {
-        // Always save to cache first (fast, always works)
-        const cleanData = JSON.parse(JSON.stringify(state.db, (k, v) => v === undefined ? null : v));
-        await this.saveCache(cleanData);
+    // Slaat op naar cache + bestand. Geeft terug: { cache, file, reason }
+    saveToFile() {
+        const run = async () => {
+            state.db.meta = {
+                ...(state.db.meta || {}),
+                schemaVersion: SCHEMA_VERSION,
+                savedAt: Date.now(),
+                revision: (state.db.meta?.revision || 0) + 1
+            };
+            const cleanData = JSON.parse(JSON.stringify(state.db, (k, v) => v === undefined ? null : v));
+            await this.saveCache(cleanData);
+            this.addBackup(cleanData); // eens per 30 min, niet afwachten
 
-        if (!state.fileHandle) return false;
-        try {
-            // Request write permission if needed
-            if (await state.fileHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-                const granted = await state.fileHandle.requestPermission({ mode: 'readwrite' });
-                if (!granted) {
-                    // Cache is saved, file write can be retried later
-                    console.warn('Write permission denied, data saved to cache only');
-                    return false;
+            if (!state.fileHandle) return { cache: true, file: false, reason: 'no-file' };
+            try {
+                const canWrite = await this._ensurePermission(state.fileHandle, 'readwrite', false);
+                if (!canWrite) {
+                    this.needsReconnect = true;
+                    return { cache: true, file: false, reason: 'permission' };
                 }
+                const writable = await state.fileHandle.createWritable();
+                await writable.write(JSON.stringify(cleanData, null, 2));
+                await writable.close();
+                this.needsReconnect = false;
+                return { cache: true, file: true };
+            } catch (e) {
+                console.error('Failed to write file, data is in cache:', e);
+                return { cache: true, file: false, reason: 'error', error: e };
             }
-            const writable = await state.fileHandle.createWritable();
-            await writable.write(JSON.stringify(cleanData, null, 2));
-            await writable.close();
-            return true;
-        } catch (e) {
-            console.error('Failed to write file, data is in cache:', e);
-            return false;
-        }
+        };
+        this._pending++;
+        const p = this._writeChain.then(run, run).finally(() => { this._pending--; });
+        this._writeChain = p.catch(() => {});
+        return p;
     }
 };
 
@@ -6526,9 +6515,7 @@ const toastNotifications = {
     },
     
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return esc(text);
     }
 };
 
@@ -6536,19 +6523,30 @@ const toastNotifications = {
 
 // ===== UNDO/REDO SYSTEM (Product Manager feedback - High Priority) =====
 const undoRedo = {
+    // Een snapshot bestaat uit { main, archive }. Het (grote) archief verandert zelden;
+    // ongewijzigde archief-strings worden hergebruikt, zodat 50 undo-stappen veel minder geheugen kosten.
+    _lastArchive: null,
+
+    _snapshot() {
+        const { archive, ...rest } = state.db;
+        let archiveStr = JSON.stringify(archive ?? null);
+        if (archiveStr === this._lastArchive) archiveStr = this._lastArchive; // zelfde string-object hergebruiken
+        else this._lastArchive = archiveStr;
+        return { main: JSON.stringify(rest), archive: archiveStr };
+    },
+
+    _restore(snap) {
+        const db = JSON.parse(snap.main);
+        const archive = JSON.parse(snap.archive);
+        if (archive !== null) db.archive = archive;
+        return db;
+    },
+
     saveState() {
         try {
-            const snapshot = JSON.stringify(state.db);
-            state.undoHistory.push(snapshot);
-            
-            // Limit history size
-            if (state.undoHistory.length > CONSTANTS.MAX_UNDO_HISTORY) {
-                state.undoHistory.shift();
-            }
-            
-            // Clear redo history when new action is performed
+            state.undoHistory.push(this._snapshot());
+            if (state.undoHistory.length > CONSTANTS.MAX_UNDO_HISTORY) state.undoHistory.shift();
             state.redoHistory = [];
-            
             this.updateButtons();
         } catch (error) {
             console.error('Failed to save undo state:', error);
@@ -6557,19 +6555,11 @@ const undoRedo = {
     
     undo() {
         if (state.undoHistory.length === 0) return;
-        
         try {
-            const currentState = JSON.stringify(state.db);
-            state.redoHistory.push(currentState);
-            
-            const previousState = state.undoHistory.pop();
-            state.db = JSON.parse(previousState);
-            
+            state.redoHistory.push(this._snapshot());
+            state.db = this._restore(state.undoHistory.pop());
             app.save();
-            
-            // Use app.changeView to properly handle all view states including column visibility
             app.changeView(state.currentView);
-            
             this.updateButtons();
             toastNotifications.show('info', 'Ongedaan gemaakt', '', 2000);
         } catch (error) {
@@ -6579,19 +6569,11 @@ const undoRedo = {
     
     redo() {
         if (state.redoHistory.length === 0) return;
-        
         try {
-            const currentState = JSON.stringify(state.db);
-            state.undoHistory.push(currentState);
-            
-            const redoState = state.redoHistory.pop();
-            state.db = JSON.parse(redoState);
-            
+            state.undoHistory.push(this._snapshot());
+            state.db = this._restore(state.redoHistory.pop());
             app.save();
-            
-            // Use app.changeView to properly handle all view states including column visibility
             app.changeView(state.currentView);
-            
             this.updateButtons();
             toastNotifications.show('info', 'Opnieuw gedaan', '', 2000);
         } catch (error) {
@@ -6685,43 +6667,32 @@ const search = {
     },
     
     highlightText(text, query) {
-        if (!query) return this.escapeHtml(text);
-        
-        const escaped = this.escapeHtml(text);
-        const regex = new RegExp(`(${query})`, 'gi');
-        return escaped.replace(regex, '<span class="search-highlight">$1</span>');
+        const raw = String(text ?? '');
+        if (!query) return esc(raw);
+        // Zoekterm letterlijk behandelen: tekens als ( + ? [ mogen de regex niet breken
+        const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        let out = '', last = 0, m;
+        while ((m = re.exec(raw)) !== null) {
+            if (m[0].length === 0) { re.lastIndex++; continue; }
+            out += esc(raw.slice(last, m.index)) + '<span class="search-highlight">' + esc(m[0]) + '</span>';
+            last = m.index + m[0].length;
+        }
+        return out + esc(raw.slice(last));
     },
     
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return esc(text);
     }
 };
 
 // ===== INPUT SANITIZATION (QA + Frontend feedback) =====
 const sanitizer = {
+    // Tekst wordt ongewijzigd opgeslagen (alleen trim + lengtegrens).
+    // Veiligheid komt van esc() bij het tonen, niet van het wegfilteren van tekst.
     sanitize(input) {
         if (typeof input !== 'string') return input;
-        
-        // Remove script tags
-        let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-        
-        // Remove event handlers
-        cleaned = cleaned.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-        cleaned = cleaned.replace(/on\w+\s*=\s*[^\s>]*/gi, '');
-        
-        // Remove javascript: protocol
-        cleaned = cleaned.replace(/javascript:/gi, '');
-        
-        // Trim
-        cleaned = cleaned.trim();
-        
-        // Max length check
-        if (cleaned.length > 10000) {
-            cleaned = cleaned.substring(0, 10000);
-        }
-        
+        let cleaned = input.trim();
+        if (cleaned.length > 100000) cleaned = cleaned.substring(0, 100000);
         return cleaned;
     },
     
@@ -6730,6 +6701,419 @@ const sanitizer = {
         if (input.length > maxLength) return false;
         if (input.trim().length === 0) return false;
         return true;
+    }
+};
+
+// ===== HERHALENDE TAKEN: VOLGENDE DATUM =====
+const recurrence = {
+    DAY_MS: 24 * 60 * 60 * 1000,
+
+    weekStart(ms) {
+        const d = new Date(ms);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // maandag
+        return d.getTime();
+    },
+
+    // Geeft de eerstvolgende datum (lokale middernacht) ná fromMs volgens regel r
+    step(r, fromMs) {
+        const interval = Math.max(1, parseInt(r.interval, 10) || 1);
+        const days = Array.isArray(r.days) ? r.days : [];
+        const next = new Date(fromMs);
+        next.setHours(0, 0, 0, 0);
+
+        if (r.frequency === 'daily') {
+            if (days.length > 0 && days.length < 7) {
+                for (let i = 0; i < 7; i++) {
+                    next.setDate(next.getDate() + 1);
+                    if (days.includes(next.getDay())) break;
+                }
+            } else {
+                next.setDate(next.getDate() + interval);
+            }
+        } else if (r.frequency === 'weekdays') {
+            do { next.setDate(next.getDate() + 1); } while (next.getDay() === 0 || next.getDay() === 6);
+        } else if (r.frequency === 'weekly') {
+            if (days.length > 0) {
+                if (interval > 1 && !r.anchorDate) r.anchorDate = this.weekStart(fromMs);
+                const anchor = r.anchorDate ? this.weekStart(r.anchorDate) : null;
+                for (let i = 0; i < 7 * interval + 7; i++) {
+                    next.setDate(next.getDate() + 1);
+                    if (!days.includes(next.getDay())) continue;
+                    if (interval === 1) return next.getTime();
+                    const weeks = Math.round((this.weekStart(next.getTime()) - anchor) / (7 * this.DAY_MS));
+                    if (((weeks % interval) + interval) % interval === 0) return next.getTime();
+                }
+                const fb = new Date(fromMs);
+                fb.setHours(0, 0, 0, 0);
+                fb.setDate(fb.getDate() + 7 * interval);
+                return fb.getTime();
+            }
+            next.setDate(next.getDate() + 7 * interval);
+        } else if (r.frequency === 'monthly') {
+            // Eerst naar dag 1, dan pas de maand ophogen: voorkomt dat 31 jan → 3 maart wordt
+            const originalDay = next.getDate();
+            next.setDate(1);
+            next.setMonth(next.getMonth() + interval);
+            const maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+            if (r.monthDayType === 'first') {
+                next.setDate(1);
+            } else if (r.monthDayType === 'last') {
+                next.setDate(maxDay);
+            } else {
+                const wanted = r.monthDay || originalDay;
+                next.setDate(Math.min(wanted, maxDay));
+            }
+        } else {
+            next.setDate(next.getDate() + 1);
+        }
+        return next.getTime();
+    }
+};
+
+// ===== EXPORT VOOR AI-COACH (leesbaar tekstoverzicht, zonder archief) =====
+const aiExport = {
+    options: { notes: true, checklist: true },
+    DAY_MS: 24 * 60 * 60 * 1000,
+    DAY_SHORT: ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'],
+    PRIORITY: { high: 'prioriteit HOOG', medium: 'prioriteit gemiddeld', low: 'prioriteit laag' },
+    PROJECT_STATUS: { planned: 'Gepland', active: 'Actief', hold: 'On hold / wacht', done: 'Klaar' },
+
+    today() { return new Date().setHours(0, 0, 0, 0); },
+
+    clean(text, max = 400) {
+        const t = String(text ?? '').replace(/\s+/g, ' ').trim();
+        return t.length > max ? t.slice(0, max - 1) + '…' : t;
+    },
+
+    day(ms) {
+        const d = new Date(ms).setHours(0, 0, 0, 0);
+        const diff = Math.round((d - this.today()) / this.DAY_MS);
+        const label = new Date(ms).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
+        if (diff === 0) return `vandaag (${label})`;
+        if (diff === 1) return `morgen (${label})`;
+        if (diff === -1) return `gisteren (${label})`;
+        if (diff < 0) return `${label}, ${-diff} dagen geleden`;
+        return label;
+    },
+
+    recurText(r) {
+        if (!r || !r.enabled) return '';
+        const n = Math.max(1, parseInt(r.interval, 10) || 1);
+        const days = Array.isArray(r.days) && r.days.length
+            ? ' op ' + r.days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => this.DAY_SHORT[d]).join(', ')
+            : '';
+        if (r.frequency === 'daily') return n > 1 ? `herhaalt elke ${n} dagen` : `herhaalt dagelijks${days}`;
+        if (r.frequency === 'weekdays') return 'herhaalt elke werkdag';
+        if (r.frequency === 'weekly') return (n > 1 ? `herhaalt elke ${n} weken` : 'herhaalt wekelijks') + days;
+        if (r.frequency === 'monthly') {
+            const when = r.monthDayType === 'first' ? ' op de 1e' : r.monthDayType === 'last' ? ' op de laatste dag' : r.monthDay ? ` op de ${r.monthDay}e` : '';
+            return (n > 1 ? `herhaalt elke ${n} maanden` : 'herhaalt maandelijks') + when;
+        }
+        return 'herhalend';
+    },
+
+    // Kenmerken van een item als leesbare tekst, bijv. "deadline: morgen · ⭐ favoriet"
+    tags(item, { skipToday = false } = {}) {
+        const t = [];
+        const today = this.today();
+        if (item.priority && this.PRIORITY[item.priority]) t.push(this.PRIORITY[item.priority]);
+        if (item.dueDate) {
+            t.push(!item.done && item.dueDate < today ? `DEADLINE VERLOPEN: ${this.day(item.dueDate)}` : `deadline: ${this.day(item.dueDate)}`);
+        }
+        if (item.scheduledDate && !(skipToday && item.scheduledDate === today)) {
+            t.push(!item.done && item.scheduledDate < today ? `was ingepland: ${this.day(item.scheduledDate)}` : `ingepland: ${this.day(item.scheduledDate)}`);
+        }
+        if (item.timeEstimate) t.push(`geschat: ${item.timeEstimate} min`);
+        const rec = this.recurText(item.recurring);
+        if (rec) t.push(rec);
+        if (item.favorite) t.push('⭐ favoriet');
+        return t.length ? ` (${t.join(' · ')})` : '';
+    },
+
+    noteLine(item, indent) {
+        if (!this.options.notes || !item.notes || !String(item.notes).trim()) return '';
+        return `\n${indent}Notitie: ${this.clean(item.notes)}`;
+    },
+
+    // Alle actieve items met context, archief wordt niet meegenomen
+    collect() {
+        const out = [];
+        state.db.categories.forEach(cat => {
+            (cat.projects || []).forEach(proj => {
+                out.push({ type: 'project', item: proj, path: [cat.name] });
+                (proj.tasks || []).forEach(task => {
+                    out.push({ type: 'task', item: task, path: [cat.name, proj.name] });
+                    (task.subtasks || []).forEach(sub => {
+                        out.push({ type: 'subtask', item: sub, path: [cat.name, proj.name, task.name] });
+                        (sub.checklist || []).forEach(c => {
+                            out.push({ type: 'checklist', item: { ...c, name: c.text ?? c.name }, path: [cat.name, proj.name, task.name, sub.name] });
+                        });
+                    });
+                });
+            });
+        });
+        return out;
+    },
+
+    TYPE_LABEL: { project: 'Project', task: 'Opdracht', subtask: 'Subtaak', checklist: 'Checklist-item' },
+
+    flatLine(entry, { skipToday = false } = {}) {
+        const i = entry.item;
+        const box = i.done ? '[x]' : '[ ]';
+        const ctx = entry.path.length ? ` — in: ${entry.path.join(' > ')}` : '';
+        return `${box} ${this.TYPE_LABEL[entry.type]}: ${this.clean(i.name, 200)}${this.tags(i, { skipToday })}${ctx}${this.noteLine(i, '      ')}`;
+    },
+
+    build() {
+        const now = new Date();
+        const today = this.today();
+        const all = this.collect().filter(e => e.type !== 'checklist' || this.options.checklist);
+        const lines = [];
+        const P = (s = '') => lines.push(s);
+
+        // --- Vandaag (zelfde logica als de Vandaag-weergave) ---
+        const todayItems = (typeof todayView !== 'undefined' && todayView.getAllTodayItems)
+            ? todayView.getAllTodayItems().filter(i => i.type !== 'checklist' || this.options.checklist)
+            : [];
+        const toEntry = (ti) => ({
+            type: ti.type,
+            item: ti.type === 'checklist' ? { ...ti.item, name: ti.item.text ?? ti.item.name } : ti.item,
+            path: String(ti.context || '').split(' → ')
+        });
+        const todayOpen = todayItems.filter(i => !i.done && !i.workedOn);
+        const todayWorked = todayItems.filter(i => !i.done && i.workedOn);
+        const todayDone = todayItems.filter(i => i.done);
+
+        // --- Achterstallig (niet op vandaag, niet afgerond) ---
+        const overdue = all.filter(e => {
+            const i = e.item;
+            if (e.type === 'project' || i.done || i.scheduledDate === today) return false;
+            return (i.scheduledDate && i.scheduledDate < today) || (i.dueDate && i.dueDate < today);
+        });
+
+        // --- Deadlines komende 7 dagen ---
+        const upcoming = all.filter(e => !e.item.done && e.item.dueDate && e.item.dueDate >= today && e.item.dueDate <= today + 7 * this.DAY_MS)
+            .sort((a, b) => a.item.dueDate - b.item.dueDate);
+
+        // --- Favorieten ---
+        const favs = all.filter(e => e.item.favorite);
+
+        // --- Tellingen ---
+        const openTasks = all.filter(e => e.type === 'task' && !e.item.done).length;
+        const activeProjects = all.filter(e => e.type === 'project' && e.item.status !== 'done' && (e.item.tasks || []).some(t => !t.done)).length;
+
+        const dateLong = now.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        P(`# Mijn ToDo-overzicht – ${dateLong}`);
+        P(`Gegenereerd op ${now.toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' })} uit mijn ToDo Dashboard. Het archief (afgeronde, opgeruimde taken) zit hier bewust niet in.`);
+        P();
+        P('## Instructie voor jou (AI-coach)');
+        P('Je bent vandaag mijn persoonlijke ToDo-coach. Hieronder staat mijn complete takenoverzicht. Help me om:');
+        P('1. een realistische dagplanning te maken op basis van wat op "Vandaag" staat, rekening houdend met deadlines en achterstallige items;');
+        P('2. te bepalen wat de belangrijkste 1–3 dingen zijn om vandaag af te ronden, en waarom;');
+        P('3. achterstallige items bewust te kiezen: vandaag oppakken, opnieuw inplannen of laten vallen;');
+        P('4. grote of vage taken op te knippen in een concrete eerste stap.');
+        P('Vraag eerst hoeveel tijd ik vandaag heb en welke afspraken er vastliggen, voordat je een planning voorstelt. Wees kort, concreet en eerlijk als ik te veel plan.');
+        P();
+        P('## Hoe dit overzicht te lezen');
+        P('- Structuur: Categorie > Project > Opdracht > Subtaak > Checklist-item.');
+        P('- [ ] = open, [x] = afgerond. "ingepland" = de dag waarop ik het wil doen; "deadline" = uiterste datum.');
+        P('- ⭐ = favoriet: dingen die ik belangrijk vind of snel terug wil vinden.');
+        P();
+        P('## Samenvatting');
+        P(`- Vandaag ingepland: ${todayItems.length} items (${todayOpen.length} open, ${todayWorked.length} dagdoel behaald, ${todayDone.length} afgerond)`);
+        P(`- Achterstallig (niet op vandaag): ${overdue.length}`);
+        P(`- Deadlines in de komende 7 dagen: ${upcoming.length}`);
+        P(`- Favorieten: ${favs.length}`);
+        P(`- Open opdrachten in totaal: ${openTasks}, verdeeld over ${activeProjects} projecten met open werk`);
+        P();
+
+        P('## 1. Vandaag ingepland');
+        if (!todayItems.length) {
+            P('Er staat nog niets op vandaag.');
+        } else {
+            if (todayOpen.length) {
+                P('Nog te doen, in de volgorde van mijn Vandaag-lijst:');
+                todayOpen.forEach((ti, n) => P(`${n + 1}. ${this.flatLine(toEntry(ti), { skipToday: true })}`));
+            } else {
+                P('Alles wat voor vandaag gepland stond is afgerond of er is aan gewerkt.');
+            }
+            if (todayWorked.length) {
+                P();
+                P('Dagdoel behaald (vandaag aan gewerkt, nog niet af):');
+                todayWorked.forEach(ti => P(`- ${this.flatLine(toEntry(ti), { skipToday: true })}`));
+            }
+            if (todayDone.length) {
+                P();
+                P('Vandaag al afgerond:');
+                todayDone.forEach(ti => P(`- ${this.flatLine(toEntry(ti), { skipToday: true })}`));
+            }
+        }
+        P();
+
+        P('## 2. Achterstallig');
+        if (!overdue.length) P('Niets achterstallig.');
+        else overdue.forEach(e => P(`- ${this.flatLine(e)}`));
+        P();
+
+        P('## 3. Deadlines komende 7 dagen');
+        if (!upcoming.length) P('Geen deadlines in de komende 7 dagen.');
+        else upcoming.forEach(e => P(`- ${this.flatLine(e)}`));
+        P();
+
+        P('## 4. Favorieten');
+        if (!favs.length) P('Geen favorieten.');
+        else favs.forEach(e => P(`- ${this.flatLine(e)}`));
+        P();
+
+        P('## 5. Alle taken per categorie en project');
+        P('Alleen open items staan hieronder uitgeschreven; afgeronde items zijn per project geteld.');
+        const doneProjects = [];
+        state.db.categories.forEach(cat => {
+            const projects = (cat.projects || []).filter(p => {
+                if (p.status === 'done') { doneProjects.push(`${p.name} (${cat.name})`); return false; }
+                return true;
+            });
+            if (!projects.length) return;
+            P();
+            P(`### Categorie: ${cat.icon ? cat.icon + ' ' : ''}${this.clean(cat.name, 200)}`);
+            const empty = projects.filter(p => !(p.tasks || []).some(t => !t.done));
+            projects.filter(p => !empty.includes(p)).forEach(proj => {
+                const tasks = proj.tasks || [];
+                const open = tasks.filter(t => !t.done);
+                const doneCount = tasks.length - open.length;
+                const status = this.PROJECT_STATUS[proj.status || 'planned'] || proj.status;
+                P();
+                P(`#### Project: ${this.clean(proj.name, 200)} — status: ${status}${proj.favorite ? ' · ⭐ favoriet' : ''} — ${open.length} open${doneCount ? `, ${doneCount} afgerond` : ''}`);
+                open.forEach(task => {
+                    P(`- [ ] Opdracht: ${this.clean(task.name, 200)}${this.tags(task)}${this.noteLine(task, '    ')}`);
+                    const subs = task.subtasks || [];
+                    const openSubs = subs.filter(s => !s.done);
+                    openSubs.forEach(sub => {
+                        P(`    - [ ] Subtaak: ${this.clean(sub.name, 200)}${this.tags(sub)}${this.noteLine(sub, '        ')}`);
+                        if (this.options.checklist) {
+                            (sub.checklist || []).filter(c => !c.done).forEach(c => {
+                                P(`        - [ ] ${this.clean(c.text ?? c.name, 200)}${this.tags(c)}`);
+                            });
+                        }
+                    });
+                    const doneSubs = subs.length - openSubs.length;
+                    if (doneSubs) P(`    - (${doneSubs} subta${doneSubs === 1 ? 'ak' : 'ken'} al afgerond)`);
+                });
+            });
+            if (empty.length) {
+                P();
+                P(`Projecten zonder open opdrachten: ${empty.map(p => this.clean(p.name, 100)).join(', ')}`);
+            }
+        });
+        if (doneProjects.length) {
+            P();
+            P(`Afgeronde projecten (niet uitgeschreven): ${doneProjects.join('; ')}`);
+        }
+        P();
+        P('— Einde overzicht —');
+        return lines.join('\n');
+    },
+
+    fileName() {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        return `ToDo_Overzicht_${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.txt`;
+    },
+
+    async copy(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (e) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand('copy');
+            ta.remove();
+            return ok;
+        }
+    },
+
+    download(text) {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.fileName();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    },
+
+    open() {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay show';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '10050';
+        overlay.innerHTML = `
+            <div class="modal" style="max-width: 860px; width: 95vw;">
+                <div class="modal-header">
+                    <h2 class="modal-title">🤖 Overzicht voor AI-coach</h2>
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                    Een leesbaar overzicht van al je open taken, wat er vandaag op staat en je favorieten, zonder archief.
+                    Kopieer het in Copilot, of download het als tekstbestand en voeg het daar als bijlage toe.
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; margin-bottom: 8px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" data-opt="notes" ${this.options.notes ? 'checked' : ''}> Notities meenemen
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" data-opt="checklist" ${this.options.checklist ? 'checked' : ''}> Checklist-items meenemen
+                    </label>
+                    <span data-count style="margin-left: auto; color: var(--text-muted);"></span>
+                </div>
+                <textarea data-preview readonly spellcheck="false"
+                    style="width: 100%; height: 50vh; resize: vertical; font-family: Consolas, 'Courier New', monospace; font-size: 12px; line-height: 1.5; padding: 12px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); white-space: pre-wrap;"></textarea>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close>Sluiten</button>
+                    <button class="btn btn-secondary" data-download>💾 Download (.txt)</button>
+                    <button class="btn btn-primary" data-copy>📋 Kopieer naar klembord</button>
+                </div>
+            </div>`;
+        const preview = overlay.querySelector('[data-preview]');
+        const count = overlay.querySelector('[data-count]');
+        const refresh = () => {
+            try {
+                preview.value = this.build();
+            } catch (e) {
+                console.error('AI export failed:', e);
+                preview.value = 'Het overzicht kon niet worden gemaakt: ' + e.message;
+            }
+            const chars = preview.value.length;
+            count.textContent = `${chars.toLocaleString('nl-NL')} tekens`;
+        };
+        overlay.addEventListener('change', (e) => {
+            const opt = e.target.dataset?.opt;
+            if (!opt) return;
+            this.options[opt] = e.target.checked;
+            refresh();
+        });
+        overlay.addEventListener('click', async (e) => {
+            if (e.target === overlay || e.target.closest('[data-close]')) return overlay.remove();
+            if (e.target.closest('[data-download]')) {
+                this.download(preview.value);
+                toastNotifications.show('success', 'Overzicht gedownload', this.fileName(), 3000);
+            }
+            if (e.target.closest('[data-copy]')) {
+                const ok = await this.copy(preview.value);
+                toastNotifications.show(ok ? 'success' : 'error',
+                    ok ? 'Gekopieerd' : 'Kopiëren mislukt',
+                    ok ? 'Plak het overzicht nu in Copilot.' : 'Gebruik de downloadknop en voeg het bestand toe in Copilot.', 3000);
+            }
+        });
+        document.body.appendChild(overlay);
+        refresh();
     }
 };
 
@@ -6752,44 +7136,38 @@ const app = {
             const savedMode = localStorage.getItem('storageMode') || 'json';
             state.storageMode = savedMode;
 
-            // Step 1: Load from IndexedDB cache (instant, always works)
+            // Step 0: zorg dat de opslag compatibel blijft met de vorige app-versie
+            await fileStorage.ensureCompatibleDb();
+
+            // Step 1: Laad uit IndexedDB-cache (direct beschikbaar)
             const cachedData = await fileStorage.loadCache();
-            if (cachedData && cachedData.categories) {
-                state.db = cachedData;
+            if (cachedData && Array.isArray(cachedData.categories)) {
+                state.db = migrateDb(cachedData);
                 app.render();
                 console.log('✓ Data loaded from IndexedDB cache');
             }
 
-            // Step 2: Try to restore file handle + sync from real file
+            // Step 2: Bestand herstellen en de NIEUWSTE versie gebruiken (cache of bestand)
             const restoredHandle = await fileStorage.restoreHandle();
             if (restoredHandle) {
                 state.fileHandle = restoredHandle;
-                const perm = await restoredHandle.queryPermission({ mode: 'read' });
-                if (perm === 'granted') {
-                    try {
-                        const file = await restoredHandle.getFile();
-                        const text = await file.text();
-                        const loaded = JSON.parse(text);
-                        if (loaded && loaded.categories) {
-                            state.db = loaded;
-                            await fileStorage.saveCache(loaded);
-                            app.render();
-                            this.setStatus('JSON', 'success');
-                            console.log('✓ Synced from file handle');
-                        }
-                    } catch (e) {
-                        console.warn('Could not read file silently, using cache:', e);
-                        this.setStatus('JSON', cachedData ? 'success' : '');
+                try {
+                    const synced = await fileStorage.syncWithFile({ interactive: false });
+                    if (synced) {
+                        this.changeView(state.currentView);
+                        console.log('✓ Synced with file handle');
+                    } else {
+                        fileStorage.needsReconnect = true;
+                        console.log('⚠️ File handle needs user gesture to reconnect');
                     }
-                } else {
-                    // Keep handle for reconnect button, data is already from cache
-                    this.setStatus('JSON', cachedData ? 'success' : '');
-                    console.log('⚠️ File handle needs user gesture to reconnect');
+                } catch (e) {
+                    fileStorage.needsReconnect = true;
+                    console.warn('Could not read file silently, using cache:', e);
                 }
-            } else {
-                this.setStatus(cachedData ? 'JSON' : 'JSON - kies bestand', cachedData ? 'success' : '');
             }
-            
+            this.refreshStorageStatus();
+            this.initSaveFlush();
+
             // Check for daily/weekly reminders
             setTimeout(() => {
                 reminders.check();
@@ -6860,9 +7238,13 @@ const app = {
     },
 
     initKeyboardShortcuts() {
+        const isTextField = (el) => !!el && (el.isContentEditable ||
+            el.tagName === 'TEXTAREA' ||
+            (el.tagName === 'INPUT' && !['checkbox', 'radio', 'button', 'submit', 'range', 'color'].includes(el.type)));
         document.addEventListener('keydown', (e) => {
+            const key = (e.key || '').toLowerCase();
             // Ctrl+K - Search
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            if ((e.ctrlKey || e.metaKey) && key === 'k') {
                 e.preventDefault();
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) searchInput.focus();
@@ -6870,14 +7252,16 @@ const app = {
             }
             
             // Ctrl+Z - Undo
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            if ((e.ctrlKey || e.metaKey) && key === 'z' && !e.shiftKey) {
+                if (isTextField(e.target)) return; // gewone tekst-undo in invoervelden
                 e.preventDefault();
                 undoRedo.undo();
                 return;
             }
             
             // Ctrl+Y or Ctrl+Shift+Z - Redo
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            if ((e.ctrlKey || e.metaKey) && (key === 'y' || (key === 'z' && e.shiftKey))) {
+                if (isTextField(e.target)) return;
                 e.preventDefault();
                 undoRedo.redo();
                 return;
@@ -7091,11 +7475,11 @@ const app = {
             section.style.display = 'block';
             if (state.fileHandle) {
                 // Check if data is loaded (from cache or file)
-                const hasData = state.db && state.db.categories && state.db.categories.length > 0;
-                status.innerHTML = hasData
-                    ? '✅ JSON-bestand — data beschikbaar'
-                    : '⚠️ Bestand bekend maar niet verbonden — klik hieronder om te herstellen';
-                status.style.color = hasData ? '#22c55e' : '#f59e0b';
+                const connected = !fileStorage.needsReconnect;
+                status.textContent = connected
+                    ? `✅ Gekoppeld aan ${state.fileHandle.name || 'JSON-bestand'}`
+                    : `⚠️ ${state.fileHandle.name || 'Bestand'} heeft toestemming nodig — klik "Herstel Verbinding"`;
+                status.style.color = connected ? '#22c55e' : '#f59e0b';
             } else {
                 status.innerHTML = '⚠️ Geen bestand geselecteerd — klik "Kies JSON Bestand"';
                 status.style.color = '#f59e0b';
@@ -7107,45 +7491,128 @@ const app = {
 
     async reconnectFile() {
         if (!state.fileHandle) {
-            toastNotifications.show('warning', 'Geen bestand', 'Kies eerst een JSON-bestand');
-            return;
+            return this.pickDatabaseFile();
         }
         try {
-            // User gesture allows requestPermission
-            const perm = await state.fileHandle.queryPermission({ mode: 'read' });
-            if (perm !== 'granted') {
-                const granted = await state.fileHandle.requestPermission({ mode: 'read' });
-                if (!granted) {
-                    toastNotifications.show('warning', 'Geen toestemming', 'Kan bestand niet lezen zonder toestemming');
-                    return;
+            // Klik = gebruikersactie, dus hier mogen we lees- én schrijfrechten vragen
+            const ok = await fileStorage.syncWithFile({ interactive: true });
+            if (!ok) {
+                if (fileStorage.needsReconnect) {
+                    toastNotifications.show('warning', 'Geen toestemming', 'Zonder toestemming kan het bestand niet worden gelezen of bijgewerkt. Je data staat veilig in de app.');
                 }
-            }
-            const file = await state.fileHandle.getFile();
-            const text = await file.text();
-            const loaded = JSON.parse(text);
-            if (loaded && loaded.categories) {
-                state.db = loaded;
-                await fileStorage.saveCache(loaded);
-                app.render();
-                this.setStatus('JSON', 'success');
-                this.updateJsonFileSection();
-                toastNotifications.show('success', 'Bestand verbonden', 'Database geladen uit bestand');
             } else {
-                toastNotifications.show('error', 'Ongeldig bestand', 'Bestand bevat geen geldige database');
+                // Eventuele openstaande wijzigingen direct wegschrijven
+                if (state.saveTimeout) await this.save(true);
+                this.changeView(state.currentView);
             }
         } catch (e) {
             console.error('Failed to reconnect file:', e);
-            toastNotifications.show('error', 'Leesfout', 'Kon bestand niet lezen. Kies opnieuw.');
-            await fileStorage.clearPersistedHandle();
-            state.fileHandle = null;
-            this.updateJsonFileSection();
+            toastNotifications.show('error', 'Verbinding mislukt', 'Het bestand kon niet worden geopend. Kies het bestand opnieuw via Instellingen.');
         }
+        this.refreshStorageStatus();
+        this.updateJsonFileSection();
     },
 
     async pickDatabaseFile() {
         const picked = await fileStorage.pickFile();
         this.updateJsonFileSection();
-        if (picked) app.render();
+        this.refreshStorageStatus();
+        if (picked) this.changeView(state.currentView);
+    },
+
+    onStatusClick() {
+        if (!state.fileHandle) return this.pickDatabaseFile();
+        if (fileStorage.needsReconnect) return this.reconnectFile();
+    },
+
+    refreshStorageStatus() {
+        if (!state.fileHandle) {
+            this.setStatus('Alleen lokaal – klik om bestand te kiezen', 'warning', true);
+        } else if (fileStorage.needsReconnect) {
+            this.setStatus('Bestand niet gekoppeld – klik hier', 'warning', true);
+        } else {
+            this.setStatus('JSON', 'success', true);
+        }
+    },
+
+    initSaveFlush() {
+        const flush = () => {
+            if (state.saveTimeout) {
+                clearTimeout(state.saveTimeout);
+                state.saveTimeout = null;
+                this.performSave();
+            }
+        };
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') flush();
+        });
+        window.addEventListener('pagehide', flush);
+        window.addEventListener('beforeunload', (e) => {
+            const pending = !!state.saveTimeout || fileStorage._pending > 0;
+            flush();
+            if (pending) {
+                // Geeft de browser tijd om de laatste save af te ronden
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    },
+
+    async showBackups() {
+        const backups = await fileStorage.listBackups();
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay show';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '10050';
+        const count = (d) => {
+            let tasks = 0;
+            (d?.categories || []).forEach(c => (c.projects || []).forEach(p => { tasks += (p.tasks || []).length; }));
+            return tasks;
+        };
+        const rows = backups.length
+            ? backups.map(b => `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:8px;">
+                    <div>
+                        <div style="font-weight:600;">${esc(new Date(b.createdAt).toLocaleString('nl-NL'))}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${esc(b.reason || 'Automatisch')} · ${count(b.data)} opdrachten</div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" data-backup-key="${b.createdAt}">Terugzetten</button>
+                </div>`).join('')
+            : '<div style="color:var(--text-muted); padding:16px 0;">Nog geen back-ups. De app maakt er automatisch één per 30 minuten waarin je iets wijzigt.</div>';
+        overlay.innerHTML = `
+            <div class="modal" style="max-width:520px;">
+                <div class="modal-header">
+                    <h2 class="modal-title">Back-ups</h2>
+                </div>
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+                    De laatste ${fileStorage.BACKUP_KEEP} back-ups worden in deze browser bewaard. Terugzetten is ongedaan te maken met Ctrl+Z.
+                </div>
+                <div style="max-height:50vh; overflow-y:auto;">${rows}</div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-close>Sluiten</button>
+                </div>
+            </div>`;
+        const close = () => overlay.remove();
+        overlay.addEventListener('click', async (e) => {
+            if (e.target === overlay || e.target.closest('[data-close]')) return close();
+            const btn = e.target.closest('[data-backup-key]');
+            if (!btn) return;
+            const backup = await fileStorage.getBackup(Number(btn.dataset.backupKey));
+            if (!backup?.data) return;
+            const ok = await customDialog.confirm(
+                'Back-up terugzetten?',
+                `Je huidige data wordt vervangen door de back-up van <strong>${esc(new Date(backup.createdAt).toLocaleString('nl-NL'))}</strong>. Je kunt dit ongedaan maken met Ctrl+Z.`
+            );
+            if (!ok) return;
+            await fileStorage.addBackup(state.db, { force: true, reason: 'Vóór terugzetten back-up' });
+            undoRedo.saveState();
+            state.db = migrateDb(JSON.parse(JSON.stringify(backup.data)));
+            await this.save(true);
+            this.changeView(state.currentView);
+            close();
+            toastNotifications.show('success', 'Back-up teruggezet', new Date(backup.createdAt).toLocaleString('nl-NL'));
+        });
+        document.body.appendChild(overlay);
     },
 
     async exportDatabase() {
@@ -7396,16 +7863,9 @@ const app = {
                             // For weekly with specific days, check if today is a valid day
                             if (r.frequency === 'weekly' && r.days && r.days.length > 0) {
                                 if (!r.days.includes(todayDayOfWeek)) {
-                                    // Today is not a scheduled day, find next valid day
-                                    const next = new Date(todayMs);
-                                    for (let i = 1; i <= 7; i++) {
-                                        next.setDate(next.getDate() + 1);
-                                        if (r.days.includes(next.getDay())) {
-                                            task.recurring.nextDue = next.getTime();
-                                            changed = true;
-                                            break;
-                                        }
-                                    }
+                                    // Vandaag is geen geplande dag: schuif door naar de eerstvolgende geldige dag
+                                    task.recurring.nextDue = recurrence.step(r, todayMs);
+                                    changed = true;
                                     return; // Don't reset task yet
                                 }
                             }
@@ -7430,59 +7890,14 @@ const app = {
                             // The Morning Wizard (step 0) will reschedule it for today
                             task.scheduledDate = null;
                             
-                            // Calculate next due date
-                            const next = new Date(nextDue);
-                            if (r.frequency === 'daily') {
-                                // Daily with specific days support
-                                if (r.days && r.days.length > 0 && r.days.length < 7) {
-                                    // Find next valid day
-                                    for (let i = 1; i <= 7; i++) {
-                                        next.setDate(next.getDate() + 1);
-                                        if (r.days.includes(next.getDay())) {
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    next.setDate(next.getDate() + (r.interval || 1));
-                                }
-                            } else if (r.frequency === 'weekly') {
-                                if (r.days && r.days.length > 0) {
-                                    // Find next occurrence based on selected days
-                                    let found = false;
-                                    for (let i = 1; i <= 14; i++) { // Check up to 2 weeks
-                                        next.setDate(next.getDate() + 1);
-                                        if (r.days.includes(next.getDay())) {
-                                            // Check interval (every N weeks)
-                                            const weeksDiff = Math.floor(i / 7);
-                                            if (weeksDiff === 0 || weeksDiff % (r.interval || 1) === 0) {
-                                                found = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (!found) {
-                                        // Fallback: add interval weeks
-                                        next.setDate(next.getDate() + (7 * (r.interval || 1)));
-                                    }
-                                } else {
-                                    next.setDate(next.getDate() + (7 * (r.interval || 1)));
-                                }
-                            } else if (r.frequency === 'monthly') {
-                                next.setMonth(next.getMonth() + (r.interval || 1));
-                                // Set day of month based on type
-                                if (r.monthDayType === 'first') {
-                                    next.setDate(1);
-                                } else if (r.monthDayType === 'last') {
-                                    // Last day of the month
-                                    const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
-                                    next.setDate(lastDay);
-                                } else if (r.monthDay) {
-                                    // Specific day (legacy support + new specific type)
-                                    const maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
-                                    next.setDate(Math.min(r.monthDay, maxDay));
-                                }
+                            // Volgende datum berekenen. Blijf doorschuiven tot ná vandaag,
+                            // zodat een taak die lang niet geopend is niet blijft achterlopen.
+                            let nextMs = recurrence.step(r, nextDue);
+                            let guard = 0;
+                            while (nextMs <= todayMs && guard++ < 2000) {
+                                nextMs = recurrence.step(r, nextMs);
                             }
-                            task.recurring.nextDue = next.getTime();
+                            task.recurring.nextDue = nextMs;
                             changed = true;
                         }
                     }
@@ -7494,6 +7909,10 @@ const app = {
     },
 
     async save(immediate = false) {
+        // Voltooide favorieten opruimen bij elke wijziging
+        if (state.db && clearCompletedFavorites(state.db) > 0 && state.currentView === 'favorites') {
+            setTimeout(() => favoritesView.render(), 0);
+        }
         
         // Voor kritieke operaties: direct opslaan zonder debounce
         if (immediate) {
@@ -7516,38 +7935,50 @@ const app = {
     },
     
     async performSave() {
+        state.saveTimeout = null;
         try {
             this.setStatus("Opslaan...", "");
-            
-            // Always save to cache (fileStorage.saveToFile does this first)
-            await fileStorage.saveToFile();
-            
-            if (state.fileHandle) {
+            const res = await fileStorage.saveToFile();
+
+            if (res.file) {
                 this.setStatus("Opgeslagen", "success");
+            } else if (res.reason === 'no-file') {
+                this.setStatus('Alleen lokaal – klik om bestand te kiezen', 'warning', true);
+            } else if (res.reason === 'permission') {
+                this.setStatus('Niet in bestand opgeslagen – klik hier', 'warning', true);
+                if (!this._reconnectWarned) {
+                    this._reconnectWarned = true;
+                    toastNotifications.show('warning', 'Bestand niet bijgewerkt', 'Je wijzigingen staan veilig in de app, maar het JSON-bestand heeft toestemming nodig. Klik op de status rechtsboven.', 8000);
+                }
             } else {
-                this.setStatus("Geen bestand", "");
+                this.setStatus('Schrijven mislukt – klik hier', 'error', true);
+                fileStorage.needsReconnect = true;
+                toastNotifications.show('error', 'Opslaan in bestand mislukt', 'Je wijzigingen staan wel in de app. Klik op de status rechtsboven om het bestand opnieuw te koppelen.', 8000);
             }
-            
+            if (res.file) this._reconnectWarned = false;
+
             // Check voor nieuwe dag bij activiteit
             reminders.checkOnActivity();
         } catch (error) {
-            this.setStatus("Fout bij opslaan", "error");
+            this.setStatus("Fout bij opslaan", "error", true);
             errorHandler.log(error, 'save');
         }
     },
 
-    setStatus(msg, type) {
+    setStatus(msg, type, sticky = false) {
         const el = document.getElementById('statusIndicator');
-        el.innerHTML = type === 'success' ? `<span>&#10003;</span> ${msg}` : 
-                       type === 'error' ? `<span>⚠️</span> ${msg}` : 
-                       `<span>&#8505;</span> ${msg}`;
+        if (!el) return;
+        const icon = type === 'success' ? '&#10003;' : type === 'error' ? '⚠️' : type === 'warning' ? '⚠️' : '&#8505;';
+        el.innerHTML = `<span>${icon}</span> ${esc(msg)}`;
         el.className = `status-pill ${type}`;
-        
-        // Tijdelijke statussen keren terug naar status gebaseerd op opslagmodus
-        if (msg !== 'Verbonden' && msg !== 'Lokaal' && msg !== 'JSON') {
-            setTimeout(() => {
-                this.setStatus('JSON', state.fileHandle ? 'success' : '');
-            }, 5000);
+        const clickable = !state.fileHandle || fileStorage.needsReconnect;
+        el.classList.toggle('clickable', clickable);
+        el.title = clickable ? 'Klik om het JSON-bestand te koppelen' : '';
+
+        clearTimeout(this._statusTimer);
+        if (!sticky) {
+            // Tijdelijke statussen keren terug naar de actuele opslagstatus
+            this._statusTimer = setTimeout(() => this.refreshStorageStatus(), 4000);
         }
     },
 
@@ -7657,12 +8088,12 @@ const app = {
                 const typeIcons = {
                     category: '📂',
                     project: '📋',
-                    task: '📄Â',
+                    task: '📄',
                     subtask: '✓'
                 };
                 
                 const highlightedName = search.highlightText(item.name, state.searchQuery);
-                const contextInfo = context ? `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${context}</div>` : '';
+                const contextInfo = context ? `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${esc(context)}</div>` : '';
                 
                 el.innerHTML = `
                     ${contextInfo}
@@ -7719,14 +8150,14 @@ const app = {
                     app.render();
                 };
 
-                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${sub._proj} → ${sub._task}</div>`;
+                const contextInfo = `<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${esc(sub._proj)} → ${esc(sub._task)}</div>`;
                 
                 el.innerHTML = `
                     ${contextInfo}
                     <div class="item-row">
                         <input type="checkbox" class="task-checkbox" ${sub.done ? 'checked' : ''}>
                         <div class="item-content">
-                            <div class="item-title">${sub.name}</div>
+                            <div class="item-title">${esc(sub.name)}</div>
                         </div>
                     </div>
                 `;
@@ -8054,7 +8485,7 @@ const renderer = {
             }
 
             if (item.notes) {
-                metaParts.push(`<span title="${item.notes.substring(0,50)}...">\u{1F4DD}</span>`);
+                metaParts.push(`<span title="${esc(item.notes.substring(0,50))}...">\u{1F4DD}</span>`);
             }
 
             // Subtask count voor tasks
@@ -8072,7 +8503,7 @@ const renderer = {
                     .filter(Boolean);
                 const sessionNames = existingSessions.map(s => s.name).join(', ');
                 if (existingSessions.length > 0) {
-                    metaParts.push(`<span class="pomodoro-badge" data-action="show-task-sessions" title="Sessies: ${sessionNames}">&#9201; ${existingSessions.length}x</span>`);
+                    metaParts.push(`<span class="pomodoro-badge" data-action="show-task-sessions" title="Sessies: ${esc(sessionNames)}">&#9201; ${existingSessions.length}x</span>`);
                 }
             }
 
@@ -8091,7 +8522,7 @@ const renderer = {
                     .filter(Boolean);
                 const sessionNames = existingSessions.map(s => s.name).join(', ');
                 if (existingSessions.length > 0) {
-                    metaParts.push(`<span class="pomodoro-badge" data-action="show-sub-sessions" title="Sessies: ${sessionNames}">&#9201; ${existingSessions.length}x</span>`);
+                    metaParts.push(`<span class="pomodoro-badge" data-action="show-sub-sessions" title="Sessies: ${esc(sessionNames)}">&#9201; ${existingSessions.length}x</span>`);
                 }
             }
 
@@ -8248,7 +8679,7 @@ const renderer = {
                         return `
                             <div class="checklist-item" style="background: var(--primary-light); padding: 6px; border-radius: 4px;">
                                 <input type="text" class="checklist-edit-input" data-subtask-id="${item.id}" data-index="${idx}" 
-                                       value="${checkItem.text.replace(/"/g, '&quot;')}"
+                                       value="${esc(checkItem.text)}"
                                        style="flex: 1; padding: 4px 8px; border: 1px solid var(--primary); border-radius: 4px; font-size: 12px;"
                                        autofocus>
                                 <button class="action-btn success" data-action="save-checklist-edit" data-index="${idx}" title="Opslaan" 
@@ -8263,7 +8694,7 @@ const renderer = {
                         <div class="checklist-item" draggable="true" data-checklist-index="${idx}">
                             <span class="checklist-drag-handle" title="Sleep om te sorteren">&#8942;</span>
                             <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-action="toggle-checklist-item" data-index="${idx}">
-                            <span>${checkItem.text}</span>
+                            <span>${esc(checkItem.text)}</span>
                             ${todayBtn}
                             ${pomodoroBtn}
                             <button class="action-btn" data-action="edit-checklist-item" data-index="${idx}" title="Bewerken" style="width: 18px; height: 18px; font-size: 10px;">&#9999;</button>
@@ -8298,7 +8729,7 @@ const renderer = {
                 <div class="drag-handle" title="Sleep om te sorteren">&#8801;</div>
                 ${leftHtml}
                 <div class="item-content">
-                    <div class="item-title">${item.name}</div>
+                    <div class="item-title">${esc(item.name)}</div>
                     ${metaHtml}
                 </div>
                 ${statusHtml}
@@ -8334,8 +8765,8 @@ const renderer = {
                             
                             const result = await customDialog.choice(
                                 'Open subtaken gevonden',
-                                `De opdracht "<strong>${item.name}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
-                                `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
+                                `De opdracht "<strong>${esc(item.name)}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
+                                `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${esc(s.name)}</div>`).join('')}</div>` +
                                 `Wat wil je doen?`,
                                 [
                                     { text: 'Annuleren', class: 'secondary', value: 'cancel' },
@@ -8426,8 +8857,8 @@ const renderer = {
                             
                             const result = await customDialog.choice(
                                 'Open checklist items gevonden',
-                                `De subtaak "<strong>${item.name}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
-                                `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${c.name}</div>`).join('')}</div>` +
+                                `De subtaak "<strong>${esc(item.name)}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
+                                `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${esc(c.text ?? c.name)}</div>`).join('')}</div>` +
                                 `Wat wil je doen?`,
                                 [
                                     { text: 'Annuleren', class: 'secondary', value: 'cancel' },
@@ -9064,7 +9495,7 @@ const crud = {
             if (task.recurring?.enabled) recurringCount++;
         });
         
-        let confirmMsg = `Wil je het hele project "<strong>${proj.name}</strong>" archiveren?<br><br>` +
+        let confirmMsg = `Wil je het hele project "<strong>${esc(proj.name)}</strong>" archiveren?<br><br>` +
             `<strong>${taskCount}</strong> opdracht(en) en <strong>${subtaskCount}</strong> subtaken worden gearchiveerd.`;
         
         if (recurringCount > 0) {
@@ -9244,7 +9675,7 @@ const crud = {
         }
         
         // Build confirmation message based on setting
-        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${proj.name}</strong>"?`;
+        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${esc(proj.name)}</strong>"?`;
         if (skippedTasks > 0) {
             confirmMsg += `<br><br><em>${skippedTasks} taak/taken met open subtaken worden overgeslagen.</em>`;
         }
@@ -9269,7 +9700,7 @@ const crud = {
                 'Open subtaken gevonden',
                 `<strong>${tasksWithOpenSubtasks.length}</strong> voltooide taak/taken hebben samen <strong>${totalOpenSubs}</strong> open subtaken:<br><br>` +
                 `<div class="custom-dialog-list">${tasksWithOpenSubtasks.map(item => 
-                    `<div class="custom-dialog-list-item"><strong>${item.task.name}</strong> (${item.openSubtasks.length} open)</div>`
+                    `<div class="custom-dialog-list-item"><strong>${esc(item.task.name)}</strong> (${item.openSubtasks.length} open)</div>`
                 ).join('')}</div>` +
                 `Wat wil je met alle open subtaken doen?`,
                 [
@@ -9528,7 +9959,7 @@ const crud = {
         }
         
         // Build confirmation message based on setting
-        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${cat.name}</strong>"?`;
+        let confirmMsg = `Wil je <strong>${totalCompleted}</strong> voltooide item(s) opschonen uit "<strong>${esc(cat.name)}</strong>"?`;
         if (skippedTasks > 0) {
             confirmMsg += `<br><br><em>${skippedTasks} taak/taken met open subtaken worden overgeslagen.</em>`;
         }
@@ -9552,7 +9983,7 @@ const crud = {
                 'Open subtaken gevonden',
                 `<strong>${tasksWithOpenSubtasks.length}</strong> voltooide taak/taken hebben samen <strong>${totalOpenSubs}</strong> open subtaken:<br><br>` +
                 `<div class="custom-dialog-list">${tasksWithOpenSubtasks.map(item => 
-                    `<div class="custom-dialog-list-item"><strong>${item.task.name}</strong> <span style="color:var(--text-muted)">(${item.projectName})</span> - ${item.openSubtasks.length} open</div>`
+                    `<div class="custom-dialog-list-item"><strong>${esc(item.task.name)}</strong> <span style="color:var(--text-muted)">(${esc(item.projectName)})</span> - ${item.openSubtasks.length} open</div>`
                 ).join('')}</div>` +
                 `Wat wil je met alle open subtaken doen?`,
                 [
@@ -9903,7 +10334,7 @@ const crud = {
             const isChecked = item.pomodoroSessions.includes(session.id);
             return `<label style="display: flex; align-items: center; gap: 8px; padding: 8px; cursor: pointer;">
                 <input type="checkbox" ${isChecked ? 'checked' : ''} value="${session.id}">
-                <span>${session.name}</span>
+                <span>${esc(session.name)}</span>
             </label>`;
         }).join('');
         
@@ -9941,7 +10372,7 @@ const crud = {
             overlay.innerHTML = `
                 <div class="modal">
                     <div class="modal-header">
-                        <h2 class="modal-title">Pomodoro Sessies voor: ${itemName}</h2>
+                        <h2 class="modal-title">Pomodoro Sessies voor: ${esc(itemName)}</h2>
                     </div>
                     <div style="max-height: 300px; overflow-y: auto;">
                         ${sessionsList}
@@ -10088,17 +10519,17 @@ const crud = {
 
             // Build initial options
             const categoryOptions = state.db.categories.map(cat => 
-                `<option value="${cat.id}" ${cat.id === currentCat.id ? 'selected' : ''}>${cat.icon} ${cat.name}</option>`
+                `<option value="${cat.id}" ${cat.id === currentCat.id ? 'selected' : ''}>${cat.icon} ${esc(cat.name)}</option>`
             ).join('');
 
             const projectOptions = currentCat.projects.map(proj => 
-                `<option value="${proj.id}" ${proj.id === currentProj.id ? 'selected' : ''}>${proj.icon} ${proj.name}</option>`
+                `<option value="${proj.id}" ${proj.id === currentProj.id ? 'selected' : ''}>${proj.icon} ${esc(proj.name)}</option>`
             ).join('');
 
             overlay.innerHTML = `
                 <div class="modal">
                     <div class="modal-header">
-                        <h2 class="modal-title">Taak verplaatsen: ${task.name}</h2>
+                        <h2 class="modal-title">Taak verplaatsen: ${esc(task.name)}</h2>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 20px;">
                         <div class="form-group">
@@ -10142,7 +10573,7 @@ const crud = {
                 const selectedCat = state.db.categories.find(c => c.id === selectedCatId);
                 if (selectedCat && selectedCat.projects) {
                     const newProjectOptions = selectedCat.projects.map(proj => 
-                        `<option value="${proj.id}">${proj.icon} ${proj.name}</option>`
+                        `<option value="${proj.id}">${proj.icon} ${esc(proj.name)}</option>`
                     ).join('');
                     projectSelect.innerHTML = `<option value="" disabled selected>-- Bestaande projecten --</option>${newProjectOptions}<option value="__new__">+ Nieuw project aanmaken</option>`;
                     newProjectInput.style.display = 'none';
@@ -10358,9 +10789,6 @@ const views = {
 };
 
 const todayView = {
-    pomodoroSelectionMode: false,
-    selectedPomodoroItems: new Set(),
-    
     getAllTodayItems() {
         const items = [];
         const today = new Date().setHours(0,0,0,0);
@@ -10473,34 +10901,19 @@ const todayView = {
         document.getElementById('todayCompletedCount').textContent = completedCount;
         document.getElementById('todayWorkedOnCount').textContent = workedOnCount;
         
-        // Update Pomodoro button state
+        // Update "Alles naar Pomodoro" button state
         const activeCount = activeItems.length;
-        const selectBtn = document.getElementById('todayPomodoroSelectBtn');
-        const confirmBtn = document.getElementById('todayPomodoroConfirmBtn');
-        const cancelBtn = document.getElementById('todayPomodoroCancelBtn');
-        
-        if (this.pomodoroSelectionMode) {
-            // In selection mode: show confirm/cancel, hide select button
-            if (selectBtn) selectBtn.style.display = 'none';
-            if (confirmBtn) confirmBtn.style.display = 'flex';
-            if (cancelBtn) cancelBtn.style.display = 'flex';
-            this.updateSelectedCount();
-        } else {
-            // Normal mode: show select button, hide confirm/cancel
-            if (selectBtn) {
-                selectBtn.style.display = 'flex';
-                if (activeCount === 0) {
-                    selectBtn.disabled = true;
-                    selectBtn.style.opacity = '0.5';
-                    selectBtn.style.cursor = 'not-allowed';
-                } else {
-                    selectBtn.disabled = false;
-                    selectBtn.style.opacity = '1';
-                    selectBtn.style.cursor = 'pointer';
-                }
+        const pomodoroAllBtn = document.getElementById('todayPomodoroAllBtn');
+        if (pomodoroAllBtn) {
+            if (activeCount === 0) {
+                pomodoroAllBtn.disabled = true;
+                pomodoroAllBtn.style.opacity = '0.5';
+                pomodoroAllBtn.style.cursor = 'not-allowed';
+            } else {
+                pomodoroAllBtn.disabled = false;
+                pomodoroAllBtn.style.opacity = '1';
+                pomodoroAllBtn.style.cursor = 'pointer';
             }
-            if (confirmBtn) confirmBtn.style.display = 'none';
-            if (cancelBtn) cancelBtn.style.display = 'none';
         }
         
         // Clear list
@@ -10642,7 +11055,7 @@ const todayView = {
                 <button class="today-action-btn worked-on" onclick="todayView.showWorkedOnConfirm('${itemData.id}', '${type}', this)">
                     &#129513; Dagdoel behaald
                 </button>
-                <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${(item.name || item.text || '').replace(/'/g, "\\'")}')">
+                <button class="today-action-btn primary" onclick="todayView.addToPomodoro('${itemData.id}', '${type}', '${esc(jsq(item.name || item.text || ''))}')">
                     &#9201; Pomodoro
                 </button>
 
@@ -10659,34 +11072,19 @@ const todayView = {
         // Status indicator for worked-on items
         const statusBadge = isWorkedOn ? '<span class="worked-on-badge">&#129513; Dagdoel behaald</span>' : '';
         
-        // Selection indicator for pomodoro selection mode (only for active items)
-        const isSelected = this.pomodoroSelectionMode && this.selectedPomodoroItems.has(itemData.id);
-        const selectionIndicator = (!isCompleted && !isWorkedOn && this.pomodoroSelectionMode) ? `
-            <div class="today-pomodoro-select-indicator">&#10003;</div>
-        ` : '';
-        
-        // Add selection classes
-        if (!isCompleted && !isWorkedOn && this.pomodoroSelectionMode) {
-            card.classList.add('pomodoro-selecting');
-            if (isSelected) {
-                card.classList.add('pomodoro-selected');
-            }
-        }
-        
         card.innerHTML = `
             <div class="today-item-header">
-                ${selectionIndicator}
                 ${!isCompleted && !isWorkedOn ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); margin-right: 8px;" title="Sleep om te herordenen">&#8942;&#8942;</div>' : ''}
                 <div class="item-type-badge">${typeBadges[type]}</div>
                 ${statusBadge}
-                <div class="today-item-title">${item.name || item.text}</div>
+                <div class="today-item-title">${esc(item.name || item.text)}</div>
                 <button class="today-navigate-btn" 
                         onclick="event.stopPropagation(); todayView.navigateToItem('${itemData.catId}', '${itemData.projId}', '${itemData.taskId || itemData.id}');"
                         title="Ga naar deze taak in alles view">
                     &#8594;
                 </button>
             </div>
-            <div class="today-item-context">${context}</div>
+            <div class="today-item-context">${esc(context)}</div>
             <div class="today-item-actions">
                 ${actionButtons}
             </div>
@@ -10725,24 +11123,6 @@ const todayView = {
                     } else {
                         list.insertBefore(dragging, afterElement);
                     }
-                }
-            });
-            
-            // Click handler for pomodoro selection mode
-            card.addEventListener('click', (e) => {
-                if (!todayView.pomodoroSelectionMode) return;
-                // Don't intercept clicks on buttons or the navigate arrow
-                if (e.target.closest('button')) return;
-                
-                const itemId = card.dataset.id;
-                const isSelected = todayView.selectedPomodoroItems.has(itemId);
-                todayView.togglePomodoroItem(itemId, !isSelected);
-                
-                // Update visual state
-                if (!isSelected) {
-                    card.classList.add('pomodoro-selected');
-                } else {
-                    card.classList.remove('pomodoro-selected');
                 }
             });
         }
@@ -10857,8 +11237,8 @@ const todayView = {
                 if (setting === 'ask') {
                     const result = await customDialog.choice(
                         'Open subtaken gevonden',
-                        `De opdracht "<strong>${targetTask.name}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
-                        `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${s.name}</div>`).join('')}</div>` +
+                        `De opdracht "<strong>${esc(targetTask.name)}</strong>" heeft nog <strong>${openSubtasks.length}</strong> open subtaken:<br><br>` +
+                        `<div class="custom-dialog-list">${openSubtasks.map(s => `<div class="custom-dialog-list-item">${esc(s.name)}</div>`).join('')}</div>` +
                         `Wat wil je doen?`,
                         [
                             { text: 'Annuleren', class: 'secondary', value: 'cancel' },
@@ -10944,8 +11324,8 @@ const todayView = {
                 if (setting === 'ask') {
                     const result = await customDialog.choice(
                         'Open checklist items gevonden',
-                        `De subtaak "<strong>${targetItem.name}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
-                        `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${c.name}</div>`).join('')}</div>` +
+                        `De subtaak "<strong>${esc(targetItem.name)}</strong>" heeft nog <strong>${openChecklist.length}</strong> open checklist items:<br><br>` +
+                        `<div class="custom-dialog-list">${openChecklist.map(c => `<div class="custom-dialog-list-item">${esc(c.text ?? c.name)}</div>`).join('')}</div>` +
                         `Wat wil je doen?`,
                         [
                             { text: 'Annuleren', class: 'secondary', value: 'cancel' },
@@ -11294,109 +11674,42 @@ const todayView = {
         }
     },
     
-    togglePomodoroSelection() {
-        // Enter or exit pomodoro selection mode
-        if (!this.pomodoroSelectionMode) {
-            // Enter selection mode: pre-select all active items
-            const allItems = this.getAllTodayItems();
-            const activeItems = allItems.filter(i => !i.done && !i.workedOn);
-            
-            if (activeItems.length === 0) {
-                toastNotifications.show('info', 'Geen Items', 'Er zijn geen openstaande items in de Vandaag-weergave.');
-                return;
-            }
-            
-            this.pomodoroSelectionMode = true;
-            this.selectedPomodoroItems = new Set(activeItems.map(i => i.id));
-            this.render();
-        } else {
-            // Already in selection mode - exit
-            this.cancelPomodoroSelection();
-        }
-    },
-    
-    cancelPomodoroSelection() {
-        this.pomodoroSelectionMode = false;
-        this.selectedPomodoroItems = new Set();
-        this.render();
-    },
-    
-    togglePomodoroItem(itemId, checked) {
-        if (checked) {
-            this.selectedPomodoroItems.add(itemId);
-        } else {
-            this.selectedPomodoroItems.delete(itemId);
-        }
-        this.updateSelectedCount();
-    },
-    
-    updateSelectedCount() {
-        const countEl = document.getElementById('todayPomodoroSelectedCount');
-        const confirmBtn = document.getElementById('todayPomodoroConfirmBtn');
-        if (countEl) {
-            countEl.textContent = this.selectedPomodoroItems.size;
-        }
-        if (confirmBtn) {
-            if (this.selectedPomodoroItems.size === 0) {
-                confirmBtn.disabled = true;
-                confirmBtn.style.opacity = '0.5';
-                confirmBtn.style.cursor = 'not-allowed';
-            } else {
-                confirmBtn.disabled = false;
-                confirmBtn.style.opacity = '1';
-                confirmBtn.style.cursor = 'pointer';
-            }
-        }
-    },
-    
-    async confirmPomodoroSelection() {
-        if (this.selectedPomodoroItems.size === 0) {
-            toastNotifications.show('info', 'Geen Selectie', 'Selecteer ten minste één item om toe te voegen.');
-            return;
-        }
-        
+    async addAllToPomodoro() {
         // Initialize pomodoroSessions array if needed
         if (!state.db.pomodoroSessions) {
             state.db.pomodoroSessions = [];
         }
         
-        // Get all active items and filter to selected ones
+        // Get all active (not done, not workedOn) items in their current display order
         const allItems = this.getAllTodayItems();
         const activeItems = allItems.filter(i => !i.done && !i.workedOn);
-        const selectedItems = activeItems.filter(i => this.selectedPomodoroItems.has(i.id));
         
-        if (selectedItems.length === 0) {
-            toastNotifications.show('info', 'Geen Items', 'Er zijn geen geselecteerde items om toe te voegen.');
+        if (activeItems.length === 0) {
+            toastNotifications.show('info', 'Geen Items', 'Er zijn geen openstaande items in de Vandaag-weergave.');
             return;
         }
         
-        // Exit selection mode immediately for better UX
-        this.pomodoroSelectionMode = false;
-        this.selectedPomodoroItems = new Set();
-        
-        // Generate today's session name
+        // Generate today's session name (e.g., "27 mei 2026")
         const todaySessionName = this.generateTodaySessionName();
         
-        // Find existing today session
+        // Find existing today session (but don't create it yet!)
         const todaySession = state.db.pomodoroSessions.find(s => s.name === todaySessionName);
         
-        // Show session selection modal
+        // Show session selection modal (today session pre-selected if exists, otherwise suggested)
         const result = await this.showSessionPickerModal(
-            `Voeg ${selectedItems.length} geselecteerde item${selectedItems.length !== 1 ? 's' : ''} toe aan een Pomodoro sessie`,
+            `Voeg ${activeItems.length} openstaande items toe aan een Pomodoro sessie`,
             state.db.pomodoroSessions,
             todaySession ? todaySession.id : null,
-            todaySession ? null : todaySessionName
+            todaySession ? null : todaySessionName // Only pass suggested name if no existing session
         );
         
-        if (!result) {
-            this.render();
-            return;
-        }
+        if (!result) return; // User cancelled
         
         let selectedSessionId = result;
         
         // Handle result types
         if (result === '__today__') {
+            // User chose the suggested today session - create it now
             const newSession = sessions.create(todaySessionName);
             await app.save();
             selectedSessionId = newSession.id;
@@ -11407,14 +11720,13 @@ const todayView = {
                 await app.save();
                 selectedSessionId = newSession.id;
             } else {
-                this.render();
                 return;
             }
         }
         
-        // Add each selected item to the session, preserving order
-        for (let i = 0; i < selectedItems.length; i++) {
-            const itemData = selectedItems[i];
+        // Add each active item to the selected session, preserving order
+        for (let i = 0; i < activeItems.length; i++) {
+            const itemData = activeItems[i];
             const item = itemData.item;
             
             if (!item.pomodoroSessions) {
@@ -11438,15 +11750,12 @@ const todayView = {
         toastNotifications.show(
             'success', 
             'Items Toegevoegd', 
-            `${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''} toegevoegd aan sessie "${sessionName}"`
+            `${activeItems.length} items toegevoegd aan sessie "${sessionName}"`
         );
         
         // Activate the correct session before opening pomodoro
         state.activePomodoroSession = selectedSessionId;
         pomodoro.open();
-        
-        // Re-render to reflect updated state
-        this.render();
     },
     
     generateTodaySessionName() {
@@ -11467,8 +11776,7 @@ const todayView = {
                 return `<label class="session-picker-label${isDefault ? ' session-picker-default' : ''}" data-session-id="${session.id}"
                        style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.15s;${isDefault ? 'background: var(--primary-light);' : ''}">
                     <input type="radio" name="sessionPicker" value="${session.id}" ${isDefault ? 'checked' : ''}>
-                    <span style="font-weight: 600; flex: 1;">${session.name}${isDefault ? ' <span style="font-size:10px;color:var(--primary);">(vandaag)</span>' : ''}</span>
-                    <button class="session-delete-btn" data-session-id="${session.id}" title="Verwijder sessie '${session.name}'" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; border-radius: 50%; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 14px; transition: all 0.2s; flex-shrink: 0;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)';">&#128465;</button>
+                    <span style="font-weight: 600;">${esc(session.name)}${isDefault ? ' <span style="font-size:10px;color:var(--primary);">(vandaag)</span>' : ''}</span>
                 </label>`;
             }).join('');
             
@@ -11533,65 +11841,11 @@ const todayView = {
                     }
                 });
                 label.addEventListener('click', (e) => {
-                    // Don't select session if clicking delete button
-                    if (e.target.closest('.session-delete-btn')) return;
                     radio.checked = true;
                     // Deselect new session option and hide its input
                     newSessionRadio.checked = false;
                     newSessionInput.style.display = 'none';
                     newSessionLabel.style.background = 'transparent';
-                });
-            });
-            
-            // Delete session buttons
-            const deleteButtons = overlay.querySelectorAll('.session-delete-btn');
-            deleteButtons.forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    const sessionId = btn.dataset.sessionId;
-                    const session = sessions.find(s => s.id === sessionId);
-                    if (!session) return;
-                    
-                    // Simple confirm
-                    const confirmed = confirm(`Weet je zeker dat je de sessie "${session.name}" wilt verwijderen?`);
-                    if (!confirmed) return;
-                    
-                    // Remove session
-                    state.db.pomodoroSessions = state.db.pomodoroSessions.filter(s => s.id !== sessionId);
-                    
-                    // Clean up all items that reference this session
-                    state.db.categories.forEach(cat => {
-                        cat.projects?.forEach(proj => {
-                            proj.tasks?.forEach(task => {
-                                if (task.pomodoroSessions) {
-                                    task.pomodoroSessions = task.pomodoroSessions.filter(sid => sid !== sessionId);
-                                    if (task.pomodoroOrder) delete task.pomodoroOrder[sessionId];
-                                }
-                                task.subtasks?.forEach(sub => {
-                                    if (sub.pomodoroSessions) {
-                                        sub.pomodoroSessions = sub.pomodoroSessions.filter(sid => sid !== sessionId);
-                                        if (sub.pomodoroOrder) delete sub.pomodoroOrder[sessionId];
-                                    }
-                                    if (sub.checklist) {
-                                        sub.checklist.forEach(checkItem => {
-                                            if (checkItem.pomodoroSessions) {
-                                                checkItem.pomodoroSessions = checkItem.pomodoroSessions.filter(sid => sid !== sessionId);
-                                                if (checkItem.pomodoroOrder) delete checkItem.pomodoroOrder[sessionId];
-                                            }
-                                        });
-                                    }
-                                });
-                            });
-                        });
-                    });
-                    
-                    await app.save();
-                    
-                    // Rebuild the modal with updated sessions
-                    cleanup();
-                    const newResult = await todayView.showSessionPickerModal(title, state.db.pomodoroSessions, null, suggestedName);
-                    resolve(newResult);
                 });
             });
             
@@ -11684,6 +11938,8 @@ const todayView = {
 // ===== ARCHIVE VIEW =====
 const favoritesView = {
     render() {
+        // Vangnet: voltooide items die nog als favoriet staan direct opruimen
+        if (clearCompletedFavorites(state.db) > 0) app.save();
         const list = document.getElementById('favoritesList');
         if (!list) return;
 
@@ -11722,6 +11978,8 @@ const favoritesView = {
         document.getElementById('favSubCount').textContent = totalSubtasks;
 
         const total = totalProjects + totalTasks + totalSubtasks;
+        const clearBtn = document.getElementById('favClearAllBtn');
+        if (clearBtn) clearBtn.disabled = total === 0;
 
         if (total === 0) {
             list.innerHTML = `
@@ -11750,8 +12008,8 @@ const favoritesView = {
                 projEl.innerHTML = `
                     <div class="fav-item-badge">Project</div>
                     <div class="fav-item-body">
-                        <div class="fav-item-title" ${doneAttr}>${proj.icon ? proj.icon + ' ' : ''}${proj.name}</div>
-                        <div class="fav-item-context"><span>${catName}</span></div>
+                        <div class="fav-item-title" ${doneAttr}>${proj.icon ? proj.icon + ' ' : ''}${esc(proj.name)}</div>
+                        <div class="fav-item-context"><span>${esc(catName)}</span></div>
                         <div class="fav-item-actions">
                             <button class="fav-action-btn unfavorite" onclick="favoritesView.removeFavorite(event, 'project', '${proj.id}')">&#9733; Favoriet verwijderen</button>
                             <button class="fav-action-btn edit-btn" onclick="favoritesView.editItem('proj', '${proj.id}')" title="Bewerken">✏️ Bewerken</button>
@@ -11764,7 +12022,7 @@ const favoritesView = {
                 // Non-favorited project with favorited children: breadcrumb header
                 const headerEl = document.createElement('div');
                 headerEl.className = 'fav-parent-header';
-                headerEl.innerHTML = `<span>📋</span> <span class="fav-parent-name">${proj.icon ? proj.icon + ' ' : ''}${proj.name}</span><span class="fav-parent-cat"> · ${catName}</span>`;
+                headerEl.innerHTML = `<span>📋</span> <span class="fav-parent-name">${proj.icon ? proj.icon + ' ' : ''}${esc(proj.name)}</span><span class="fav-parent-cat"> · ${esc(catName)}</span>`;
                 groupEl.appendChild(headerEl);
             }
 
@@ -11789,8 +12047,8 @@ const favoritesView = {
                         taskEl.innerHTML = `
                             <div class="fav-item-badge">Opdracht</div>
                             <div class="fav-item-body">
-                                <div class="fav-item-title" ${doneAttr}>${task.icon ? task.icon + ' ' : ''}${task.name}</div>
-                                <div class="fav-item-context"><span>${proj.name}</span></div>
+                                <div class="fav-item-title" ${doneAttr}>${task.icon ? task.icon + ' ' : ''}${esc(task.name)}</div>
+                                <div class="fav-item-context"><span>${esc(proj.name)}</span></div>
                                 <div class="fav-item-actions">
                                     ${todayBtn}
                                     <button class="fav-action-btn pomodoro-btn" onclick="favoritesView.pomodoroItem('task', '${task.id}')" title="Pomodoro sessie">&#9201; Pomodoro</button>
@@ -11805,7 +12063,7 @@ const favoritesView = {
                         // Non-favorited task with favorited subtasks: show as small header
                         const taskHeaderEl = document.createElement('div');
                         taskHeaderEl.className = 'fav-parent-header fav-parent-header-task';
-                        taskHeaderEl.innerHTML = `<span>📄</span> <span class="fav-parent-name">${task.icon ? task.icon + ' ' : ''}${task.name}</span>`;
+                        taskHeaderEl.innerHTML = `<span>📄</span> <span class="fav-parent-name">${task.icon ? task.icon + ' ' : ''}${esc(task.name)}</span>`;
                         taskGroupEl.appendChild(taskHeaderEl);
                     }
 
@@ -11825,8 +12083,8 @@ const favoritesView = {
                             subEl.innerHTML = `
                                 <div class="fav-item-badge">Subtaak</div>
                                 <div class="fav-item-body">
-                                    <div class="fav-item-title" ${doneAttr}>${sub.icon ? sub.icon + ' ' : ''}${sub.name}</div>
-                                    <div class="fav-item-context"><span>${task.name}</span></div>
+                                    <div class="fav-item-title" ${doneAttr}>${sub.icon ? sub.icon + ' ' : ''}${esc(sub.name)}</div>
+                                    <div class="fav-item-context"><span>${esc(task.name)}</span></div>
                                     <div class="fav-item-actions">
                                         ${todayBtn}
                                         <button class="fav-action-btn pomodoro-btn" onclick="favoritesView.pomodoroItem('sub', '${sub.id}')" title="Pomodoro sessie">&#9201; Pomodoro</button>
@@ -11887,8 +12145,60 @@ const favoritesView = {
         if (item) crud.manageItemSessions(item, type);
     },
 
+    async clearAll() {
+        let projects = 0, tasks = 0, subtasks = 0, checklist = 0;
+        state.db.categories.forEach(cat => cat.projects?.forEach(proj => {
+            if (proj.favorite) projects++;
+            proj.tasks?.forEach(task => {
+                if (task.favorite) tasks++;
+                task.subtasks?.forEach(sub => {
+                    if (sub.favorite) subtasks++;
+                    sub.checklist?.forEach(c => { if (c.favorite) checklist++; });
+                });
+            });
+        }));
+        const total = projects + tasks + subtasks + checklist;
+        if (total === 0) {
+            toastNotifications.show('info', 'Geen favorieten', 'Er zijn geen favorieten om te wissen.', 2500);
+            return;
+        }
+
+        const parts = [];
+        if (projects) parts.push(`${projects} project${projects === 1 ? '' : 'en'}`);
+        if (tasks) parts.push(`${tasks} opdracht${tasks === 1 ? '' : 'en'}`);
+        if (subtasks) parts.push(`${subtasks} subta${subtasks === 1 ? 'ak' : 'ken'}`);
+        if (checklist) parts.push(`${checklist} checklist-item${checklist === 1 ? '' : 's'}`);
+
+        const confirmed = await customDialog.choice(
+            'Alle favorieten wissen?',
+            `Je zet <strong>${total}</strong> favoriet${total === 1 ? '' : 'en'} uit (${parts.join(', ')}).<br><br>` +
+            `De items zelf blijven gewoon bestaan. Je kunt dit ongedaan maken met Ctrl+Z.`,
+            [
+                { text: 'Annuleren', value: false, class: 'secondary' },
+                { text: 'Alle favorieten wissen', value: true, class: 'danger' }
+            ]
+        );
+        if (confirmed !== true) return;
+
+        undoRedo.saveState();
+        state.db.categories.forEach(cat => cat.projects?.forEach(proj => {
+            if (proj.favorite) proj.favorite = false;
+            proj.tasks?.forEach(task => {
+                if (task.favorite) task.favorite = false;
+                task.subtasks?.forEach(sub => {
+                    if (sub.favorite) sub.favorite = false;
+                    sub.checklist?.forEach(c => { if (c.favorite) c.favorite = false; });
+                });
+            });
+        }));
+        await app.save(true);
+        this.render();
+        toastNotifications.show('success', 'Favorieten gewist', `${total} item${total === 1 ? '' : 's'} ${total === 1 ? 'is' : 'zijn'} geen favoriet meer. Ctrl+Z maakt dit ongedaan.`, 4000);
+    },
+
     async removeFavorite(e, type, itemId) {
         e.stopPropagation();
+        undoRedo.saveState();
         state.db.categories.forEach(cat => {
             cat.projects?.forEach(proj => {
                 if (type === 'project' && proj.id === itemId) { proj.favorite = false; }
@@ -12003,7 +12313,7 @@ const archiveView = {
                 <div class="archive-category-header" onclick="archiveView.toggleCategory('${catGroup.categoryId}')">
                     <div class="archive-category-title">
                         <span>${catGroup.categoryIcon}</span>
-                        <span>${catGroup.categoryName}</span>
+                        <span>${esc(catGroup.categoryName)}</span>
                     </div>
                     <span class="archive-category-count">${Object.values(catGroup.projects).reduce((sum, p) => sum + p.items.length, 0)} items</span>
                 </div>
@@ -12023,7 +12333,7 @@ const archiveView = {
                     <div class="archive-project-header" onclick="archiveView.toggleProject('${projGroup.projectId}')">
                         <div class="archive-project-title">
                             <span>${projGroup.projectIcon}</span>
-                            <span>${projGroup.projectName}</span>
+                            <span>${esc(projGroup.projectName)}</span>
                             <span style="color: var(--text-muted); font-size: 12px;">(${projGroup.items.length})</span>
                         </div>
                     </div>
@@ -12064,7 +12374,7 @@ const archiveView = {
                                     ${item.checklist.map(c => `
                                         <div class="archive-checklist-item ${c.done ? 'done' : 'open'}">
                                             <span class="archive-checklist-check">${c.done ? '☑' : '☐'}</span>
-                                            <span class="archive-checklist-name">${c.name}</span>
+                                            <span class="archive-checklist-name">${esc(c.text ?? c.name)}</span>
                                             ${!c.done ? '<span class="archive-checklist-status">(open)</span>' : ''}
                                         </div>
                                     `).join('')}
@@ -12076,9 +12386,9 @@ const archiveView = {
                     itemEl.innerHTML = `
                         <div class="archive-item-info">
                             <span class="archive-item-type ${item.type}">${item.type === 'task' ? 'Opdracht' : 'Subtaak'}</span>
-                            <span class="archive-item-name">${item.name}</span>
+                            <span class="archive-item-name">${esc(item.name)}</span>
                             ${checklistBadge}
-                            ${item.originalTaskName && item.type === 'subtask' ? `<span style="font-size: 10px; color: var(--text-muted);">(in: ${item.originalTaskName})</span>` : ''}
+                            ${item.originalTaskName && item.type === 'subtask' ? `<span style="font-size: 10px; color: var(--text-muted);">(in: ${esc(item.originalTaskName)})</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span class="archive-item-date">&#128197; ${archivedDate}</span>
@@ -12185,7 +12495,7 @@ const archiveView = {
                 if (archivedTask) {
                     const confirmed = await customDialog.confirm(
                         'Opdracht ook terughalen?',
-                        `De opdracht "<strong>${archivedTask.name}</strong>" is ook gearchiveerd.<br><br>` +
+                        `De opdracht "<strong>${esc(archivedTask.name)}</strong>" is ook gearchiveerd.<br><br>` +
                         `Wil je de opdracht ook terughalen?`,
                         '&#8630;'
                     );
@@ -12240,7 +12550,7 @@ const archiveView = {
             // Task exists - confirm and restore subtask
             const confirmed = await customDialog.confirm(
                 'Subtaak terughalen',
-                `Wil je de subtaak "<strong>${item.name}</strong>" terughalen uit het archief?`,
+                `Wil je de subtaak "<strong>${esc(item.name)}</strong>" terughalen uit het archief?`,
                 '&#8630;'
             );
             if (!confirmed) return;
@@ -12271,7 +12581,7 @@ const archiveView = {
         // For tasks
         const confirmed = await customDialog.confirm(
             'Opdracht terughalen',
-            `Wil je de opdracht "<strong>${item.name}</strong>" terughalen uit het archief?<br><br>` +
+            `Wil je de opdracht "<strong>${esc(item.name)}</strong>" terughalen uit het archief?<br><br>` +
             `Onderliggende subtaken die gearchiveerd zijn blijven in het archief.`,
             '&#8630;'
         );
@@ -13741,9 +14051,7 @@ const insightsView = {
     },
 
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return esc(text);
     },
 
     navigateToItem(catId, projId, taskId) {
@@ -14183,14 +14491,14 @@ const weekView = {
                 <div class="browse-group">
                     <div class="browse-group-header" onclick="weekView.toggleBrowseCategory('${cat.id}')">
                         <span class="browse-group-toggle">${isExpanded ? '▼' : '▶'}</span>
-                        <span>&#128193; ${cat.name}</span>
+                        <span>&#128193; ${esc(cat.name)}</span>
                         <span class="browse-group-count">${taskCount}</span>
                     </div>
                     <div class="browse-group-content ${isExpanded ? 'expanded' : ''}" id="browse-cat-${cat.id}">
                         ${Object.values(cat.projects).map(proj => `
                             <div class="browse-project-group">
                                 <div class="browse-project-header">
-                                    &#128194; ${proj.name} (${proj.tasks.length})
+                                    &#128194; ${esc(proj.name)} (${proj.tasks.length})
                                 </div>
                                 <div class="browse-project-tasks">
                                     ${proj.tasks.map(task => this.renderBrowseTaskPill(task)).join('')}
@@ -14231,8 +14539,8 @@ const weekView = {
                  data-subtask-id="${item._subtaskId || ''}"
                  data-checklist-index="${item._checklistIndex !== undefined ? item._checklistIndex : ''}"
                  data-item-type="${item._type || 'task'}"
-                 title="${item._type === 'task' ? (item._proj || '') : item._type === 'subtask' ? (item._task || '') : (item._subtask || '')}">
-                ${typeBadge} ${priorityIcon} ${item.name || item.text}
+                 title="${esc(item._type === 'task' ? (item._proj || '') : item._type === 'subtask' ? (item._task || '') : (item._subtask || ''))}">
+                ${typeBadge} ${priorityIcon} ${esc(item.name || item.text)}
             </div>
         `;
     },
@@ -14295,15 +14603,15 @@ const weekView = {
         if (item._type === 'task') {
             typeBadge = '📄';
             typeClass = 'type-task';
-            meta = `${item._cat} → ${item._proj}`;
+            meta = esc(`${item._cat} → ${item._proj}`);
         } else if (item._type === 'subtask') {
             typeBadge = '✓';
             typeClass = 'type-subtask';
-            meta = `${item._cat} → ${item._proj} → ${item._task}`;
+            meta = esc(`${item._cat} → ${item._proj} → ${item._task}`);
         } else if (item._type === 'checklist') {
             typeBadge = '□';
             typeClass = 'type-checklist';
-            meta = `${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`;
+            meta = esc(`${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`);
         }
         
         // Add recurring-preview class for visual differentiation
@@ -14324,7 +14632,7 @@ const weekView = {
                  title="${isRecurringPreview ? 'Terugkerende taak (preview)' : ''}">
                 <div class="week-task-header">
                     <span class="week-task-badge">${typeBadge}</span>
-                    <div class="week-task-title">${recurringIcon} ${priorityIcon} ${item.name || item.text}</div>
+                    <div class="week-task-title">${recurringIcon} ${priorityIcon} ${esc(item.name || item.text)}</div>
                     <button class="week-task-navigate" 
                             onclick="event.stopPropagation(); weekView.openTask('${item._catId}', '${item._projId}', '${item._taskId || item.id}');"
                             title="Ga naar deze taak in alles view">
@@ -14347,15 +14655,15 @@ const weekView = {
         if (item._type === 'task') {
             typeBadge = '📄';
             typeClass = 'type-task';
-            meta = `${item._cat} → ${item._proj}`;
+            meta = esc(`${item._cat} → ${item._proj}`);
         } else if (item._type === 'subtask') {
             typeBadge = '✓';
             typeClass = 'type-subtask';
-            meta = `${item._cat} → ${item._proj} → ${item._task}`;
+            meta = esc(`${item._cat} → ${item._proj} → ${item._task}`);
         } else if (item._type === 'checklist') {
             typeBadge = '□';
             typeClass = 'type-checklist';
-            meta = `${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`;
+            meta = esc(`${item._cat || ''} → ${item._proj || ''} → ${item._task || ''} → ${item._subtask || ''}`);
         }
             
         return `
@@ -14371,7 +14679,7 @@ const weekView = {
                  title="${meta}">
                 <div style="display: flex; align-items: center; gap: 6px; font-weight: 500;">
                     <span>${typeBadge}</span>
-                    <span>${priorityIcon} ${item.name || item.text}</span>
+                    <span>${priorityIcon} ${esc(item.name || item.text)}</span>
                 </div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; margin-left: 22px;">${meta}</div>
             </div>
@@ -15107,10 +15415,10 @@ const morningWizard = {
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ${task.name} ${missedLabel}
+                        ${esc(task.name)} ${missedLabel}
                     </div>
                     <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
-                        ${task._cat} → ${task._proj}
+                        ${esc(task._cat)} → ${esc(task._proj)}
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
@@ -15216,8 +15524,8 @@ const morningWizard = {
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <div style="flex: 1;">
                             <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">${typeBadge}</div>
-                            <div class="wizard-card-title">${item.name}</div>
-                            <div class="wizard-card-meta">${context}</div>
+                            <div class="wizard-card-title">${esc(item.name)}</div>
+                            <div class="wizard-card-meta">${esc(context)}</div>
                         </div>
                         <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-left: 8px;">
                             📅 ${daysText}
@@ -15656,8 +15964,8 @@ const morningWizard = {
                 <input type="checkbox" class="task-select-checkbox" style="margin-top: 2px; cursor: pointer; width: 18px; height: 18px; min-width: 18px;" />
                 <div style="flex: 1; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
                     <div style="flex: 1;">
-                        <div class="wizard-card-title">📄 ${task.name}</div>
-                        <div class="wizard-card-meta">${task._cat} / ${task._proj}</div>
+                        <div class="wizard-card-title">📄 ${esc(task.name)}</div>
+                        <div class="wizard-card-meta">${esc(task._cat)} / ${esc(task._proj)}</div>
                         ${subtaskInfo}
                     </div>
                     ${task._dueBadge ? `<div style="font-size: 11px; color: ${task._dueColor}; white-space: nowrap; font-weight: 600; background: ${task._dueColor}15; padding: 4px 8px; border-radius: 4px;">
@@ -15737,7 +16045,7 @@ const morningWizard = {
             <div style="display: flex; align-items: center; gap: 6px;">
                 <input type="checkbox" class="task-select-checkbox" style="cursor: pointer; width: 16px; height: 16px; min-width: 16px;" />
                 <span style="font-size: 12px;">✓</span>
-                <span style="flex: 1;">${sub.name}</span>
+                <span style="flex: 1;">${esc(sub.name)}</span>
             </div>
         `;
         
@@ -15786,7 +16094,7 @@ const morningWizard = {
             <div style="display: flex; align-items: center; gap: 6px;">
                 <input type="checkbox" class="task-select-checkbox" style="cursor: pointer; width: 14px; height: 14px; min-width: 14px;" />
                 <span style="font-size: 11px;">□</span>
-                <span style="flex: 1;">${checkItem.text}</span>
+                <span style="flex: 1;">${esc(checkItem.text)}</span>
             </div>
         `;
         
@@ -15855,9 +16163,9 @@ const morningWizard = {
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                             <span style="font-size: 14px;">${typeBadge}</span>
-                            <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
+                            <span class="wizard-card-title" style="margin: 0;">${esc(item.name)}</span>
                         </div>
-                        <div class="wizard-card-meta">${item._context}</div>
+                        <div class="wizard-card-meta">${esc(item._context)}</div>
                         ${extraInfo}
                     </div>
                 </div>
@@ -16260,9 +16568,9 @@ const morningWizard = {
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                             <span style="font-size: 14px;">${typeBadge}</span>
-                            <span class="wizard-card-title" style="margin: 0;">${item.name}</span>
+                            <span class="wizard-card-title" style="margin: 0;">${esc(item.name)}</span>
                         </div>
-                        <div class="wizard-card-meta">${context}</div>
+                        <div class="wizard-card-meta">${esc(context)}</div>
                     </div>
                 </div>
             `;
@@ -16558,7 +16866,7 @@ const sessionReview = {
                 <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
                     ${this.currentIndex + 1} van ${this.items.length}
                 </div>
-                <div class="review-card-title">${item.text}</div>
+                <div class="review-card-title">${esc(item.text)}</div>
                 <div class="review-actions">
                     <button class="review-btn review-btn-trash" onclick="sessionReview.handleTrash()">
                         <div class="review-btn-icon">🗑️</div>
@@ -16612,7 +16920,7 @@ const sessionReview = {
                 <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
                     ${this.currentIndex + 1} van ${this.items.length}
                 </div>
-                <div class="review-card-title" style="margin-bottom: 32px;">${item.text}</div>
+                <div class="review-card-title" style="margin-bottom: 32px;">${esc(item.text)}</div>
                 
                 <div style="margin-bottom: 24px; text-align: center; padding: 20px; background: rgba(37, 99, 235, 0.05); border-radius: var(--radius-lg);">
                     <div style="font-size: 14px; color: var(--text-muted);">
@@ -17282,7 +17590,7 @@ const modal = {
                 div.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-app); border-radius: var(--radius-md); margin-bottom: 6px;';
                 div.innerHTML = `
                     <input type="checkbox" ${checkItem.done ? 'checked' : ''} data-checklist-idx="${idx}" style="width: 16px; height: 16px;">
-                    <span style="flex: 1; font-size: 14px;">${checkItem.text}</span>
+                    <span style="flex: 1; font-size: 14px;">${esc(checkItem.text)}</span>
                     <button class="action-btn danger" data-action="remove-checklist" data-idx="${idx}" title="Verwijder" style="width: 24px; height: 24px; font-size: 12px;">&#10005;</button>
                 `;
                 
@@ -17937,7 +18245,7 @@ const sessions = {
             div.className = 'session-item';
             div.innerHTML = `
                 <span class="session-icon">⚡</span>
-                <input type="text" class="session-name-input" value="${session.name}" data-session-id="${session.id}">
+                <input type="text" class="session-name-input" value="${esc(session.name)}" data-session-id="${session.id}">
                 <button class="action-btn danger" data-action="delete" data-session-id="${session.id}" title="Verwijder">&#128465;</button>
             `;
             
@@ -18334,19 +18642,6 @@ const pomodoro = {
             return orderA - orderB;
         });
         
-        // Separate: active, worked-on, completed
-        const today = new Date().setHours(0, 0, 0, 0);
-        const activeItems = pomodoroItems.filter(p => !p.item.done && !(p.item.workedOnDates || []).includes(today));
-        const workedOnItems = pomodoroItems.filter(p => !p.item.done && (p.item.workedOnDates || []).includes(today));
-        const completedItems = pomodoroItems.filter(p => p.item.done);
-        completedItems.sort((a, b) => (b.item.completedAt || 0) - (a.item.completedAt || 0));
-        workedOnItems.sort((a, b) => {
-            const aLog = (a.item.workedOnLog || []).filter(e => e.date === today);
-            const bLog = (b.item.workedOnLog || []).filter(e => e.date === today);
-            return (bLog[bLog.length - 1]?.date || 0) - (aLog[aLog.length - 1]?.date || 0);
-        });
-        pomodoroItems = [...activeItems, ...workedOnItems, ...completedItems];
-        
         if (pomodoroItems.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-muted); padding: 32px;">
@@ -18359,17 +18654,9 @@ const pomodoro = {
 
         container.innerHTML = '';
         pomodoroItems.forEach((pomItem, index) => {
-            const isDone = pomItem.item.done;
-            const isWorkedOn = !isDone && (pomItem.item.workedOnDates || []).includes(today);
-            const isActive = !isDone && !isWorkedOn;
-            
-            let stateClass = '';
-            if (isDone) stateClass = 'completed';
-            else if (isWorkedOn) stateClass = 'worked-on';
-            
             const div = document.createElement('div');
-            div.className = `pomodoro-task-item ${stateClass}`;
-            div.draggable = isActive; // Only active items are draggable
+            div.className = `pomodoro-task-item ${pomItem.item.done ? 'completed' : ''}`;
+            div.draggable = true;
             div.setAttribute('data-pomodoro-index', index);
             
             // Type badge
@@ -18379,79 +18666,52 @@ const pomodoro = {
             else if (pomItem.type === 'checklist') typeBadge = '□';
             
             // Item name/text
-            const itemText = pomItem.item.name || pomItem.item.text || '';
-            
-            // Build action buttons based on state
-            // Checkbox is de primaire "voltooien"-actie (links) — geen dubbele ✅ knop rechts
-            let actionButtonsHTML = '';
-            if (isActive) {
-                actionButtonsHTML = `
-                    <button class="pomodoro-action-btn dagdoel" data-action="pomodoro-worked-on" title="Markeer als dagdoel behaald (niet voltooid, wel klaar voor vandaag)">🎯 Dagdoel</button>
-                `;
-            } else if (isWorkedOn) {
-                actionButtonsHTML = `
-                    <span class="pomodoro-worked-on-badge">🎯 Dagdoel behaald</span>
-                    <button class="pomodoro-action-btn success" data-action="pomodoro-done" title="Alsnog voltooien">✅ Voltooien</button>
-                    <button class="pomodoro-action-btn reopen" data-action="pomodoro-reopen" title="Heropen">↩️</button>
-                `;
-            } else if (isDone) {
-                actionButtonsHTML = `
-                    <button class="pomodoro-action-btn reopen" data-action="pomodoro-reopen" title="Heropen">↩️ Heropen</button>
-                `;
-            }
+            const itemText = pomItem.item.name || pomItem.item.text;
             
             div.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
-                    <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${pomItem.context}</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        ${isActive ? '<div class="drag-handle" style="cursor: move; color: var(--text-muted); font-size: 16px; user-select: none;" title="Sleep om te herordenen">⋮⋮</div>' : ''}
+                    <div style="font-size: 10px; color: var(--text-muted); min-height: 16px;">${esc(pomItem.context)}</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="drag-handle" style="cursor: move; color: var(--text-muted); font-size: 16px; user-select: none;" title="Sleep om te herordenen">⋮⋮</div>
                         <span style="font-size: 14px;">${typeBadge}</span>
-                        ${isActive ? '<input type="checkbox" class="task-checkbox" title="Voltooien">' : ''}
-                        ${isWorkedOn ? '<span style="font-size: 14px;">🎯</span>' : ''}
-                        ${isDone ? '<span style="font-size: 14px;">✅</span>' : ''}
-                        <span class="pomodoro-task-name" style="flex: 1;">${itemText}</span>
-                        <div class="pomodoro-item-actions">
-                            ${actionButtonsHTML}
-                            <button class="pomodoro-action-btn remove-btn" data-action="remove-from-session" title="Verwijder uit deze sessie">✖</button>
-                        </div>
+                        <input type="checkbox" class="task-checkbox" ${pomItem.item.done ? 'checked' : ''}>
+                        <span class="pomodoro-task-name" style="flex: 1;">${esc(itemText)}</span>
+                        <button class="action-btn danger" data-action="remove-from-session" title="Verwijder uit deze sessie" style="display: flex;">&#10006;</button>
                     </div>
                 </div>
             `;
             
-            // Drag and drop handlers (only for active items)
-            if (isActive) {
-                div.addEventListener('dragstart', (e) => {
-                    div.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', index);
-                });
-                
-                div.addEventListener('dragend', () => {
-                    div.classList.remove('dragging');
-                    this.savePomodoroOrder(pomodoroItems);
-                });
-                
-                div.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const afterElement = this.getDragAfterElement(container, e.clientY);
-                    const dragging = container.querySelector('.dragging');
-                    if (dragging) {
-                        if (afterElement == null) {
-                            container.appendChild(dragging);
-                        } else {
-                            container.insertBefore(dragging, afterElement);
-                        }
+            // Drag and drop handlers
+            div.addEventListener('dragstart', (e) => {
+                div.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', index);
+            });
+            
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+                // Save new order
+                this.savePomodoroOrder(pomodoroItems);
+            });
+            
+            div.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = this.getDragAfterElement(container, e.clientY);
+                const dragging = container.querySelector('.dragging');
+                if (dragging) {
+                    if (afterElement == null) {
+                        container.appendChild(dragging);
+                    } else {
+                        container.insertBefore(dragging, afterElement);
                     }
-                });
-            }
+                }
+            });
             
             div.onclick = (e) => {
-                // Prevent clicking on action buttons, checkbox, drag handle
-                if (e.target.closest('.pomodoro-action-btn') || 
-                    e.target.closest('.task-checkbox') || 
+                // Prevent clicking on checkbox, remove button, or drag handle
+                if (e.target.closest('.task-checkbox') || 
                     e.target.closest('[data-action="remove-from-session"]') ||
-                    e.target.closest('.drag-handle') ||
-                    e.target.closest('.pomodoro-worked-on-confirm')) {
+                    e.target.closest('.drag-handle')) {
                     return;
                 }
                 
@@ -18489,93 +18749,68 @@ const pomodoro = {
                 });
                 
                 if (foundCatId && foundProjId && foundTaskId) {
+                    // Close pomodoro overlay
                     pomodoro.close();
+                    
+                    // Select the item in the main dashboard
                     state.sel.cat = foundCatId;
                     state.sel.proj = foundProjId;
                     state.sel.task = foundTaskId;
+                    
+                    // Switch to all view
                     state.currentView = 'all';
                     document.getElementById('viewSelector').value = 'all';
+                    
+                    // Render
                     app.render();
                 }
             };
             
-            // Checkbox handler (only for active items)
             const checkbox = div.querySelector('.task-checkbox');
-            if (checkbox) {
-                checkbox.onclick = async (e) => {
-                    e.stopPropagation();
-                    await pomodoro.toggleDone(pomItem);
-                };
-            }
-            
-            // Action button handlers
-            const doneBtn = div.querySelector('[data-action="pomodoro-done"]');
-            if (doneBtn) {
-                doneBtn.onclick = async (e) => {
-                    e.stopPropagation();
-                    if (isWorkedOn) {
-                        // Unmark worked-on first, then complete
-                        await pomodoro.unmarkWorkedOn(pomItem);
-                    }
-                    pomItem.item.done = true;
+            checkbox.onclick = async (e) => {
+                e.stopPropagation();
+                const wasNotDone = !pomItem.item.done;
+                const today = new Date().setHours(0, 0, 0, 0);
+                const wasScheduledForToday = pomItem.item.scheduledDate === today;
+                pomItem.item.done = checkbox.checked;
+                if (pomItem.item.done) {
                     pomItem.item.completedAt = Date.now();
                     productivityTracker.logPomodoroCompleted();
-                    const wasScheduledForToday = pomItem.item.scheduledDate === today;
+                    // Use appropriate log based on whether item was scheduled
                     if (wasScheduledForToday) {
                         productivityTracker.logCompleted();
                     } else {
                         productivityTracker.logUnscheduledCompleted();
                     }
                     productivityTracker.resetItemProcrastination(pomItem.item);
-                    const itemName = pomItem.item.name || pomItem.item.text;
-                    celebration.show(itemName);
-                    await app.save();
-                    this.renderTasks();
-                    app.render();
-                };
-            }
-            
-            const workedOnBtn = div.querySelector('[data-action="pomodoro-worked-on"]');
-            if (workedOnBtn) {
-                workedOnBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    pomodoro.showWorkedOnConfirm(pomItem, div);
-                };
-            }
-            
-            const reopenBtn = div.querySelector('[data-action="pomodoro-reopen"]');
-            if (reopenBtn) {
-                reopenBtn.onclick = async (e) => {
-                    e.stopPropagation();
-                    if (isDone) {
-                        // Reopen completed item
-                        pomItem.item.done = false;
-                        const completedToday = pomItem.item.completedAt && 
-                            new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
-                        productivityTracker.restoreItemProcrastination(pomItem.item);
-                        if (completedToday) {
-                            const wasScheduledForToday = pomItem.item.scheduledDate === today;
-                            if (wasScheduledForToday) {
-                                productivityTracker.logUncompleted();
-                            } else {
-                                productivityTracker.logUnscheduledUncompleted();
-                            }
-                        }
-                        delete pomItem.item.completedAt;
-                    } else if (isWorkedOn) {
-                        // Reopen worked-on item
-                        await pomodoro.unmarkWorkedOn(pomItem);
+                    if (wasNotDone) {
+                        const itemName = pomItem.item.name || pomItem.item.text;
+                        celebration.show(itemName);
                     }
-                    await app.save();
-                    this.renderTasks();
-                    app.render();
-                };
-            }
+                } else {
+                    // Unchecking - always correct stats if completed today
+                    const completedToday = pomItem.item.completedAt && 
+                        new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
+                    productivityTracker.restoreItemProcrastination(pomItem.item);
+                    if (completedToday) {
+                        if (wasScheduledForToday) {
+                            productivityTracker.logUncompleted();
+                        } else {
+                            productivityTracker.logUnscheduledUncompleted();
+                        }
+                    }
+                    delete pomItem.item.completedAt;
+                }
+                await app.save();
+                this.renderTasks();
+                app.render();
+            };
             
             const removeBtn = div.querySelector('[data-action="remove-from-session"]');
             if (removeBtn) {
                 removeBtn.onclick = async (e) => {
                     e.stopPropagation();
+                    // Verwijder alleen uit deze sessie
                     if (pomItem.item.pomodoroSessions) {
                         pomItem.item.pomodoroSessions = pomItem.item.pomodoroSessions.filter(
                             sid => sid !== state.activePomodoroSession
@@ -18590,145 +18825,6 @@ const pomodoro = {
             
             container.appendChild(div);
         });
-    },
-
-    async toggleDone(pomItem) {
-        const today = new Date().setHours(0, 0, 0, 0);
-        const wasNotDone = !pomItem.item.done;
-        const wasScheduledForToday = pomItem.item.scheduledDate === today;
-        pomItem.item.done = !pomItem.item.done;
-        if (pomItem.item.done) {
-            pomItem.item.completedAt = Date.now();
-            productivityTracker.logPomodoroCompleted();
-            if (wasScheduledForToday) {
-                productivityTracker.logCompleted();
-            } else {
-                productivityTracker.logUnscheduledCompleted();
-            }
-            productivityTracker.resetItemProcrastination(pomItem.item);
-            if (wasNotDone) {
-                const itemName = pomItem.item.name || pomItem.item.text;
-                celebration.show(itemName);
-            }
-        } else {
-            const completedToday = pomItem.item.completedAt && 
-                new Date(pomItem.item.completedAt).setHours(0,0,0,0) === today;
-            productivityTracker.restoreItemProcrastination(pomItem.item);
-            if (completedToday) {
-                if (wasScheduledForToday) {
-                    productivityTracker.logUncompleted();
-                } else {
-                    productivityTracker.logUnscheduledUncompleted();
-                }
-            }
-            delete pomItem.item.completedAt;
-        }
-        await app.save();
-        this.renderTasks();
-        app.render();
-    },
-
-    showWorkedOnConfirm(pomItem, itemDiv) {
-        // Find the inner content div and replace with confirm panel
-        const innerDiv = itemDiv.querySelector('div[style]');
-        if (!innerDiv) return;
-        
-        // Store original HTML
-        itemDiv._originalHTML = itemDiv.innerHTML;
-        
-        const itemText = pomItem.item.name || pomItem.item.text || '';
-        
-        itemDiv.innerHTML = `
-            <div class="pomodoro-worked-on-confirm">
-                <div class="worked-on-confirm-question">🎯 Hoe heb je aan "${itemText}" gewerkt?</div>
-                <div class="worked-on-confirm-options">
-                    <button class="worked-on-confirm-btn" data-type="step">🧲 Kleine stap</button>
-                    <button class="worked-on-confirm-btn" data-type="worked">🔧 Aan gewerkt</button>
-                    <button class="worked-on-confirm-btn" data-type="prepared">💭 Voorbereid</button>
-                </div>
-                <button class="worked-on-confirm-cancel" data-action="cancel-worked-on">↩ Annuleren</button>
-            </div>
-        `;
-        
-        // Add event listeners
-        itemDiv.querySelectorAll('.worked-on-confirm-btn').forEach(btn => {
-            btn.onclick = async (e) => {
-                e.stopPropagation();
-                const type = btn.getAttribute('data-type');
-                await pomodoro.markWorkedOn(pomItem, type);
-            };
-        });
-        
-        itemDiv.querySelector('[data-action="cancel-worked-on"]').onclick = (e) => {
-            e.stopPropagation();
-            if (itemDiv._originalHTML) {
-                itemDiv.innerHTML = itemDiv._originalHTML;
-                delete itemDiv._originalHTML;
-                // Re-attach event listeners by re-rendering
-                pomodoro.renderTasks();
-            }
-        };
-    },
-
-    async markWorkedOn(pomItem, workedOnType) {
-        const today = new Date().setHours(0,0,0,0);
-        const item = pomItem.item;
-        
-        if (!item.workedOnDates) {
-            item.workedOnDates = [];
-        }
-        if (!item.workedOnDates.includes(today)) {
-            item.workedOnDates.push(today);
-        }
-        
-        if (!item.workedOnLog) {
-            item.workedOnLog = [];
-        }
-        item.workedOnLog.push({
-            date: today,
-            type: workedOnType || 'worked'
-        });
-        
-        const typeLabels = {
-            step: 'Kleine stap gezet',
-            worked: 'Aan gewerkt',
-            prepared: 'Voorbereid / gepland'
-        };
-        const feedbackLabel = typeLabels[workedOnType] || 'Dagdoel behaald';
-        
-        productivityTracker.logWorkedOn();
-        productivityTracker.trackSchedulingEvent(item, 'workedOn', { type: workedOnType || 'worked' });
-        
-        toastNotifications.show('success', 'Dagdoel behaald!', `${item.name || item.text} - ${feedbackLabel}`, 2500);
-        
-        await app.save();
-        this.renderTasks();
-        app.render();
-    },
-
-    async unmarkWorkedOn(pomItem) {
-        const today = new Date().setHours(0,0,0,0);
-        const item = pomItem.item;
-        
-        if (item.workedOnDates) {
-            item.workedOnDates = item.workedOnDates.filter(d => d !== today);
-            if (item.workedOnDates.length === 0) {
-                delete item.workedOnDates;
-            }
-        }
-        
-        if (item.workedOnLog) {
-            item.workedOnLog = item.workedOnLog.filter(entry => entry.date !== today);
-            if (item.workedOnLog.length === 0) {
-                delete item.workedOnLog;
-            }
-        }
-        
-        productivityTracker.logUnworkedOn();
-        
-        await app.save();
-        this.renderTasks();
-        app.render();
     },
     
     getDragAfterElement(container, y) {
@@ -18933,7 +19029,7 @@ const weekPlanner = {
         
         el.innerHTML = `
             <span class="task-time">${task.schedule.time}</span>
-            <span class="task-name" title="${task.name}">${task.name}</span>
+            <span class="task-name" title="${esc(task.name)}">${esc(task.name)}</span>
             <button class="remove-schedule" onclick="weekPlanner.unscheduleTask('${task.id}', '${type}', event)">×</button>
         `;
         
@@ -19010,7 +19106,7 @@ const weekPlanner = {
                 el.style.borderColor = 'var(--primary)';
             }
             el.style.cursor = 'pointer';
-            el.innerHTML = `<span>${cat.icon || '📄Â'}</span> <span style="font-size: 12px;">${cat.name}</span>`;
+            el.innerHTML = `<span>${cat.icon || '📂'}</span> <span style="font-size: 12px;">${esc(cat.name)}</span>`;
             el.onclick = () => {
                 state.miniDashboard.selectedCat = cat.id;
                 state.miniDashboard.selectedProj = null;
@@ -19044,7 +19140,7 @@ const weekPlanner = {
                 el.style.borderColor = 'var(--primary)';
             }
             el.style.cursor = 'pointer';
-            el.innerHTML = `<span>${proj.icon || '📋'}</span> <span style="font-size: 12px;">${proj.name}</span>`;
+            el.innerHTML = `<span>${proj.icon || '📋'}</span> <span style="font-size: 12px;">${esc(proj.name)}</span>`;
             el.onclick = () => {
                 state.miniDashboard.selectedProj = proj.id;
                 state.miniDashboard.selectedTask = null;
@@ -19095,7 +19191,7 @@ const weekPlanner = {
                 ? CONSTANTS.PRIORITIES[task.priority].icon 
                 : '';
             
-            el.innerHTML = `${priorityIcon} <span style="font-size: 12px;">${task.name}</span>`;
+            el.innerHTML = `${priorityIcon} <span style="font-size: 12px;">${esc(task.name)}</span>`;
             
             el.ondragstart = (e) => {
                 e.dataTransfer.setData('taskId', task.id);
@@ -19150,7 +19246,7 @@ const weekPlanner = {
             el.className = 'unscheduled-task';
             el.draggable = true;
             
-            el.innerHTML = `<span style="font-size: 12px;">${sub.name}</span>`;
+            el.innerHTML = `<span style="font-size: 12px;">${esc(sub.name)}</span>`;
             
             el.ondragstart = (e) => {
                 e.dataTransfer.setData('taskId', sub.id);
@@ -19694,7 +19790,6 @@ app.init();
     </div>
 </div>
 
-</body>
 
 <!-- Custom Dialog -->
 <div class="custom-dialog-overlay" id="customDialogOverlay">
@@ -19743,7 +19838,7 @@ app.init();
             </div>
             
             <div class="form-group" style="margin-top: 24px;">
-                <label class="form-label">� Opslagmodus</label>
+                <label class="form-label">💾 Opslagmodus</label>
                 <select id="storageModeSelect" onchange="app.toggleStorageMode()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); color: var(--text-main); font-size: 14px;">
                     <option value="json">📁 JSON Bestand (lokaal)</option>
                 </select>
@@ -19755,6 +19850,7 @@ app.init();
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-primary btn-sm" onclick="app.pickDatabaseFile()" style="font-size: 12px; padding: 6px 12px;">📁 Kies JSON Bestand</button>
                         <button class="btn btn-secondary btn-sm" onclick="app.reconnectFile()" style="font-size: 12px; padding: 6px 12px;">🔄 Herstel Verbinding</button>
+                        <button class="btn btn-secondary btn-sm" onclick="app.showBackups()" style="font-size: 12px; padding: 6px 12px;">🕘 Back-ups</button>
                     </div>
                 </div>
             </div>
@@ -19762,8 +19858,10 @@ app.init();
         
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="app.exportDatabase()">📥 Exporteer JSON</button>
+            <button class="btn btn-secondary" onclick="aiExport.open()" title="Leesbaar overzicht voor Copilot of een andere AI-assistent">🤖 Export voor AI-coach</button>
             <button class="btn btn-primary" onclick="app.hideSettings()">Sluiten</button>
         </div>
     </div>
 </div>
+</body>
 </html>
