@@ -3879,8 +3879,8 @@
             margin-bottom: 8px;
         }
 
-        /* ===== FEEDBACK SYSTEM STYLES ===== */
-        .feedback-button {
+        /* ===== NOTITIES (OneNote-achtig) ===== */
+        .notes-button {
             position: fixed;
             bottom: 24px;
             right: 24px;
@@ -3894,162 +3894,129 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
             transition: all 0.3s ease;
-            z-index: 999;
+            z-index: 99;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
-        .feedback-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        .notes-button:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6); }
+        .notes-button:active { transform: scale(0.95); }
+
+        .notes-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            flex-direction: column;
         }
-        
-        .feedback-button:active {
-            transform: scale(0.95);
+        .notes-overlay.show { display: flex; }
+
+        .notes-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 16px;
         }
-        
-        body.dark-mode .feedback-button {
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-        
-        body.dark-mode .feedback-button:hover {
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-        }
-        
-        .feedback-modal-content {
+        .notes-layout { flex: 1; display: flex; min-height: 0; }
+
+        .notes-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            min-height: 0;
         }
-        
-        .feedback-type-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-        
-        .feedback-type-btn {
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            background: var(--bg-panel);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-        
-        .feedback-type-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-        
-        .feedback-type-btn.selected {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-        
-        .feedback-textarea {
+        .notes-sidebar-head { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .notes-search {
             width: 100%;
-            min-height: 120px;
-            padding: 12px;
+            padding: 8px 10px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
-            transition: border-color 0.2s;
             background: var(--bg-panel);
             color: var(--text-main);
+            font: inherit;
+            font-size: 13px;
+            box-sizing: border-box;
         }
-        
-        .feedback-textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-            outline: none;
-        }
-        
-        body.dark-mode .feedback-textarea {
-            background: #0f172a;
-            border-color: #475569;
-        }
-        
-        .feedback-screenshot-preview {
-            margin-top: 8px;
+        .notes-list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+        .notes-item {
+            padding: 10px 12px;
             border-radius: var(--radius-md);
-            border: 2px dashed var(--border-color);
-            padding: 12px;
-            display: none;
-            position: relative;
-        }
-        
-        .feedback-screenshot-preview.has-image {
-            display: block;
-        }
-        
-        .feedback-screenshot-preview img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: var(--radius-md);
-            display: block;
-            margin: 0 auto;
-        }
-        
-        .feedback-screenshot-remove {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #ef4444;
-            color: white;
-            border: none;
             cursor: pointer;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
+        }
+        .notes-item:hover { background: var(--primary-light); }
+        .notes-item.active { background: var(--primary-light); border-color: var(--primary); }
+        .notes-item-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notes-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notes-empty { padding: 24px 12px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+        .notes-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+        .notes-title-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 26px;
+            font-weight: 700;
+            padding: 16px 24px 8px;
+        }
+        .notes-toolbar {
             display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px 20px;
+            border-bottom: 1px solid var(--border-color);
             align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s;
         }
-        
-        .feedback-screenshot-remove:hover {
-            background: #dc2626;
-            transform: scale(1.1);
-        }
-        
-        .feedback-info {
-            font-size: 12px;
-            color: var(--text-muted);
-            padding: 8px 12px;
-            background: var(--primary-light);
+        .notes-toolbar button {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-main);
             border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
         }
-        
-        .feedback-rate-limit-warning {
-            font-size: 12px;
-            color: #f59e0b;
-            padding: 8px 12px;
-            background: #fef3c7;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .notes-toolbar button:hover { background: var(--primary-light); border-color: var(--border-color); }
+        .notes-toolbar .notes-sep { width: 1px; height: 20px; background: var(--border-color); margin: 0 4px; }
+        .notes-toolbar .notes-delete { margin-left: auto; color: #ef4444; }
+        .notes-status { font-size: 11px; color: var(--text-muted); padding: 0 8px; }
+
+        .notes-editor {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px 48px;
+            outline: none;
+            font-size: 15px;
+            line-height: 1.6;
         }
-        
-        body.dark-mode .feedback-rate-limit-warning {
-            background: #78350f;
-            color: #fde68a;
+        .notes-editor:empty::before { content: attr(data-placeholder); color: var(--text-muted); }
+        .notes-editor h1 { font-size: 22px; margin: 12px 0 6px; }
+        .notes-editor h2 { font-size: 18px; margin: 10px 0 4px; }
+        .notes-editor ul, .notes-editor ol { padding-left: 26px; }
+        .notes-editor hr { border: none; border-top: 1px solid var(--border-color); margin: 12px 0; }
+        .notes-editor mark { background: #fde68a; color: #1f2937; border-radius: 2px; }
+        .notes-no-note {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            .notes-layout { flex-direction: column; }
+            .notes-sidebar { width: 100%; max-height: 35%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .notes-title-input { font-size: 20px; padding: 12px 16px 6px; }
+            .notes-editor { padding: 12px 16px 40px; }
         }
 
         /* ===== WEEK VIEW ===== */
@@ -5981,7 +5948,8 @@ function migrateDb(db) {
     if (!db || typeof db !== 'object') return db;
     if (!Array.isArray(db.categories)) db.categories = [];
     if (!Array.isArray(db.pomodoroSessions)) db.pomodoroSessions = [];
-    if (!db.productivityStats || typeof db.productivityStats !== 'object') {
+    if (!Array.isArray(db.notes)) db.notes = [];
+    if (!db.productivityStats ||typeof db.productivityStats !== 'object') {
         db.productivityStats = { dailyLogs: [], streaks: { current: 0, longest: 0, lastActiveDate: null } };
     }
     if (!Array.isArray(db.productivityStats.dailyLogs)) db.productivityStats.dailyLogs = [];
@@ -19323,250 +19291,195 @@ const weekPlanner = {
     }
 };
 
-// ===== FEEDBACK SYSTEM =====
-const feedbackSystem = {
-    selectedType: 'bug',
-    screenshotData: null,
-    
+// ===== NOTITIES (OneNote-achtig) =====
+// Notities staan in state.db.notes en worden met de rest van de data opgeslagen (app.save).
+const notesSystem = {
+    currentId: null,
+    saveTimer: null,
+    ALLOWED_TAGS: ['B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'DEL', 'MARK', 'H1', 'H2', 'H3', 'P', 'DIV', 'BR', 'UL', 'OL', 'LI', 'HR', 'SPAN'],
+
+    get notes() {
+        if (!Array.isArray(state.db.notes)) state.db.notes = [];
+        return state.db.notes;
+    },
+
+    // Veilig HTML laden: alleen toegestane tags, geen attributen
+    sanitizeHtml(html) {
+        const tpl = document.createElement('template');
+        tpl.innerHTML = html || '';
+        const clean = (node) => {
+            [...node.childNodes].forEach(child => {
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    if (!this.ALLOWED_TAGS.includes(child.tagName)) {
+                        if (['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED'].includes(child.tagName)) {
+                            child.remove();
+                            return;
+                        }
+                        clean(child);
+                        child.replaceWith(...child.childNodes);
+                        return;
+                    }
+                    [...child.attributes].forEach(a => child.removeAttribute(a.name));
+                    clean(child);
+                } else if (child.nodeType !== Node.TEXT_NODE) {
+                    child.remove();
+                }
+            });
+        };
+        clean(tpl.content);
+        return tpl.innerHTML;
+    },
+
+    esc(text) {
+        const d = document.createElement('div');
+        d.textContent = text == null ? '' : String(text);
+        return d.innerHTML;
+    },
+
+    plainText(html) {
+        const d = document.createElement('div');
+        d.innerHTML = html || '';
+        return (d.textContent || '').replace(/\s+/g, ' ').trim();
+    },
+
     open() {
-        // Check rate limit
-        if (!this.checkRateLimit()) {
-            document.getElementById('feedbackRateLimitWarning').style.display = 'flex';
-            document.getElementById('feedbackSubmitBtn').disabled = true;
-        } else {
-            document.getElementById('feedbackRateLimitWarning').style.display = 'none';
-            document.getElementById('feedbackSubmitBtn').disabled = false;
-        }
-        
-        const overlay = document.getElementById('feedbackModalOverlay');
-        overlay.style.display = 'flex';
-        requestAnimationFrame(() => overlay.classList.add('show'));
-        
-        // Focus textarea
-        setTimeout(() => {
-            document.getElementById('feedbackMessage').focus();
-        }, 100);
-        
-        // Setup character counter
-        const textarea = document.getElementById('feedbackMessage');
-        const counter = document.getElementById('feedbackCharCount');
-        textarea.oninput = () => {
-            counter.textContent = textarea.value.length;
-        };
-        
-        // Setup image upload
-        const imageUpload = document.getElementById('feedbackImageUpload');
-        imageUpload.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                this.handleImageFile(file);
-            }
-        };
-        
-        // Setup paste handler
-        document.addEventListener('paste', this.handlePaste.bind(this));
-    },
-    
-    handlePaste(e) {
-        // Only handle paste when feedback modal is open
-        const modalOpen = document.getElementById('feedbackModalOverlay').classList.contains('show');
-        if (!modalOpen) return;
-        
-        const items = e.clipboardData?.items;
-        if (!items) return;
-        
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
+        const overlay = document.getElementById('notesOverlay');
+        overlay.classList.add('show');
+        if (!this._bound) {
+            this._bound = true;
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && document.getElementById('notesOverlay').classList.contains('show')
+                    && !document.getElementById('customDialogOverlay').classList.contains('show')) {
+                    this.close();
+                }
+            });
+            // Plakken als platte tekst, zodat er geen vreemde opmaak binnenkomt
+            document.getElementById('notesEditor').addEventListener('paste', (e) => {
                 e.preventDefault();
-                const blob = items[i].getAsFile();
-                this.handleImageFile(blob);
-                break;
-            }
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
         }
-    },
-    
-    handleImageFile(file) {
-        if (!file || !file.type.startsWith('image/')) {
-            toastNotifications.show('warning', 'Ongeldig Bestand', 'Upload alleen afbeeldingen (JPG, PNG, etc.)', 3000);
-            return;
+        const list = this.notes;
+        if (!this.currentId || !list.some(n => n.id === this.currentId)) {
+            this.currentId = list.length ? this.sorted()[0].id : null;
         }
-        
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            toastNotifications.show('warning', 'Bestand Te Groot', 'Afbeelding moet kleiner zijn dan 5MB', 3000);
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.screenshotData = e.target.result;
-            this.showImagePreview(e.target.result);
-        };
-        reader.readAsDataURL(file);
+        this.renderList();
+        this.loadCurrent();
     },
-    
-    showImagePreview(dataUrl) {
-        const preview = document.getElementById('feedbackScreenshotPreview');
-        preview.className = 'feedback-screenshot-preview has-image';
-        preview.innerHTML = `
-            <button class="feedback-screenshot-remove" onclick="feedbackSystem.removeImage()" title="Verwijder afbeelding">×</button>
-            <img src="${dataUrl}" alt="Preview">
-        `;
-    },
-    
-    removeImage() {
-        this.screenshotData = null;
-        const preview = document.getElementById('feedbackScreenshotPreview');
-        preview.className = 'feedback-screenshot-preview';
-        preview.innerHTML = '';
-        document.getElementById('feedbackImageUpload').value = '';
-    },
-    
+
     close() {
-        const overlay = document.getElementById('feedbackModalOverlay');
-        overlay.classList.remove('show');
-        
-        // Remove paste handler
-        document.removeEventListener('paste', this.handlePaste.bind(this));
-        
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            this.reset();
-        }, 200);
+        this.flush();
+        document.getElementById('notesOverlay').classList.remove('show');
     },
-    
-    reset() {
-        this.selectedType = 'bug';
-        document.getElementById('feedbackMessage').value = '';
-        document.getElementById('feedbackCharCount').textContent = '0';
-        document.getElementById('feedbackImageUpload').value = '';
-        this.removeImage();
-        
-        // Reset type buttons
-        document.querySelectorAll('.feedback-type-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        document.querySelector('[data-type="bug"]').classList.add('selected');
+
+    sorted() {
+        return [...this.notes].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
     },
-    
-    selectType(type) {
-        this.selectedType = type;
-        document.querySelectorAll('.feedback-type-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        document.querySelector(`[data-type="${type}"]`).classList.add('selected');
-    },
-    
-    checkRateLimit() {
-        const key = 'feedbackRateLimit';
-        const now = Date.now();
-        const weekInMs = 7 * 24 * 60 * 60 * 1000;
-        
-        let rateData = localStorage.getItem(key);
-        if (!rateData) {
-            rateData = { count: 0, resetTime: now + weekInMs };
-            localStorage.setItem(key, JSON.stringify(rateData));
-            return true;
-        }
-        
-        rateData = JSON.parse(rateData);
-        
-        // Reset if week has passed
-        if (now > rateData.resetTime) {
-            rateData = { count: 0, resetTime: now + weekInMs };
-            localStorage.setItem(key, JSON.stringify(rateData));
-            return true;
-        }
-        
-        // Check limit
-        if (rateData.count >= 50) {
-            const daysLeft = Math.ceil((rateData.resetTime - now) / (24 * 60 * 60 * 1000));
-            toastNotifications.show('warning', 'Limiet Bereikt', 
-                `Je hebt je feedback limiet bereikt (50/week). Probeer het over ${daysLeft} dag(en) opnieuw.`, 5000);
-            return false;
-        }
-        
-        return true;
-    },
-    
-    incrementRateLimit() {
-        const key = 'feedbackRateLimit';
-        let rateData = JSON.parse(localStorage.getItem(key));
-        rateData.count++;
-        localStorage.setItem(key, JSON.stringify(rateData));
-    },
-    
-    async submit() {
-        const message = document.getElementById('feedbackMessage').value.trim();
-        
-        // Validation
-        if (!message) {
-            toastNotifications.show('warning', 'Feedback Leeg', 'Typ eerst je feedback voordat je verstuurt.', 3000);
+
+    renderList() {
+        const q = (document.getElementById('notesSearch').value || '').trim().toLowerCase();
+        const items = this.sorted().filter(n =>
+            !q || (n.title || '').toLowerCase().includes(q) || this.plainText(n.html).toLowerCase().includes(q));
+        const list = document.getElementById('notesList');
+        if (!items.length) {
+            list.innerHTML = `<div class="notes-empty">${q ? 'Geen notities gevonden' : 'Nog geen notities'}</div>`;
             return;
         }
-        
-        if (message.length < 10) {
-            toastNotifications.show('warning', 'Te Kort', 'Geef wat meer details (minimaal 10 karakters).', 3000);
-            return;
+        list.innerHTML = items.map(n => {
+            const preview = this.plainText(n.html).slice(0, 60);
+            const date = new Date(n.updatedAt || Date.now()).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            return `<div class="notes-item ${n.id === this.currentId ? 'active' : ''}" onclick="notesSystem.select('${n.id}')">
+                <div class="notes-item-title">${this.esc(n.title) || 'Naamloze notitie'}</div>
+                <div class="notes-item-meta">${date}${preview ? ' · ' + this.esc(preview) : ''}</div>
+            </div>`;
+        }).join('');
+    },
+
+    loadCurrent() {
+        const note = this.notes.find(n => n.id === this.currentId);
+        document.getElementById('notesMain').style.display = note ? 'flex' : 'none';
+        document.getElementById('notesNoNote').style.display = note ? 'none' : 'flex';
+        if (!note) return;
+        document.getElementById('notesTitle').value = note.title || '';
+        document.getElementById('notesEditor').innerHTML = this.sanitizeHtml(note.html);
+        document.getElementById('notesStatus').textContent = '';
+    },
+
+    select(id) {
+        this.flush();
+        this.currentId = id;
+        this.renderList();
+        this.loadCurrent();
+    },
+
+    create() {
+        this.flush();
+        const note = { id: 'note_' + Date.now(), title: '', html: '', createdAt: Date.now(), updatedAt: Date.now() };
+        this.notes.push(note);
+        this.currentId = note.id;
+        document.getElementById('notesSearch').value = '';
+        this.renderList();
+        this.loadCurrent();
+        app.save();
+        document.getElementById('notesTitle').focus();
+    },
+
+    async remove() {
+        const note = this.notes.find(n => n.id === this.currentId);
+        if (!note) return;
+        const ok = await customDialog.confirmDanger('Notitie verwijderen', `Weet je zeker dat je "${this.esc(note.title) || 'Naamloze notitie'}" wilt verwijderen?`);
+        if (!ok) return;
+        clearTimeout(this.saveTimer);
+        this.saveTimer = null;
+        state.db.notes = this.notes.filter(n => n.id !== note.id);
+        this.currentId = state.db.notes.length ? this.sorted()[0].id : null;
+        this.renderList();
+        this.loadCurrent();
+        await app.save();
+    },
+
+    cmd(command, value) {
+        document.getElementById('notesEditor').focus();
+        document.execCommand(command, false, value || null);
+        this.onChange();
+    },
+
+    highlight() {
+        document.getElementById('notesEditor').focus();
+        const sel = window.getSelection();
+        const inMark = sel.anchorNode && (sel.anchorNode.parentElement || sel.anchorNode).closest?.('mark');
+        if (inMark) {
+            document.execCommand('removeFormat');
+        } else {
+            document.execCommand('hiliteColor', false, '#fde68a');
         }
-        
-        // Check rate limit again
-        if (!this.checkRateLimit()) {
-            return;
+        this.onChange();
+    },
+
+    onChange() {
+        document.getElementById('notesStatus').textContent = 'Bezig met opslaan...';
+        clearTimeout(this.saveTimer);
+        this.saveTimer = setTimeout(() => this.flush(), 600);
+    },
+
+    // Schrijf de huidige invoer naar de notitie en sla op
+    flush() {
+        if (this.saveTimer === null && !document.getElementById('notesStatus').textContent) return;
+        clearTimeout(this.saveTimer);
+        this.saveTimer = null;
+        const note = this.notes.find(n => n.id === this.currentId);
+        if (!note) return;
+        const title = document.getElementById('notesTitle').value.trim();
+        const html = this.sanitizeHtml(document.getElementById('notesEditor').innerHTML);
+        if (title !== note.title || html !== note.html) {
+            note.title = title;
+            note.html = html;
+            note.updatedAt = Date.now();
+            app.save();
+            this.renderList();
         }
-        
-        // Disable submit button
-        const submitBtn = document.getElementById('feedbackSubmitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '⏳ Versturen...';
-        
-        try {
-            // Save feedback locally since Firebase is removed
-            const feedbackData = {
-                type: this.selectedType,
-                message: sanitizer.sanitize(message),
-                timestamp: new Date().toISOString(),
-                browserInfo: {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    screenResolution: `${window.screen.width}x${window.screen.height}`,
-                    viewportSize: `${window.innerWidth}x${window.innerHeight}`
-                },
-                appState: {
-                    currentView: state.currentView,
-                    darkMode: document.body.classList.contains('dark-mode'),
-                    totalCategories: state.db.categories?.length || 0,
-                    totalProjects: state.db.categories?.reduce((acc, cat) => acc + (cat.projects?.length || 0), 0) || 0
-                },
-                screenshot: this.screenshotData,
-                status: 'new',
-                read: false
-            };
-            
-            // Store feedback in localStorage
-            const existingFeedback = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-            existingFeedback.push(feedbackData);
-            localStorage.setItem('localFeedback', JSON.stringify(existingFeedback));
-            
-            // Increment rate limit
-            this.incrementRateLimit();
-            
-            // Success!
-            toastNotifications.show('success', 'Feedback Verstuurd! 🎉', 
-                'Bedankt voor je hulp!', 3000);
-            
-            this.close();
-            
-        } catch (error) {
-            errorHandler.log(error, 'feedback.submit');
-            toastNotifications.show('error', 'Feedback Mislukt', 
-                'Er ging iets mis. Probeer het later opnieuw of neem contact op via email.', 5000);
-            
-            // Re-enable button
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '📤 Versturen';
-        }
+        document.getElementById('notesStatus').textContent = 'Opgeslagen';
     }
 };
 
@@ -19712,80 +19625,47 @@ app.init();
     </div>
 </div>
 
-<!-- ===== FEEDBACK SYSTEM ===== -->
-<button class="feedback-button" onclick="feedbackSystem.open()" title="Geef feedback (💡 Idee, 🐛Bug, ? Vraag)" aria-label="Geef feedback">
-    💬
+<!-- ===== NOTITIES ===== -->
+<button class="notes-button" onclick="notesSystem.open()" title="Notities" aria-label="Notities">
+    📝
 </button>
 
-<!-- Feedback Modal -->
-<div class="modal-overlay" id="feedbackModalOverlay">
-    <div class="modal">
-        <div class="modal-header">
-            <h2 class="modal-title">💬 Geef Feedback</h2>
-            <button class="pomodoro-close" onclick="feedbackSystem.close()" aria-label="Sluiten">×</button>
+<div class="notes-overlay" id="notesOverlay" role="dialog" aria-label="Notities">
+    <div class="notes-topbar">
+        <span>📝 Notities</span>
+        <button class="pomodoro-close" onclick="notesSystem.close()" aria-label="Sluiten">×</button>
+    </div>
+    <div class="notes-layout">
+        <div class="notes-sidebar">
+            <div class="notes-sidebar-head">
+                <button class="btn btn-primary" onclick="notesSystem.create()" style="width: 100%;">+ Nieuwe notitie</button>
+                <input type="search" class="notes-search" id="notesSearch" placeholder="Zoeken in notities..." oninput="notesSystem.renderList()">
+            </div>
+            <div class="notes-list" id="notesList"></div>
         </div>
-        
-        <div class="feedback-modal-content">
-            <div class="form-group">
-                <label class="form-label">Type Feedback</label>
-                <div class="feedback-type-selector">
-                    <button class="feedback-type-btn selected" data-type="bug" onclick="feedbackSystem.selectType('bug')">
-                        🐛Bug
-                    </button>
-                    <button class="feedback-type-btn" data-type="feature" onclick="feedbackSystem.selectType('feature')">
-                        💡 Feature
-                    </button>
-                    <button class="feedback-type-btn" data-type="question" onclick="feedbackSystem.selectType('question')">
-                        ? Vraag
-                    </button>
-                    <button class="feedback-type-btn" data-type="other" onclick="feedbackSystem.selectType('other')">
-                        💬 Anders
-                    </button>
-                </div>
+        <div class="notes-main" id="notesMain">
+            <input type="text" class="notes-title-input" id="notesTitle" placeholder="Titel" maxlength="200" oninput="notesSystem.onChange()">
+            <div class="notes-toolbar">
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('bold')" title="Vet (Ctrl+B)"><b>B</b></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('italic')" title="Cursief (Ctrl+I)"><i>I</i></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('underline')" title="Onderstrepen (Ctrl+U)"><u>U</u></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('strikeThrough')" title="Doorhalen"><s>S</s></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.highlight()" title="Markeren">🖍️</button>
+                <span class="notes-sep"></span>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('formatBlock', 'H1')" title="Kop 1">H1</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('formatBlock', 'H2')" title="Kop 2">H2</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('formatBlock', 'P')" title="Gewone tekst">¶</button>
+                <span class="notes-sep"></span>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('insertUnorderedList')" title="Opsomming">• Lijst</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('insertOrderedList')" title="Genummerde lijst">1. Lijst</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="notesSystem.cmd('insertHorizontalRule')" title="Scheidingslijn">―</button>
+                <span class="notes-status" id="notesStatus"></span>
+                <button type="button" class="notes-delete" onclick="notesSystem.remove()" title="Notitie verwijderen">🗑️ Verwijderen</button>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Jouw Feedback</label>
-                <textarea 
-                    id="feedbackMessage" 
-                    class="feedback-textarea" 
-                    placeholder="Beschrijf je bug, feature request, of vraag..."
-                    maxlength="5000"
-                ></textarea>
-                <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
-                    <span id="feedbackCharCount">0</span>/5000 karakters
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Screenshot of Afbeelding (Optioneel)</label>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <input type="file" id="feedbackImageUpload" accept="image/*" style="display: none;">
-                    <button class="btn btn-secondary" onclick="document.getElementById('feedbackImageUpload').click()" style="width: 100%;">
-                        📁 Upload Afbeelding
-                    </button>
-                    <div style="font-size: 12px; color: var(--text-muted); text-align: center;">
-                        Of plak een screenshot met Ctrl+V
-                    </div>
-                </div>
-            </div>
-            
-            <div id="feedbackScreenshotPreview"></div>
-            
-            <div class="feedback-info">
-                ℹ️ Bedankt voor je hulp! 🙏
-            </div>
-            
-            <div id="feedbackRateLimitWarning" class="feedback-rate-limit-warning" style="display: none;">
-                ⚠️ Je hebt je limiet bereikt. Probeer het later opnieuw.
-            </div>
+            <div class="notes-editor" id="notesEditor" contenteditable="true" data-placeholder="Begin met typen..." oninput="notesSystem.onChange()"></div>
         </div>
-        
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="feedbackSystem.close()">Annuleren</button>
-            <button class="btn btn-primary" onclick="feedbackSystem.submit()" id="feedbackSubmitBtn">
-                📤 Versturen
-            </button>
+        <div class="notes-main notes-no-note" id="notesNoNote" style="display: none;">
+            Maak een nieuwe notitie aan of kies er een uit de lijst.
         </div>
     </div>
 </div>
