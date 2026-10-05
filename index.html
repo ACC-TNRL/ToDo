@@ -7259,14 +7259,14 @@ const app = {
             }
             
             // Shift+? - Keyboard shortcuts help
-            if (e.shiftKey && e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+            if (e.shiftKey && e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) && !e.target.isContentEditable) {
                 e.preventDefault();
                 this.showKeyboardShortcuts();
                 return;
             }
             
             // Space - Quick add (original)
-            if (e.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+            if (e.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) && !e.target.isContentEditable) {
                 e.preventDefault();
                 const activeCol = state.sel.task ? 'sub' : state.sel.proj ? 'task' : null;
                 if (activeCol) {
@@ -7276,7 +7276,7 @@ const app = {
             }
             
             // X - Toggle task done (original)
-            if (e.key === 'x' && state.sel.task && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            if (e.key === 'x' && state.sel.task && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.isContentEditable) {
                 const task = helpers.find('task', state.sel.task);
                 if (task) {
                     undoRedo.saveState();
